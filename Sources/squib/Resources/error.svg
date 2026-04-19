@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 130" width="200" height="260">
+  <!-- Body: red tint -->
+  <ellipse cx="50" cy="52" rx="36" ry="40" fill="#B03060"/>
+
+  <!-- Eyes with X marks -->
+  <circle cx="38" cy="44" r="7" fill="white"/>
+  <circle cx="62" cy="44" r="7" fill="white"/>
+  <!-- Left X -->
+  <line x1="33.5" y1="39.5" x2="42.5" y2="48.5" stroke="#B03060" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="42.5" y1="39.5" x2="33.5" y2="48.5" stroke="#B03060" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Right X -->
+  <line x1="57.5" y1="39.5" x2="66.5" y2="48.5" stroke="#B03060" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="66.5" y1="39.5" x2="57.5" y2="48.5" stroke="#B03060" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Sad mouth -->
+  <path d="M 40 69 Q 50 62 60 69" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Sweat drop -->
+  <path d="M 65 28 Q 67.5 22 65 17 Q 62.5 22 65 28" fill="#FF9999" opacity="0.8"/>
+
+  <!-- Tentacles: drooping in distress -->
+  <path d="M 24 82 Q 22 100 28 97 Q 24 114 30 112" stroke="#8A2040" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M 38 88 Q 36 106 41 103 Q 37 119 43 117" stroke="#8A2040" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M 62 88 Q 64 106 59 103 Q 63 119 57 117" stroke="#8A2040" stroke-width="9" fill="none" stroke-linecap="round"/>
+  <path d="M 76 82 Q 78 100 72 97 Q 76 114 70 112" stroke="#8A2040" stroke-width="9" fill="none" stroke-linecap="round"/>
+</svg>

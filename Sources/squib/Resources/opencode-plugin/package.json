@@ -1,0 +1,9 @@
+{
+  "name": "squib-opencode-plugin",
+  "version": "0.1.0",
+  "description": "squib plugin for opencode — reports session/tool events to the squib desktop pet",
+  "type": "module",
+  "main": "index.mjs",
+  "private": true,
+  "license": "MIT"
+}

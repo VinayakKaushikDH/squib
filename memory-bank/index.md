@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Exploration / planning
-- **Last updated**: 2026-04-19
+- **Phase**: Phase 1e+ complete — bubble system at reference parity
+- **Last updated**: 2026-04-20 (Session 5)
 
 ## Agent Instructions
 - Read this file first, every session
@@ -13,7 +13,9 @@ Read this file at the start of every session to restore context.
 - New memory files must be registered in the table below before closing a session
 
 ## Active Decisions
-- None yet — still reviewing the reference and defining direction
+- Swift/AppKit, SPM only, NWListener HTTP server, WKWebView inline SVG rendering
+- 6 states shipped: idle, thinking, working, error, attention, sleeping
+- Multi-session StateEngine with priority + stale eviction; eye tracking via global NSEvent monitor
 
 ## Files
 | File | Contents |
