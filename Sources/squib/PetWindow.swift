@@ -33,9 +33,11 @@ final class PetWindow: NSPanel {
     ]
 
     // Drag
-    private var mouseOverPet      = false
-    private var isDragging        = false
-    private var isDragReacting    = false   // showing clawd-react-drag.svg
+    private var mouseOverPet          = false
+    private var cursorIsOverCharacter = false   // async pixel hit test result
+    private var hitTestPending        = false
+    private var isDragging            = false
+    private var isDragReacting        = false   // showing clawd-react-drag.svg
     private var dragStartCursor: NSPoint = .zero
     private var dragStartOrigin: NSPoint = .zero
 
@@ -117,18 +119,26 @@ final class PetWindow: NSPanel {
         //    only when the cursor is actually over the pet.
         let move = NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved) { [weak self] _ in
             guard let self else { return }
-            let cursor    = NSEvent.mouseLocation
-            let wasOver   = self.mouseOverPet
+            let cursor  = NSEvent.mouseLocation
+            let wasOver = self.mouseOverPet
             self.mouseOverPet = self.frame.contains(cursor)
 
-            if self.mouseOverPet != wasOver {
-                // Open up for events when hovering; restore click-through on leave
-                // (never close while a drag is in progress — pointer capture keeps
-                //  drag events flowing to us until mouseUp)
-                if self.mouseOverPet {
-                    self.ignoresMouseEvents = false
-                } else if !self.isDragging {
-                    self.ignoresMouseEvents = true
+            if !self.mouseOverPet {
+                // Cursor left the frame — clear immediately without waiting for JS
+                if wasOver {
+                    self.cursorIsOverCharacter = false
+                    if !self.isDragging { self.ignoresMouseEvents = true }
+                }
+            } else if !self.hitTestPending {
+                // Inside frame — fire async pixel hit test (skip if one already in flight)
+                self.hitTestPending = true
+                let local = NSPoint(x: cursor.x - self.frame.origin.x,
+                                    y: cursor.y - self.frame.origin.y)
+                self.petView.isOpaque(at: local, frameHeight: self.frame.height) { [weak self] opaque in
+                    guard let self else { return }
+                    self.hitTestPending = false
+                    self.cursorIsOverCharacter = opaque
+                    if !self.isDragging { self.ignoresMouseEvents = !opaque }
                 }
             }
 
@@ -144,7 +154,7 @@ final class PetWindow: NSPanel {
         //      Returning nil consumes the event so it never reaches the app below.
 
         let down = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
-            guard let self, self.mouseOverPet else { return event }
+            guard let self, self.mouseOverPet, self.cursorIsOverCharacter else { return event }
             if self.isMiniMode || self.miniAnimating { return nil }
             self.isDragging      = true
             self.dragStartCursor = NSEvent.mouseLocation
@@ -177,7 +187,7 @@ final class PetWindow: NSPanel {
             }
             guard self.isDragging else { return event }
             self.isDragging         = false
-            self.ignoresMouseEvents = !self.mouseOverPet
+            self.ignoresMouseEvents = !self.cursorIsOverCharacter
             self.baseFrame          = self.frame
             if self.isDragReacting {
                 self.isDragReacting = false

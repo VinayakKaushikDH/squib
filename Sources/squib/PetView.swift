@@ -73,6 +73,16 @@ final class PetView: NSView {
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
+    // MARK: - Hit Test
+
+    /// Circle hit test — synchronous, no JS.
+    /// Circle centered at the window midpoint, radius 65pt.
+    func isOpaque(at windowLocal: NSPoint, frameHeight: CGFloat, callback: @escaping (Bool) -> Void) {
+        let cx = frameHeight / 2
+        let cy = frameHeight / 2
+        callback(hypot(windowLocal.x - cx, windowLocal.y - cy) < 65)
+    }
+
     // MARK: - Loaders (internal so PetWindow can drive sequences)
 
     func loadSVG(name: String, flipped: Bool = false) {
