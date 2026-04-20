@@ -44,10 +44,36 @@
 - Elicitation: form rendered in JS, answers collected and posted as `{type: "elicitation-submit", answers}`; Swift merges into original toolInput as updatedInput
 - WKWebView transparency: `webView.setValue(false, forKey: "drawsBackground")`
 - Retain cycle in BubbleWindow avoided by calling `removeScriptMessageHandler(forName:)` in `BubbleWindow.close()` override
+- Bug fix: elicitation form rendered raw JSON in live squib — two root causes found and fixed: (1) Claude Code never sends `isElicitation: true`; must detect by `toolName == "AskUserQuestion"` in `HookServer.parsePermissionPayload`; (2) `JSONSerialization` returns `NSNumber` for JSON booleans so `as? Bool` always returned false — fixed with `.boolValue`
+
+## 2026-04-20 — Session 6: GIF assets + full state set
+
+- Replaced all hand-drawn SVGs with original clawd assets from clawd-on-desk-ref
+- PetState expanded 6 → 12 states: added building, juggling, conducting, notification, sweeping, carrying
+- Idle state uses `clawd-idle-follow.svg` (inline SVG, CSS breathe+blink animations, `#eyes-js` eye tracking)
+- All other 11 states use clawd GIFs via `<img>` in WKWebView
+- Eye tracking restored: targets `#eyes-js` via `style.transform = translate(dx, dy)`, max 3.0 SVG units (theme spec)
+- PetWindow tracks `currentState` to gate eye tracking on `state.supportsEyeTracking` (idle only)
+- StateEngine: subagent count tracked (`activeSubagents`); juggling (1) vs conducting (2+) via synthetic `__subagent__` session
+- StateEngine: building upgrade — PreToolUse/PostToolUse with 3+ real sessions → .building
+- StateEngine: `setNotification(id:active:)` manages synthetic `__notification__<id>` sessions; eviction-exempt
+- AppDelegate: permission request/eviction/decision all call `setNotification` to drive notification state
+- HookInstaller: added WorktreeCreate to hookedEvents
+- All mini-mode, debugger, and reaction GIFs bundled (ready for later use)
+
+## 2026-04-20 — Session 6b: SVG idle variants + sleep sequence
+
+- Idle pool: PetWindow randomly cycles between clawd-idle-look (10s), clawd-idle-reading (14s), clawd-idle-yawn (3.8s) every 20–45s, returning to clawd-idle-follow after each variant
+- Sleep sequence: yawn (3.8s) → doze (2s) → collapse (1s) → sleeping — all chained via Timer in PetWindow.playSleepSequence()
+- Step 1 uses loadSVG (full page load); steps 2–4 use swapInlineSVG (JS innerHTML, no flash)
+- PetState.sleeping now uses clawd-sleeping.svg (sploot + floating Zzz particles) instead of GIF
+- PetView.swapInlineSVG: swaps body innerHTML via JS template literal — avoids WKWebView page reload between sequence steps
+- All idle/sleep SVGs bundled: clawd-idle-yawn, clawd-idle-look, clawd-idle-reading, clawd-idle-doze, clawd-idle-collapse, clawd-sleeping
+- Visually confirmed: transitions seamless (no flash between sequence steps)
 
 ## Current Status
-- **Phase**: Phase 1e+ complete — bubble system at feature parity with reference
-- **Next**: TBD (v1.1 ideas: pi-mono extension API, mini mode, settings UI)
+- **Phase**: Session 6b complete — full clawd SVG animations, sleep sequence, idle variant pool
+- **Next**: TBD (working-state SVGs, mini mode, theming)
 
 ## Build Phases
 | Phase | Status | Description |

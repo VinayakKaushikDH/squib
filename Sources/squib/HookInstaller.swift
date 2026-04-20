@@ -15,6 +15,7 @@ final class HookInstaller {
         "Stop", "StopFailure", "Notification",
         "PostCompact", "PreCompact",
         "SubagentStart", "SubagentStop",
+        "WorktreeCreate",
         "Elicitation",
     ]
 

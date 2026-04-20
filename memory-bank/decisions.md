@@ -85,5 +85,20 @@ Rewrote BubbleWindow from NSTextField/NSButton to WKWebView with inline HTML/CSS
 ## 2026-04-20 — PermissionDecision: typed enum over Bool
 Replaced `resolvePermission(id:allow:Bool)` with `resolvePermission(id:decision:PermissionDecision)`. The 4 cases (allow, deny, allowWithPermissions, allowWithUpdatedInput) cannot be expressed as a Bool and require different response body shapes that `buildResponseBody(for:)` serialises per case.
 
+## 2026-04-20 — Elicitation detection: tool_name, not isElicitation field
+Claude Code never sends `isElicitation: true` in the permission payload. Detect elicitation by checking `toolName == "AskUserQuestion"` in `HookServer.parsePermissionPayload` — exactly as the reference does in `server.js`. Any check of an `isElicitation` field will silently always be false. Also: `JSONSerialization` decodes JSON booleans as `NSNumber`, so boolean fields parsed with `obj["x"] as? Bool` always return nil; use `(obj["x"] as? NSNumber)?.boolValue ?? false` for all boolean fields from hook payloads.
+
+## 2026-04-20 — Sleep sequence: swapInlineSVG for steps 2–4 to avoid WKWebView reload flash
+Step 1 (yawn) uses loadSVG (full page load, sets base URL). Steps 2–4 (doze, collapse, sleeping) use swapInlineSVG which calls evaluateJavaScript to replace document.body.innerHTML via a JS template literal. This avoids a blank-frame flash during page reloads. SVGs must not contain backticks (they don't). CSS animations restart cleanly on innerHTML swap, which is the desired behavior for each sequence step.
+
+## 2026-04-20 — Idle variant pool: random timer in PetWindow, 20–45s interval
+PetWindow.scheduleIdleVariant() picks a random idle SVG (look 10s, reading 14s, yawn 3.8s) after a 20–45s random delay, plays it for its natural duration, then returns to clawd-idle-follow and schedules the next variant. cancelSequences() clears both sequenceTimer and idleVariantTimer on any state change, so no variant bleeds into a non-idle state.
+
+## 2026-04-20 — Assets: clawd-idle-follow.svg for idle, GIFs for all other states
+Idle uses the reference SVG (inline in WKWebView) because it has CSS `breathe` + `eye-blink` animations and `#eyes-js` for cursor tracking. All other 11 states use GIFs — simpler, no DOM needed. Eye tracking targets `#eyes-js` via `style.transform = translate(dx, dy)` (max 3.0 SVG units per theme spec), NOT `lp`/`rp` `cx`/`cy` as in the old hand-drawn SVGs. `PetWindow.currentState` gates the mouse monitor to only call `updateEyes` when `state.supportsEyeTracking`.
+
+## 2026-04-20 — StateEngine: synthetic session keys for subagent and notification states
+Subagent state uses `__subagent__` key; notification uses `__notification__<UUID>`. `isSynthetic()` identifies these by prefix/equality and the stale eviction timer skips them — they are managed explicitly (SubagentStart/Stop and setNotification). Real anonymous sessions use `[anon]` key (evictable). Building detection: after updating a session on PreToolUse/PostToolUse, count real (non-synthetic) sessions; if ≥3, upgrade that session to `.building`.
+
 ## 2026-04-20 — StateEngine: onSessionsChange callback for TrayMenu
 TrayMenu reads the full `[String: PetState]` snapshot. StateEngine gained an `onSessionsChange: (([String: PetState]) -> Void)?` callback that fires alongside `onStateChange`, consistent with the existing closure pattern throughout the codebase.

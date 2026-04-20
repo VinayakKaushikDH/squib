@@ -36,11 +36,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Show a bubble when Claude Code holds a connection open for approval.
         hookServer.onPermissionRequest = { [weak self] request in
             self?.bubbleManager.add(request)
+            self?.stateEngine.setNotification(id: request.id, active: true)
         }
 
         // If the client disconnects before the user decides, dismiss the bubble.
         hookServer.onPermissionEvicted = { [weak self] id in
             self?.bubbleManager.remove(id: id)
+            self?.stateEngine.setNotification(id: id, active: false)
         }
 
         // Slide the pet up to clear the bubble stack.
@@ -48,9 +50,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.petWindow?.setBubbleOffset(offset)
         }
 
-        // Forward the user's decision back to Claude Code.
+        // Forward the user's decision back to Claude Code and clear the notification state.
         bubbleManager.onDecision = { [weak self] id, decision in
             self?.hookServer.resolvePermission(id: id, decision: decision)
+            self?.stateEngine.setNotification(id: id, active: false)
         }
 
         piWatcher.onEvent = { [weak self] event in

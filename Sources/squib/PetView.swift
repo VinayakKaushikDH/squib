@@ -22,66 +22,74 @@ final class PetView: NSView {
             webView.topAnchor.constraint(equalTo: topAnchor),
             webView.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
-        loadState("idle")
+        loadState(.idle)
     }
 
-    func loadState(_ name: String) {
-        let svgURL = Bundle.module.url(forResource: name, withExtension: "svg")
-        let svgContent: String
-        if let url = svgURL, let content = try? String(contentsOf: url, encoding: .utf8) {
-            svgContent = content
-        } else {
-            svgContent = fallbackSVG
+    func loadState(_ state: PetState) {
+        switch state.assetExtension {
+        case "svg": loadSVG(name: state.assetName)
+        default:    loadGIF(name: state.assetName)
         }
-
-        let html = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <style>
-          html, body {
-            margin: 0; padding: 0;
-            width: 100%; height: 100%;
-            background: transparent;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          }
-          svg { width: 100%; height: 100%; }
-        </style>
-        </head>
-        <body>\(svgContent)</body>
-        </html>
-        """
-        webView.loadHTMLString(html, baseURL: svgURL?.deletingLastPathComponent())
     }
 
-    // Move pupils toward the cursor. dx/dy are offsets from socket centers in SVG units,
-    // already clamped to the socket radius. No-op if the current state has no lp/rp elements.
+    /// Swaps SVG content in-place via JS — no page reload, no flash.
+    /// Use this for sequence steps where the webview already has an SVG loaded.
+    func swapInlineSVG(name: String) {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "svg"),
+              let content = try? String(contentsOf: url, encoding: .utf8) else {
+            print("[PetView] SVG not found for swap: \(name).svg")
+            return
+        }
+        // Use JS template literal — SVGs won't contain backticks.
+        let escaped = content.replacingOccurrences(of: "\\", with: "\\\\")
+        let js = "document.body.innerHTML = `\(escaped)`;"
+        webView.evaluateJavaScript(js, completionHandler: nil)
+    }
+
+    // Translate #eyes-js to follow the cursor. dx/dy are in SVG units,
+    // already clamped to max 3.0 by PetWindow. No-op if element is absent.
     func updateEyes(dx: Double, dy: Double) {
         let js = """
-        (function() {
-          var lp = document.getElementById('lp');
-          var rp = document.getElementById('rp');
-          if (!lp || !rp) return;
-          lp.setAttribute('cx', \(38 + dx));
-          lp.setAttribute('cy', \(44 + dy));
-          rp.setAttribute('cx', \(62 + dx));
-          rp.setAttribute('cy', \(44 + dy));
+        (function(){
+          var e=document.getElementById('eyes-js');
+          if(e) e.style.transform='translate(\(dx)px,\(dy)px)';
         })();
         """
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
-    private let fallbackSVG = """
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120">
-      <ellipse cx="50" cy="52" rx="36" ry="40" fill="#6B73FF"/>
-      <circle cx="38" cy="44" r="7" fill="white"/>
-      <circle cx="62" cy="44" r="7" fill="white"/>
-      <circle id="lp" cx="40" cy="45" r="3.5" fill="#1a1a2e"/>
-      <circle id="rp" cx="64" cy="45" r="3.5" fill="#1a1a2e"/>
-      <path d="M 40 64 Q 50 72 60 64" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-    </svg>
-    """
+    // MARK: - Loaders (internal so PetWindow can drive sequences)
+
+    func loadSVG(name: String) {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "svg"),
+              let content = try? String(contentsOf: url, encoding: .utf8) else {
+            print("[PetView] SVG not found: \(name).svg")
+            return
+        }
+        let html = """
+        <!DOCTYPE html><html><head><style>
+          html,body{margin:0;padding:0;width:100%;height:100%;
+            background:transparent;overflow:hidden;
+            display:flex;align-items:center;justify-content:center;}
+          svg{width:100%;height:100%;}
+        </style></head><body>\(content)</body></html>
+        """
+        webView.loadHTMLString(html, baseURL: url.deletingLastPathComponent())
+    }
+
+    func loadGIF(name: String) {
+        guard let url = Bundle.module.url(forResource: name, withExtension: "gif") else {
+            print("[PetView] GIF not found: \(name).gif")
+            return
+        }
+        let html = """
+        <!DOCTYPE html><html><head><style>
+          html,body{margin:0;padding:0;width:100%;height:100%;
+            background:transparent;overflow:hidden;
+            display:flex;align-items:center;justify-content:center;}
+          img{width:100%;height:100%;object-fit:contain;}
+        </style></head><body><img src="\(url.lastPathComponent)"/></body></html>
+        """
+        webView.loadHTMLString(html, baseURL: url.deletingLastPathComponent())
+    }
 }

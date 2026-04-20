@@ -13,9 +13,10 @@ Read this file at the start of every session to restore context.
 - New memory files must be registered in the table below before closing a session
 
 ## Active Decisions
-- Swift/AppKit, SPM only, NWListener HTTP server, WKWebView inline SVG rendering
-- 6 states shipped: idle, thinking, working, error, attention, sleeping
-- Multi-session StateEngine with priority + stale eviction; eye tracking via global NSEvent monitor
+- Swift/AppKit, SPM only, NWListener HTTP server, WKWebView
+- 12 states: idle (SVG+eye tracking), thinking/working/building/juggling/conducting/error/attention/notification/sweeping/carrying/sleeping (all GIF)
+- Idle: `clawd-idle-follow.svg` inline; eye tracking via `#eyes-js` translate, max 3.0 SVG units
+- Multi-session StateEngine: priority + stale eviction; synthetic sessions for subagent (juggling/conducting) and notification
 
 ## Files
 | File | Contents |
