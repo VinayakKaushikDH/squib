@@ -83,3 +83,42 @@
 | 1c | done | StateEngine: multi-session, priority, stale cleanup, eye tracking |
 | 1d | done | BubbleWindow: permission approve/deny, lower-right stack, pet slides up |
 | 1e | done | opencode plugin, PiWatcher, TrayMenu — v1 scope complete |
+
+## 2026-04-20 — Session 7: Drag + Mini Mode
+
+- Drag: local mouseDown (consuming) + global mouseDragged/mouseUp monitors
+  - Local mouseDown consumes event to prevent text-selection start in background apps
+  - Global drag+up monitors fire when cursor enters other processes (menu bar area) — fills gap local monitors have
+  - `dragThreshold = 3pt`, position saved to `~/.squib/position.json`, restored on launch
+- Mini mode: SVG-based (not GIF) — reference uses `viewBox="-15 -25 45 45"` zoomed-in viewport
+  - Entry: `clawd-mini-enter.svg` (100ms Timer slide + 3.2s timer) → `clawd-mini-idle.svg`
+  - Exit: parabola arc `+ arc` (AppKit Y-from-bottom, NOT `- arc` like Electron Y-from-top)
+  - Peek: cursor enters visible strip → `clawd-mini-peek.svg` + 25pt animateSlide in
+  - All slides use Timer-based `animateSlide(toX:duration:)` — NSAnimationContext/CA layer path bypasses `constrainFrameRect` and resizes window at edges
+  - Left edge GIFs flipped via CSS `svg{transform:scaleX(-1);}` in PetView.loadSVG
+  - Eye tracking active in mini mode (all mini SVGs have `#eyes-js`)
+- `clampToScreen()`: loose clamp — `visibleFrame ± 25% of size`, allows pet into menu bar/dock zone
+- Window level 1500 (`CGAssistiveTechHighWindowLevel`), `constrainFrameRect` returns unchanged
+
+## 2026-04-20 — Session 9: Eye tracking fidelity + drag reaction
+
+- **Body+shadow tracking**: `PetView.updateEyes` now drives three SVG elements:
+  - `#eyes-js` — full (dx, dy) via `setAttribute('transform','translate(x,y)')` (SVG units)
+  - `#body-js` — 33% of eye offset (subtle whole-body lean, matches reference `bodyScale=0.33`)
+  - `#shadow-js` — horizontal stretch (`scaleX = 1 + |bdx| * 0.15`) + shift (`bdx * 0.3`)
+  - Switched from CSS `style.transform = 'translate(Xpx, Ypx)'` to `setAttribute` — CSS px ≠ SVG units; previous code moved eyes only ~3px, setAttribute gives full 3 SVG units (~13px at 200px size)
+- **Eye tracking math**: 0.5-unit grid snap (`rounded() / 2`), Y clamped to ±1.5 (50% of maxOffset); matches reference tick.js exactly
+- **Bubble offset guard**: `setBubbleOffset` now checks if pet's `baseFrame` horizontally overlaps the bubble zone (`wa.maxX - 356`) AND vertically before animating — pet no longer slides when it's far from bubbles
+- **Drag reaction**: `clawd-react-drag.svg` bundled and shown when drag threshold (3pt) is first crossed; restored via `loadState(currentState)` on mouseUp in both local and global handlers
+
+## Missing states inventory (from reference audit this session)
+- `dozing`: SVG with eye tracking (we only use it mid-sequence, not as named state)
+- `waking`: `clawd-wake.svg` — wake-up animation when cursor moves after sleeping; entirely absent
+- `mini-working`: `clawd-mini-typing.svg` — not implemented
+- `mini-crabwalk`, `mini-enter-sleep`, `mini-sleep` — not implemented
+- All click reactions: `clawd-react-left/right.svg` (2500ms), `clawd-react-annoyed.svg` (3500ms), `clawd-react-double[/jump].svg` (3500ms)
+- `clawd-working-debugger.svg` missing from idle animation pool (reference plays it as 14s idle variant)
+
+## Current Status
+- **Phase**: Session 9 complete — eye tracking at reference fidelity, drag reaction, bubble fix
+- **Next**: waking state, click reactions, idle debugger variant

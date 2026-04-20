@@ -1,5 +1,6 @@
 import AppKit
 import WebKit
+import SquibCore
 
 final class BubbleWindow: NSPanel {
     static let width:           CGFloat = 340

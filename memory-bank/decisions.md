@@ -100,5 +100,20 @@ Idle uses the reference SVG (inline in WKWebView) because it has CSS `breathe` +
 ## 2026-04-20 — StateEngine: synthetic session keys for subagent and notification states
 Subagent state uses `__subagent__` key; notification uses `__notification__<UUID>`. `isSynthetic()` identifies these by prefix/equality and the stale eviction timer skips them — they are managed explicitly (SubagentStart/Stop and setNotification). Real anonymous sessions use `[anon]` key (evictable). Building detection: after updating a session on PreToolUse/PostToolUse, count real (non-synthetic) sessions; if ≥3, upgrade that session to `.building`.
 
+## 2026-04-20 — Mini states: SVGs not GIFs
+Reference uses SVGs with `viewBox="-15 -25 45 45"` for all mini states (idle, enter, peek, alert, happy). This tiny viewport zooms in on just the peeking portion of the pet — the enter animation slides in from `translate(25px,0)` which is off the right edge of that viewport. GIFs (302×300) scale to fill the full window, showing the entire body and looking oversized in the 103pt strip. All mini state loads use `loadSVG`, not `loadGIF`.
+
+## 2026-04-20 — Mini slide animation: Timer not NSAnimationContext
+`NSAnimationContext`+`animator().setFrame` uses the CoreAnimation layer path which bypasses `constrainFrameRect`. When the window is near a screen edge, CA applies its own resize constraint — the window gets bigger instead of going off-screen. Timer-based `animateSlide(toX:duration:)` calls `setFrameOrigin` which stays in the AppKit path and respects the `constrainFrameRect` override. All mini mode X-slides use this helper.
+
+## 2026-04-20 — Arc direction: + arc in AppKit (not - arc from Electron)
+`animateParabola` uses `arc = -4*h*p*(p-1)` which is positive at midpoint. In Electron (Y from top), `y - arc` goes UP the screen. In AppKit (Y from bottom), `y + arc` goes UP. Using `-arc` (copied literally from JS) made the pet dive downward during mini exit. Fixed to `+ arc`.
+
+## 2026-04-20 — Drag: local mouseDown + global mouseDragged/Up
+Local monitors only fire for events dispatched to our process. When cursor enters the menu bar area (a separate system process), local drag monitors stop receiving events — the pet freezes. Fix: keep local `leftMouseDown` (consume to block text selection) and add permanent global `leftMouseDragged`/`leftMouseUp` monitors. Global monitors fire for events in OTHER processes, so there is no double-fire when cursor is over our window.
+
+## 2026-04-20 — clampToScreen: loose clamp via visibleFrame ± 25%
+Matches reference `computeLooseClamp`. Uses `visibleFrame` (excludes menu bar + dock) with 25% of pet size as margin at each edge. Allows the pet to sit partially in the menu bar area at the top (50pt above visible area for a 200pt pet) and in the dock area at the bottom. Previous `screen.frame` clamp was exactly at the screen edge with no margin.
+
 ## 2026-04-20 — StateEngine: onSessionsChange callback for TrayMenu
 TrayMenu reads the full `[String: PetState]` snapshot. StateEngine gained an `onSessionsChange: (([String: PetState]) -> Void)?` callback that fires alongside `onStateChange`, consistent with the existing closure pattern throughout the codebase.

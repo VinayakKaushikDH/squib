@@ -1,4 +1,5 @@
 import AppKit
+import SquibCore
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var petWindow:     PetWindow?
@@ -7,6 +8,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let bubbleManager = BubbleManager()
     private let piWatcher     = PiWatcher()
     private var trayMenu:      TrayMenu?
+
+    /// Maps session ID → pending permission UUID so we can auto-dismiss when
+    /// Claude Code resolves the permission in its own UI (PostToolUse fires
+    /// before we get a connection-close event).
+    private var pendingPermissionsBySession: [String: UUID] = [:]
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -26,6 +32,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         hookServer.onEvent = { [weak self] event in
             self?.stateEngine.handle(event)
+            // PostToolUse means the tool ran — Claude Code resolved the permission
+            // in its own UI without closing our connection. Auto-dismiss the bubble.
+            if event.hookEventName == "PostToolUse",
+               let sessionId = event.sessionId,
+               let id = self?.pendingPermissionsBySession.removeValue(forKey: sessionId) {
+                self?.bubbleManager.remove(id: id)
+                self?.stateEngine.setNotification(id: id, active: false)
+                self?.hookServer.resolvePermission(id: id, decision: .deny)
+            }
         }
 
         // Register the blocking HTTP permission hook once the port is known.
@@ -37,12 +52,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         hookServer.onPermissionRequest = { [weak self] request in
             self?.bubbleManager.add(request)
             self?.stateEngine.setNotification(id: request.id, active: true)
+            if let sessionId = request.sessionId {
+                self?.pendingPermissionsBySession[sessionId] = request.id
+            }
         }
 
         // If the client disconnects before the user decides, dismiss the bubble.
         hookServer.onPermissionEvicted = { [weak self] id in
             self?.bubbleManager.remove(id: id)
             self?.stateEngine.setNotification(id: id, active: false)
+            self?.pendingPermissionsBySession = self?.pendingPermissionsBySession.filter { $0.value != id } ?? [:]
         }
 
         // Slide the pet up to clear the bubble stack.
@@ -54,6 +73,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         bubbleManager.onDecision = { [weak self] id, decision in
             self?.hookServer.resolvePermission(id: id, decision: decision)
             self?.stateEngine.setNotification(id: id, active: false)
+            self?.pendingPermissionsBySession = self?.pendingPermissionsBySession.filter { $0.value != id } ?? [:]
         }
 
         piWatcher.onEvent = { [weak self] event in

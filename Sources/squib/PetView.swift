@@ -1,5 +1,6 @@
 import AppKit
 import WebKit
+import SquibCore
 
 final class PetView: NSView {
     private let webView: WKWebView
@@ -46,13 +47,27 @@ final class PetView: NSView {
         webView.evaluateJavaScript(js, completionHandler: nil)
     }
 
-    // Translate #eyes-js to follow the cursor. dx/dy are in SVG units,
-    // already clamped to max 3.0 by PetWindow. No-op if element is absent.
+    // Translate eye/body/shadow elements to follow the cursor.
+    // dx/dy are in SVG units, snapped to 0.5-unit grid by PetWindow.
+    // - #eyes-js  moves at full offset (setAttribute, SVG units)
+    // - #body-js  moves at 33% (subtle whole-body lean)
+    // - #shadow-js stretches/shifts with the body lean
     func updateEyes(dx: Double, dy: Double) {
+        let bdx = (dx * 0.33 * 2).rounded() / 2
+        let bdy = (dy * 0.33 * 2).rounded() / 2
         let js = """
         (function(){
           var e=document.getElementById('eyes-js');
-          if(e) e.style.transform='translate(\(dx)px,\(dy)px)';
+          if(e) e.setAttribute('transform','translate(\(dx),\(dy))');
+          var b=document.getElementById('body-js');
+          if(b) b.setAttribute('transform','translate(\(bdx),\(bdy))');
+          var s=document.getElementById('shadow-js');
+          if(s){
+            var absDx=Math.abs(\(bdx));
+            var scaleX=1+absDx*0.15;
+            var shiftX=Math.round(\(bdx)*0.3*2)/2;
+            s.setAttribute('transform','translate('+shiftX+',0) scale('+scaleX+',1)');
+          }
         })();
         """
         webView.evaluateJavaScript(js, completionHandler: nil)
@@ -60,7 +75,7 @@ final class PetView: NSView {
 
     // MARK: - Loaders (internal so PetWindow can drive sequences)
 
-    func loadSVG(name: String) {
+    func loadSVG(name: String, flipped: Bool = false) {
         guard let url = Bundle.module.url(forResource: name, withExtension: "svg"),
               let content = try? String(contentsOf: url, encoding: .utf8) else {
             print("[PetView] SVG not found: \(name).svg")
@@ -71,23 +86,24 @@ final class PetView: NSView {
           html,body{margin:0;padding:0;width:100%;height:100%;
             background:transparent;overflow:hidden;
             display:flex;align-items:center;justify-content:center;}
-          svg{width:100%;height:100%;}
+          svg{width:100%;height:100%;\(flipped ? "transform:scaleX(-1);" : "")}
         </style></head><body>\(content)</body></html>
         """
         webView.loadHTMLString(html, baseURL: url.deletingLastPathComponent())
     }
 
-    func loadGIF(name: String) {
+    func loadGIF(name: String, flipped: Bool = false) {
         guard let url = Bundle.module.url(forResource: name, withExtension: "gif") else {
             print("[PetView] GIF not found: \(name).gif")
             return
         }
+        let flipStyle = flipped ? "transform:scaleX(-1);" : ""
         let html = """
         <!DOCTYPE html><html><head><style>
           html,body{margin:0;padding:0;width:100%;height:100%;
             background:transparent;overflow:hidden;
             display:flex;align-items:center;justify-content:center;}
-          img{width:100%;height:100%;object-fit:contain;}
+          img{width:100%;height:100%;object-fit:contain;\(flipStyle)}
         </style></head><body><img src="\(url.lastPathComponent)"/></body></html>
         """
         webView.loadHTMLString(html, baseURL: url.deletingLastPathComponent())

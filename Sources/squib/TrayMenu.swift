@@ -1,4 +1,5 @@
 import AppKit
+import SquibCore
 
 // NSStatusItem menu bar presence.
 // Shows the active session list and a Quit item.

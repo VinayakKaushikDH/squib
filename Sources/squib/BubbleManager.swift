@@ -1,4 +1,5 @@
 import AppKit
+import SquibCore
 
 /// Manages the permission bubble stack anchored to the lower-right corner of the screen.
 /// Bubbles stack vertically upward. Each bubble self-reports its actual rendered height
