@@ -179,7 +179,8 @@ final class HookServer {
         let toolName      = obj["tool_name"]     as? String ?? "(unknown)"
         let sessionId     = obj["session_id"]    as? String
         let cwd           = obj["cwd"]           as? String
-        let isElicitation = obj["isElicitation"] as? Bool ?? false
+        let isElicitation = toolName == "AskUserQuestion"
+            || (obj["isElicitation"] as? NSNumber)?.boolValue ?? false
         let suggestions   = obj["suggestions"]   as? [[String: Any]] ?? []
 
         var toolInput: String? = nil
