@@ -60,6 +60,19 @@ public final class StateEngine {
     }
 
     /// Sets or clears the notification state for a pending permission request.
+    /// Current session states as a synchronous snapshot. Useful for assertions in tests.
+    public var sessionSnapshot: [String: PetState] {
+        sessions.mapValues(\.state)
+    }
+
+    /// Clears all session state and resets to idle. Useful for test teardown.
+    public func reset() {
+        sessions.removeAll()
+        activeSubagents = 0
+        resolveState()
+        notifySessionsChange()
+    }
+
     public func setNotification(id: UUID, active: Bool) {
         let key = "__notification__\(id)"
         if active {

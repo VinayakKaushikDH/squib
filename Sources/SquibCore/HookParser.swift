@@ -2,17 +2,19 @@ import Foundation
 
 /// Pure HTTP parsing and permission payload parsing extracted from HookServer.
 /// Struct with no state — all methods are deterministic functions of their inputs.
-struct HookParser {
+public struct HookParser {
+
+    public init() {}
 
     // MARK: - HTTP parsing
 
-    enum ParseResult {
+    public enum ParseResult {
         case incomplete
         case complete(method: String, path: String, body: Data)
         case error(Data)
     }
 
-    func tryParse(_ data: Data) -> ParseResult {
+    public func tryParse(_ data: Data) -> ParseResult {
         let sep = Data("\r\n\r\n".utf8)
         guard let sepRange = data.range(of: sep) else { return .incomplete }
 
@@ -45,7 +47,7 @@ struct HookParser {
 
     // MARK: - Permission payload parsing
 
-    func parsePermissionPayload(_ data: Data) -> PermissionRequest? {
+    public func parsePermissionPayload(_ data: Data) -> PermissionRequest? {
         guard let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return nil }
 
         let toolName      = obj["tool_name"]     as? String ?? "(unknown)"
@@ -74,7 +76,7 @@ struct HookParser {
 
     // MARK: - Decision response serialisation
 
-    func buildResponseBody(for decision: PermissionDecision) -> String {
+    public func buildResponseBody(for decision: PermissionDecision) -> String {
         let hookName = "PermissionRequest"
         switch decision {
         case .allow:
@@ -98,7 +100,7 @@ struct HookParser {
 
     // MARK: - HTTP response helper (shared with HookServer via this struct)
 
-    func httpResponse(_ status: Int, _ body: String) -> Data {
+    public func httpResponse(_ status: Int, _ body: String) -> Data {
         let bodyData = Data(body.utf8)
         let header = "HTTP/1.1 \(status) \(statusText(status))\r\n" +
                      "Content-Type: application/json\r\n" +

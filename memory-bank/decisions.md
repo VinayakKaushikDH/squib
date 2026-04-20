@@ -117,3 +117,9 @@ Matches reference `computeLooseClamp`. Uses `visibleFrame` (excludes menu bar + 
 
 ## 2026-04-20 — StateEngine: onSessionsChange callback for TrayMenu
 TrayMenu reads the full `[String: PetState]` snapshot. StateEngine gained an `onSessionsChange: (([String: PetState]) -> Void)?` callback that fires alongside `onStateChange`, consistent with the existing closure pattern throughout the codebase.
+
+## 2026-04-20 — Permission auto-dismiss: PostToolUse, not connection close
+When Claude Code resolves a permission in its own UI, it does NOT close the held HTTP connection — it resolves internally and proceeds. The `.cancelled` eviction path in `HookServer.stateUpdateHandler` never fires. Fix: `AppDelegate` tracks `pendingPermissionsBySession: [String: UUID]`; when a `PostToolUse` event arrives for a session that has a pending permission, it auto-dismisses (removes bubble, clears notification state, closes connection). Map populated on `onPermissionRequest`, cleared on `onPermissionEvicted` and auto-dismiss.
+
+## 2026-04-20 — SquibCore module: all public-facing declarations need explicit `public`
+Moving types from the `squib` target to `SquibCore` requires `public` on every class/struct/enum/init/property/method that crosses the module boundary. Swift internals do not cross module boundaries — omitting `public` compiles within the module but produces "cannot find type" errors in the importing target. This applies to `HookEvent`, `HookServer`, `PermissionDecision`, `PermissionRequest`, `PetState`, `PiWatcher`, `StateEngine`, and any new SquibCore types.

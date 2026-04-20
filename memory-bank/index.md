@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Phase 1e+ complete — bubble system at reference parity
-- **Last updated**: 2026-04-20 (Session 5)
+- **Phase**: Session 10 complete — SquibCore module split, permission auto-dismiss
+- **Last updated**: 2026-04-20 (Session 10)
 
 ## Agent Instructions
 - Read this file first, every session

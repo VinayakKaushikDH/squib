@@ -2,11 +2,13 @@ import Foundation
 
 /// Pure JSONL parsing logic extracted from PiWatcher.
 /// Stateless — call parseMessage for each line.
-struct PiJSONLParser {
+public struct PiJSONLParser {
+
+    public init() {}
 
     /// Parses a single JSONL line from a pi-mono session file.
     /// Returns nil for non-message entries (session headers, labels, model_change, etc.)
-    func parseMessage(_ json: String, sessionId: String) -> HookEvent? {
+    public func parseMessage(_ json: String, sessionId: String) -> HookEvent? {
         guard let data = json.data(using: .utf8),
               let obj  = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
         else { return nil }

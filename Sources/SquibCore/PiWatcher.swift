@@ -13,14 +13,21 @@ import Foundation
 public final class PiWatcher {
     public var onEvent: ((HookEvent) -> Void)?
 
-    public init() {}
-
-    private let sessionsRoot = URL.homeDirectory.appending(path: ".pi/agent/sessions")
+    private let sessionsRoot:  URL
+    private let pollInterval:  TimeInterval
     /// Tracks last-read byte offset per file path. Accessed on pollQueue only.
     private var fileOffsets: [String: Int] = [:]
     private var pollTimer:   Timer?
     private let pollQueue  = DispatchQueue(label: "squib.piwatcher", qos: .utility)
     private let parser     = PiJSONLParser()
+
+    public init(
+        sessionsRoot: URL = URL.homeDirectory.appending(path: ".pi/agent/sessions"),
+        pollInterval: TimeInterval = 2
+    ) {
+        self.sessionsRoot = sessionsRoot
+        self.pollInterval = pollInterval
+    }
 
     // MARK: - Lifecycle
 
@@ -29,11 +36,14 @@ public final class PiWatcher {
             print("[PiWatcher] ~/.pi/agent/sessions not found — skipping")
             return
         }
-        // Initial scan on the poll queue, then schedule repeating timer.
+        // Initial scan on the poll queue, then schedule repeating timer on RunLoop.main
+        // so the timer fires regardless of which thread start() is called from.
         pollQueue.async { self.scan() }
-        pollTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
+        let timer = Timer(timeInterval: pollInterval, repeats: true) { [weak self] _ in
             self?.pollQueue.async { self?.scan() }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        pollTimer = timer
     }
 
     public func stop() {
