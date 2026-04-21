@@ -12,6 +12,8 @@ final class PetWindow: NSPanel {
     private static let jumpDuration:   TimeInterval     = 0.35
     private static let jumpPeakHeight: CGFloat          = 40
     private static let dragThreshold:  CGFloat          = 3
+    private static let wakeDuration:     TimeInterval     = 1.4
+    private static let deepSleepTimeout: TimeInterval     = 60.0
 
     // MARK: - Properties
 
@@ -25,12 +27,20 @@ final class PetWindow: NSPanel {
     // Sequence timers
     private var sequenceTimer:    Timer?
     private var idleVariantTimer: Timer?
+    private var wakePollTimer:    Timer?
+    private var dozeCursorPos:    NSPoint = .zero
+    private var dozeEntryDate:    Date?
+    private var isShowingDoze:    Bool    = false
 
     private let idleVariants: [(name: String, duration: Double)] = [
-        ("clawd-idle-look",    10.0),
-        ("clawd-idle-reading", 14.0),
-        ("clawd-idle-yawn",     3.8),
+        ("clawd-idle-look",        10.0),
+        ("clawd-idle-reading",     14.0),
+        ("clawd-idle-yawn",         3.8),
+        ("clawd-idle-living",      16.0),
+        ("clawd-working-debugger", 14.0),
     ]
+
+    var doNotDisturb: Bool = false
 
     // Drag
     private var mouseOverPet          = false
@@ -40,6 +50,10 @@ final class PetWindow: NSPanel {
     private var isDragReacting        = false   // showing clawd-react-drag.svg
     private var dragStartCursor: NSPoint = .zero
     private var dragStartOrigin: NSPoint = .zero
+
+    // Click reactions
+    private var clickReactionTimer: Timer?
+    private var isClickReacting     = false
 
     // Mini mode
     private enum MiniEdge { case left, right }
@@ -99,6 +113,8 @@ final class PetWindow: NSPanel {
         monitors.forEach { NSEvent.removeMonitor($0) }
         sequenceTimer?.invalidate()
         idleVariantTimer?.invalidate()
+        wakePollTimer?.invalidate()
+        clickReactionTimer?.invalidate()
         miniAnimTimer?.invalidate()
         slideTimer?.invalidate()
         parabolaTimer?.invalidate()
@@ -145,7 +161,7 @@ final class PetWindow: NSPanel {
             if self.isMiniMode {
                 self.handleMiniPeek(cursor: cursor)
                 self.updateEyeTracking(cursor: cursor)   // mini SVGs all have #eyes-js
-            } else if self.currentState.supportsEyeTracking {
+            } else if self.currentState.supportsEyeTracking || self.isShowingDoze {
                 self.updateEyeTracking(cursor: cursor)
             }
         }
@@ -156,6 +172,14 @@ final class PetWindow: NSPanel {
         let down = NSEvent.addLocalMonitorForEvents(matching: .leftMouseDown) { [weak self] event in
             guard let self, self.mouseOverPet, self.cursorIsOverCharacter else { return event }
             if self.isMiniMode || self.miniAnimating { return nil }
+            // Play click reaction before isDragging is set (guard in playClickReaction checks !isDragging).
+            // If the user drags past threshold, the drag handler cancels this and shows react-drag instead.
+            switch event.clickCount {
+            case 1:      self.playClickReaction(svg: "clawd-react-left",        duration: 2.5)
+            case 2:      self.playClickReaction(svg: Bool.random()
+                             ? "clawd-react-double" : "clawd-react-double-jump", duration: 3.5)
+            default:     self.playClickReaction(svg: "clawd-react-annoyed",     duration: 3.5)
+            }
             self.isDragging      = true
             self.dragStartCursor = NSEvent.mouseLocation
             self.dragStartOrigin = self.frame.origin
@@ -170,6 +194,10 @@ final class PetWindow: NSPanel {
             guard hypot(dx, dy) > PetWindow.dragThreshold else { return nil }
             if !self.isDragReacting {
                 self.isDragReacting = true
+                // Cancel any pending click reaction — drag wins visually
+                self.clickReactionTimer?.invalidate()
+                self.clickReactionTimer = nil
+                self.isClickReacting    = false
                 self.petView.loadSVG(name: "clawd-react-drag")
             }
             self.setFrameOrigin(NSPoint(
@@ -209,6 +237,9 @@ final class PetWindow: NSPanel {
             guard hypot(dx, dy) > PetWindow.dragThreshold else { return }
             if !self.isDragReacting {
                 self.isDragReacting = true
+                self.clickReactionTimer?.invalidate()
+                self.clickReactionTimer = nil
+                self.isClickReacting    = false
                 self.petView.loadSVG(name: "clawd-react-drag")
             }
             self.setFrameOrigin(NSPoint(
@@ -230,7 +261,14 @@ final class PetWindow: NSPanel {
             self.checkMiniSnap()
         }
 
-        monitors = [move, down, drag, up, globalDrag, globalUp].compactMap { $0 }
+        // 5. Right-click: react-right reaction (consumes event — no context menu on pet body).
+        let rightDown = NSEvent.addLocalMonitorForEvents(matching: .rightMouseDown) { [weak self] event in
+            guard let self, self.mouseOverPet, self.cursorIsOverCharacter else { return event }
+            self.playClickReaction(svg: "clawd-react-right", duration: 2.5)
+            return nil
+        }
+
+        monitors = [move, down, drag, up, globalDrag, globalUp, rightDown].compactMap { $0 }
     }
 
     // MARK: - Eye Tracking
@@ -254,6 +292,21 @@ final class PetWindow: NSPanel {
         petView.updateEyes(dx: eyeDx, dy: eyeDy)
     }
 
+    // MARK: - Click Reactions
+
+    private func playClickReaction(svg: String, duration: TimeInterval) {
+        guard !isDragging, !isMiniMode, !miniAnimating else { return }
+        clickReactionTimer?.invalidate()
+        isClickReacting = true
+        petView.loadSVG(name: svg)
+        clickReactionTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            self.isClickReacting    = false
+            self.clickReactionTimer = nil
+            self.loadState(self.currentState)
+        }
+    }
+
     // MARK: - State Loading
 
     func loadState(_ state: PetState) {
@@ -266,6 +319,8 @@ final class PetWindow: NSPanel {
                 showMiniState(gif: "clawd-mini-alert", duration: 4.0)
             case .attention:
                 showMiniState(gif: "clawd-mini-happy", duration: 4.0)
+            case .working, .thinking, .juggling, .building, .conducting:
+                showMiniState(gif: "clawd-mini-typing", duration: 4.0)
             default:
                 break
             }
@@ -291,7 +346,8 @@ final class PetWindow: NSPanel {
         miniAnimTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
             guard let self, self.isMiniMode else { return }
             self.miniAnimTimer = nil
-            self.petView.loadSVG(name: "clawd-mini-idle", flipped: self.miniEdge == .left)
+            let restName = self.doNotDisturb ? "clawd-mini-sleep" : "clawd-mini-idle"
+            self.petView.loadSVG(name: restName, flipped: self.miniEdge == .left)
         }
     }
 
@@ -302,14 +358,68 @@ final class PetWindow: NSPanel {
         sequenceTimer = Timer.scheduledTimer(withTimeInterval: 3.8, repeats: false) { [weak self] _ in
             guard let self, self.currentState == .sleeping else { return }
             self.petView.swapInlineSVG(name: "clawd-idle-doze")
+            self.isShowingDoze = true
+            self.dozeCursorPos = NSEvent.mouseLocation
+            self.dozeEntryDate = Date()
+            self.startWakePoll()
             self.sequenceTimer = Timer.scheduledTimer(withTimeInterval: 2.0, repeats: false) { [weak self] _ in
                 guard let self, self.currentState == .sleeping else { return }
+                self.wakePollTimer?.invalidate()
+                self.wakePollTimer = nil
+                self.dozeEntryDate = nil
+                self.isShowingDoze = false
                 self.petView.swapInlineSVG(name: "clawd-idle-collapse")
                 self.sequenceTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
                     guard let self, self.currentState == .sleeping else { return }
                     self.petView.swapInlineSVG(name: "clawd-sleeping")
                 }
             }
+        }
+    }
+
+    // MARK: - Wake Poll
+
+    private func startWakePoll() {
+        wakePollTimer?.invalidate()
+        wakePollTimer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { [weak self] _ in
+            guard let self, self.currentState == .sleeping else {
+                self?.wakePollTimer?.invalidate()
+                return
+            }
+            let cursor = NSEvent.mouseLocation
+            let moved  = hypot(cursor.x - self.dozeCursorPos.x,
+                               cursor.y - self.dozeCursorPos.y) > 2.0
+            if moved {
+                self.wakePollTimer?.invalidate()
+                self.wakePollTimer = nil
+                self.playWakeSequence()
+            } else if let entry = self.dozeEntryDate,
+                      Date().timeIntervalSince(entry) >= PetWindow.deepSleepTimeout {
+                // No movement for 60s — advance to collapse
+                self.wakePollTimer?.invalidate()
+                self.wakePollTimer = nil
+                self.dozeEntryDate = nil
+                self.isShowingDoze = false
+                self.sequenceTimer?.invalidate()
+                self.petView.swapInlineSVG(name: "clawd-idle-collapse")
+                self.sequenceTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: false) { [weak self] _ in
+                    guard let self, self.currentState == .sleeping else { return }
+                    self.petView.swapInlineSVG(name: "clawd-sleeping")
+                }
+            }
+        }
+    }
+
+    private func playWakeSequence() {
+        sequenceTimer?.invalidate()
+        sequenceTimer = nil
+        dozeEntryDate = nil
+        isShowingDoze = false
+        petView.loadSVG(name: "clawd-wake")
+        sequenceTimer = Timer.scheduledTimer(withTimeInterval: PetWindow.wakeDuration, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            self.sequenceTimer = nil
+            self.loadState(self.currentState)
         }
     }
 
@@ -330,8 +440,13 @@ final class PetWindow: NSPanel {
     }
 
     private func cancelSequences() {
-        sequenceTimer?.invalidate();    sequenceTimer    = nil
-        idleVariantTimer?.invalidate(); idleVariantTimer = nil
+        sequenceTimer?.invalidate();        sequenceTimer        = nil
+        idleVariantTimer?.invalidate();     idleVariantTimer     = nil
+        wakePollTimer?.invalidate();        wakePollTimer        = nil
+        clickReactionTimer?.invalidate();   clickReactionTimer   = nil
+        dozeEntryDate   = nil
+        isShowingDoze   = false
+        isClickReacting = false
     }
 
     // MARK: - Bubble Offset
@@ -374,7 +489,8 @@ final class PetWindow: NSPanel {
         preMiniOrigin = baseFrame.origin
         currentMiniX  = calcMiniX(workArea: workArea)
 
-        petView.loadSVG(name: "clawd-mini-enter", flipped: edge == .left)
+        let enterName = doNotDisturb ? "clawd-mini-enter-sleep" : "clawd-mini-enter"
+        petView.loadSVG(name: enterName, flipped: edge == .left)
 
         // Slide to edge (100ms), then start enter→idle timer
         miniAnimating = true
@@ -387,7 +503,8 @@ final class PetWindow: NSPanel {
             ) { [weak self] _ in
                 guard let self, self.isMiniMode else { return }
                 self.miniAnimTimer = nil
-                self.petView.loadSVG(name: "clawd-mini-idle", flipped: self.miniEdge == .left)
+                let restName = self.doNotDisturb ? "clawd-mini-sleep" : "clawd-mini-idle"
+                self.petView.loadSVG(name: restName, flipped: self.miniEdge == .left)
             }
         }
     }
@@ -508,7 +625,8 @@ final class PetWindow: NSPanel {
     private func miniPeekOut() {
         guard miniPeeked else { return }
         miniPeeked = false
-        petView.loadSVG(name: "clawd-mini-idle", flipped: miniEdge == .left)
+        let restName = doNotDisturb ? "clawd-mini-sleep" : "clawd-mini-idle"
+        petView.loadSVG(name: restName, flipped: miniEdge == .left)
         animateSlide(toX: currentMiniX, duration: 0.2)
     }
 

@@ -71,7 +71,7 @@ struct PiWatcherIntegrationTests {
         defer { tmp.cleanup() }
 
         let file = try tmp.makeJsonlFile(sessionId: "s2")
-        try append(#"{"type":"message","role":"user","content":"hello"}"#, to: file)
+        try append(#"{"type":"message","id":"m1","parentId":"m0","timestamp":1,"message":{"role":"user","content":[],"timestamp":1}}"#, to: file)
 
         let watcher = PiWatcher(sessionsRoot: tmp.root, pollInterval: 0.05)
         var events: [HookEvent] = []
@@ -101,7 +101,7 @@ struct PiWatcherIntegrationTests {
         #expect(sessionStarted, "SessionStart not fired for initial file")
 
         // Now append a message line
-        try append(#"{"type":"message","role":"user","content":"hi"}"#, to: file)
+        try append(#"{"type":"message","id":"m1","parentId":"m0","timestamp":1,"message":{"role":"user","content":[],"timestamp":1}}"#, to: file)
 
         let got = await waitFor { events.contains { $0.hookEventName == "UserPromptSubmit" } }
         #expect(got, "UserPromptSubmit not picked up after appending a line")

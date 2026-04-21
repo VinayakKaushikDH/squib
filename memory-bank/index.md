@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Session 10 complete — SquibCore module split, permission auto-dismiss
-- **Last updated**: 2026-04-20 (Session 10)
+- **Phase**: Session 14 complete — PiJSONLParser bug fix, all 84 tests passing
+- **Last updated**: 2026-04-21 (Session 14)
 
 ## Agent Instructions
 - Read this file first, every session
@@ -24,6 +24,7 @@ Read this file at the start of every session to restore context.
 | `reference-notes.md` | Key observations from clawd-on-desk source |
 | `decisions.md` | Architecture and design decisions log |
 | `progress.md` | Task-level progress log |
+| `animation-gaps.md` | Prioritised task list: missing states, priority bugs, mini gaps (Session 12) |
 
 ## Reference
 - Source: `/Users/vinayak.kaushik/Developer/clawd-on-desk-ref`

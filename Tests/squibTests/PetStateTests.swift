@@ -20,7 +20,8 @@ struct PetStateTests {
         #expect(PetState.juggling.priority     > PetState.attention.priority)
         #expect(PetState.attention.priority    > PetState.building.priority)
         #expect(PetState.building.priority     > PetState.working.priority)
-        #expect(PetState.working.priority      > PetState.sweeping.priority)
+        #expect(PetState.sweeping.priority     > PetState.working.priority)   // TASK-1: sweeping beats working
+        #expect(PetState.carrying.priority     > PetState.working.priority)   // TASK-2: carrying beats working
         #expect(PetState.idle.priority         >= PetState.sleeping.priority)
     }
 

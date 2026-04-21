@@ -23,8 +23,8 @@ public enum PetState: String, CaseIterable {
         case .attention:    return 5
         case .building:     return 4
         case .working:      return 3
-        case .sweeping:     return 2
-        case .carrying:     return 2
+        case .sweeping:     return 6
+        case .carrying:     return 4
         case .thinking:     return 1
         case .idle:         return 1
         case .sleeping:     return 0

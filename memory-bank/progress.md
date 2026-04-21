@@ -145,6 +145,32 @@
 - README.md updated — 78/6 counts, integration suites added to table
 - Run tests: `swift run squibTestRunner`
 
+## 2026-04-21 — Session 12: Animation gap fixes
+
+- **Priority bugs fixed** (TASK-1, TASK-2): `sweeping` 2→6, `carrying` 2→4 in `PetState.priority`. Both now beat `working` (3) as the reference requires. Tests updated + 3 new StateEngine tests added.
+- **SVGs bundled** (TASK-3, 5, 8, 9): `clawd-wake`, `clawd-mini-sleep`, `clawd-mini-enter-sleep`, `clawd-mini-typing`, `clawd-idle-living`, `clawd-working-debugger` copied from reference.
+- **Wake sequence** (TASK-4): `startWakePoll()` (200ms) starts after doze; cursor movement triggers `playWakeSequence()` (clawd-wake.svg, 1.4s, then restore). Deep sleep: 60s no-move → skip to collapse. `wakePollTimer` invalidated on cancelSequences + before collapse step.
+- **DND mini mode** (TASK-6): `doNotDisturb: Bool = false` on PetWindow. Three sites fixed: `enterMiniMode`, `showMiniState`, `miniPeekOut` all use `clawd-mini-enter-sleep`/`clawd-mini-sleep` when DND is on.
+- **mini-working** (TASK-7): working/thinking/juggling/building/conducting states in mini mode now play `clawd-mini-typing` (4s).
+- **Idle variants expanded** (TASK-8, 9): `clawd-idle-living` (16s) and `clawd-working-debugger` (14s) added to `idleVariants` pool.
+- **Stale SVGs deleted** (TASK-12): `attention.svg`, `error.svg`, `idle.svg`, `sleeping.svg`, `thinking.svg`, `working.svg` removed from Resources.
+- **Tests**: 81/81 passing (3 new StateEngine tests: sweeping beats working, carrying beats working, sweeping end fallback).
+- **Deferred**: TASK-10 (doze eye tracking — `clawd-idle-doze.svg` lacks #eyes-js; needs SVG edit first), TASK-11 (click reactions).
+
+## 2026-04-21 — Session 13: Doze eye tracking + click reactions
+
+- **Doze eye tracking** (TASK-10): Edited `clawd-idle-doze.svg` — wrapped shadow in `<g id="shadow-js">`, body in `<g id="body-js">`, renamed `eyes-doze` → `eyes-js`. CSS breathing animation runs on inner `.doze-body`; JS `setAttribute` runs on wrapper groups (no conflict). Added `isShowingDoze: Bool` to PetWindow; set true on doze swap, false in `cancelSequences()`, `playWakeSequence()`, and both collapse paths (2s timer + deep sleep). `mouseMoved` checks `isShowingDoze` alongside `currentState.supportsEyeTracking`.
+- **Click reactions** (TASK-11): Copied `clawd-react-left/right/double/double-jump/annoyed.svg` from reference. Added `playClickReaction(svg:duration:)` helper (guards against drag/mini/miniAnimating). Left-click: `clickCount==1` → react-left (2.5s), `clickCount==2` → react-double or react-double-jump randomly (3.5s), `clickCount≥3` → react-annoyed (3.5s). Right-click local monitor → react-right (2.5s, consumes event). Drag threshold cancels pending click reaction and replaces with react-drag (both local + global drag handlers). `cancelSequences()` clears `clickReactionTimer` + `isClickReacting`. `deinit` invalidates `clickReactionTimer`.
+- **Tests**: 81/81 passing (no new tests needed — reaction logic is UI-only).
+
+## 2026-04-21 — Session 14: PiJSONLParser bug fix
+
+- **Root cause**: `PiJSONLParser` was built against the Anthropic API message format, not pi-mono's actual format. Tests were written against the same wrong schema so all 13 tests passed with no real coverage.
+- **Fixed**: message nesting (payload under `"message"` key), content block type (`"toolCall"` not `"tool_use"`), stop reason values (`"stop"/"toolUse"/"aborted"`), compaction handling (`{"type":"compaction",...}` now emits PostCompact).
+- **Fixed**: integration test fixtures in `PiWatcherIntegrationTests` updated from flat format to nested pi-mono format.
+- **Result**: 84/84 tests passing with correct pi-mono format fixtures.
+
 ## Current Status
-- **Phase**: Session 11 complete — full test infrastructure, 78/78 passing
-- **Next**: waking state / click reactions, or mini-mode improvements (mini-working, mini-crabwalk)
+- **Phase**: Session 14 complete — PiJSONLParser now correctly parses real pi-mono sessions
+- **Next**: new feature work
+- **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it

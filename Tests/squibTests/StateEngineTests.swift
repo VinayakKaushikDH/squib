@@ -124,6 +124,31 @@ struct StateEngineTests {
         #expect(engine.currentState == .notification)
     }
 
+    @Test("sweeping beats working (TASK-1)")
+    func sweepingBeatsWorking() {
+        let engine = StateEngine()
+        engine.handle(HookEvent(hookEventName: "PreToolUse", sessionId: "s1", toolName: nil))
+        engine.handle(HookEvent(hookEventName: "PreCompact",  sessionId: "s2", toolName: nil))
+        #expect(engine.currentState == .sweeping)
+    }
+
+    @Test("carrying beats working (TASK-2)")
+    func carryingBeatsWorking() {
+        let engine = StateEngine()
+        engine.handle(HookEvent(hookEventName: "PreToolUse",    sessionId: "s1", toolName: nil))
+        engine.handle(HookEvent(hookEventName: "WorktreeCreate", sessionId: "s2", toolName: nil))
+        #expect(engine.currentState == .carrying)
+    }
+
+    @Test("sweeping session end falls back to working")
+    func sweepingEndFallsBack() {
+        let engine = StateEngine()
+        engine.handle(HookEvent(hookEventName: "PreToolUse", sessionId: "s1", toolName: nil))
+        engine.handle(HookEvent(hookEventName: "PreCompact",  sessionId: "s2", toolName: nil))
+        engine.handle(HookEvent(hookEventName: "SessionEnd",  sessionId: "s2", toolName: nil))
+        #expect(engine.currentState == .working)
+    }
+
     // MARK: - Building upgrade
 
     @Test("3+ real sessions upgrading to building from PreToolUse")
