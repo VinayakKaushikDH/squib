@@ -36,14 +36,40 @@ public final class PiWatcher {
             print("[PiWatcher] ~/.pi/agent/sessions not found — skipping")
             return
         }
-        // Initial scan on the poll queue, then schedule repeating timer on RunLoop.main
-        // so the timer fires regardless of which thread start() is called from.
-        pollQueue.async { self.scan() }
+        // Seed pre-existing files to their current size so we don't replay history
+        // from sessions that ended before squib started. Files created after start()
+        // are genuinely new and will be processed from byte 0 on first sight.
+        pollQueue.async { self.seedExistingFiles() }
         let timer = Timer(timeInterval: pollInterval, repeats: true) { [weak self] _ in
             self?.pollQueue.async { self?.scan() }
         }
         RunLoop.main.add(timer, forMode: .common)
         pollTimer = timer
+    }
+
+    /// Records current file sizes for all pre-existing JSONL files without emitting events.
+    private func seedExistingFiles() {
+        let fm = FileManager.default
+        guard let cwdDirs = try? fm.contentsOfDirectory(
+            at: sessionsRoot,
+            includingPropertiesForKeys: [.isDirectoryKey],
+            options: .skipsHiddenFiles
+        ) else { return }
+        for cwdDir in cwdDirs {
+            guard (try? cwdDir.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true else { continue }
+            guard let files = try? fm.contentsOfDirectory(
+                at: cwdDir,
+                includingPropertiesForKeys: [.fileSizeKey],
+                options: .skipsHiddenFiles
+            ) else { continue }
+            for file in files where file.pathExtension == "jsonl" {
+                let path = file.path
+                if let attrs = try? fm.attributesOfItem(atPath: path),
+                   let size = attrs[.size] as? Int {
+                    fileOffsets[path] = size
+                }
+            }
+        }
     }
 
     public func stop() {
@@ -86,7 +112,9 @@ public final class PiWatcher {
         let lastOffset = fileOffsets[path]
 
         if lastOffset == nil {
-            // New file — emit SessionStart.
+            // Truly new file (created after squib started) — emit SessionStart and
+            // process from byte 0. Pre-existing files are seeded in seedExistingFiles()
+            // so they never reach this branch.
             fileOffsets[path] = 0
             emit(HookEvent(hookEventName: "SessionStart", sessionId: sessionId, toolName: nil))
         }
