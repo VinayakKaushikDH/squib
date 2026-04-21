@@ -44,8 +44,7 @@ final class PetWindow: NSPanel {
 
     // Drag
     private var mouseOverPet          = false
-    private var cursorIsOverCharacter = false   // async pixel hit test result
-    private var hitTestPending        = false
+    private var cursorIsOverCharacter = false   // synchronous rect hit test result
     private var isDragging            = false
     private var isDragReacting        = false   // showing clawd-react-drag.svg
     private var dragStartCursor: NSPoint = .zero
@@ -140,22 +139,18 @@ final class PetWindow: NSPanel {
             self.mouseOverPet = self.frame.contains(cursor)
 
             if !self.mouseOverPet {
-                // Cursor left the frame — clear immediately without waiting for JS
+                // Cursor left the frame — clear immediately
                 if wasOver {
                     self.cursorIsOverCharacter = false
                     if !self.isDragging { self.ignoresMouseEvents = true }
                 }
-            } else if !self.hitTestPending {
-                // Inside frame — fire async pixel hit test (skip if one already in flight)
-                self.hitTestPending = true
+            } else {
+                // Inside frame — synchronous rect hit test against current SVG hitBox
                 let local = NSPoint(x: cursor.x - self.frame.origin.x,
                                     y: cursor.y - self.frame.origin.y)
-                self.petView.isOpaque(at: local, frameHeight: self.frame.height) { [weak self] opaque in
-                    guard let self else { return }
-                    self.hitTestPending = false
-                    self.cursorIsOverCharacter = opaque
-                    if !self.isDragging { self.ignoresMouseEvents = !opaque }
-                }
+                let opaque = self.petView.hitRect.contains(local)
+                self.cursorIsOverCharacter = opaque
+                if !self.isDragging { self.ignoresMouseEvents = !opaque }
             }
 
             if self.isMiniMode {
@@ -316,11 +311,11 @@ final class PetWindow: NSPanel {
             pendingState = state
             switch state {
             case .error, .notification:
-                showMiniState(gif: "clawd-mini-alert", duration: 4.0)
+                showMiniState(svg: "clawd-mini-alert", duration: 4.0)
             case .attention:
-                showMiniState(gif: "clawd-mini-happy", duration: 4.0)
+                showMiniState(svg: "clawd-mini-happy", duration: 4.0)
             case .working, .thinking, .juggling, .building, .conducting:
-                showMiniState(gif: "clawd-mini-typing", duration: 4.0)
+                showMiniState(svg: "clawd-mini-typing", duration: 4.0)
             default:
                 break
             }
@@ -339,10 +334,10 @@ final class PetWindow: NSPanel {
         }
     }
 
-    private func showMiniState(gif: String, duration: TimeInterval) {
+    private func showMiniState(svg: String, duration: TimeInterval) {
         miniAnimTimer?.invalidate()
         miniPeeked = false
-        petView.loadSVG(name: gif, flipped: miniEdge == .left)
+        petView.loadSVG(name: svg, flipped: miniEdge == .left)
         miniAnimTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
             guard let self, self.isMiniMode else { return }
             self.miniAnimTimer = nil

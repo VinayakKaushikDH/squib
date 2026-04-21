@@ -31,32 +31,25 @@ public enum PetState: String, CaseIterable {
         }
     }
 
-    /// File name without extension. Pair with `assetExtension`.
+    /// File name without extension. All states use SVGs.
     public var assetName: String {
         switch self {
-        case .idle:         return "clawd-idle-follow"   // SVG with eye tracking
-        case .thinking:     return "clawd-thinking"
-        case .working:      return "clawd-typing"
-        case .building:     return "clawd-building"
-        case .juggling:     return "clawd-juggling"
-        case .conducting:   return "clawd-conducting"
+        case .idle:         return "clawd-idle-follow"
+        case .thinking:     return "clawd-working-thinking"
+        case .working:      return "clawd-working-typing"
+        case .building:     return "clawd-working-building"
+        case .juggling:     return "clawd-working-juggling"
+        case .conducting:   return "clawd-working-conducting"
         case .error:        return "clawd-error"
         case .attention:    return "clawd-happy"
         case .notification: return "clawd-notification"
-        case .sweeping:     return "clawd-sweeping"
-        case .carrying:     return "clawd-carrying"
-        case .sleeping:     return "clawd-sleeping"    // SVG: sploot + floating Zzz
+        case .sweeping:     return "clawd-working-sweeping"
+        case .carrying:     return "clawd-working-carrying"
+        case .sleeping:     return "clawd-sleeping"
         }
     }
 
-    /// Idle and sleeping use SVGs (CSS animations + eye tracking for idle).
-    /// All other states use GIFs.
-    public var assetExtension: String {
-        switch self {
-        case .idle, .sleeping: return "svg"
-        default:               return "gif"
-        }
-    }
+    public var assetExtension: String { "svg" }
 
     /// Only the idle SVG has #eyes-js for cursor following.
     public var supportsEyeTracking: Bool { self == .idle }
