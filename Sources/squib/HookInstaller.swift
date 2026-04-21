@@ -1,4 +1,5 @@
 import Foundation
+import SquibCore
 
 // Installs hook scripts and registers them with supported agents.
 // Safe to call on every launch — idempotent.
@@ -10,18 +11,85 @@ final class HookInstaller {
     private static let claudeSettings = URL.homeDirectory.appending(path: ".claude/settings.json")
 
     private static let hookedEvents = [
-        "SessionStart", "SessionEnd", "UserPromptSubmit",
-        "PreToolUse", "PostToolUse", "PostToolUseFailure",
-        "Stop", "StopFailure", "Notification",
-        "PostCompact", "PreCompact",
-        "SubagentStart", "SubagentStop",
-        "WorktreeCreate",
-        "Elicitation",
+        HookEventName.sessionStart,
+        HookEventName.sessionEnd,
+        HookEventName.userPromptSubmit,
+        HookEventName.preToolUse,
+        HookEventName.postToolUse,
+        HookEventName.postToolUseFailure,
+        HookEventName.stop,
+        HookEventName.stopFailure,
+        HookEventName.notification,
+        HookEventName.postCompact,
+        HookEventName.preCompact,
+        HookEventName.subagentStart,
+        HookEventName.subagentStop,
+        HookEventName.worktreeCreate,
+        HookEventName.elicitation,
     ]
 
+    /// Copies the hook script to ~/.squib/hooks/. Call at launch before the server starts.
     static func installIfNeeded() {
         copyHookScript()
-        registerClaudeHooks()
+    }
+
+    /// Registers all Claude Code hooks (event hooks + permission hook) in a single
+    /// settings.json write. Call from the HookServer onReady callback once the port is known.
+    static func registerClaudeHooks(port: UInt16) {
+        let fm = FileManager.default
+        var settings: [String: Any] = [:]
+        if fm.fileExists(atPath: claudeSettings.path),
+           let data = try? Data(contentsOf: claudeSettings),
+           let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            settings = parsed
+        }
+
+        var hooks = settings["hooks"] as? [String: [[String: Any]]] ?? [:]
+        let command = "node \(scriptDest.path)"
+
+        // Event hooks (fire-and-forget command)
+        for event in hookedEvents {
+            var entries = hooks[event] ?? []
+            let alreadyAdded = entries.contains { entry in
+                (entry["hooks"] as? [[String: Any]])?.contains { $0["command"] as? String == command } == true
+            }
+            if !alreadyAdded {
+                entries.append([
+                    "matcher": "",
+                    "hooks": [["type": "command", "command": command]],
+                ])
+            }
+            hooks[event] = entries
+        }
+
+        // Permission hook (blocking HTTP).
+        // Filter out any existing squib entry (identified by the /squib/permission path on
+        // localhost) so we replace the stale port from the previous launch without clobbering
+        // entries registered by other tools.
+        let permissionURL = "http://127.0.0.1:\(port)/squib/permission"
+        var permEntries = hooks[HookEventName.permissionRequest] ?? []
+        permEntries = permEntries.filter { entry in
+            let entryHooks = entry["hooks"] as? [[String: Any]] ?? []
+            return !entryHooks.contains { hook in
+                guard let url = hook["url"] as? String else { return false }
+                return url.contains("127.0.0.1") && url.hasSuffix("/squib/permission")
+            }
+        }
+        permEntries.append([
+            "matcher": "",
+            "hooks": [["type": "http", "url": permissionURL, "timeout": 600]],
+        ])
+        hooks[HookEventName.permissionRequest] = permEntries
+
+        settings["hooks"] = hooks
+        guard let data = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys]) else { return }
+        try? fm.createDirectory(at: claudeSettings.deletingLastPathComponent(), withIntermediateDirectories: true)
+        do {
+            try data.write(to: claudeSettings)
+            print("[HookInstaller] Claude hooks registered (port \(port))")
+        } catch {
+            print("[HookInstaller] failed to write settings: \(error)")
+        }
     }
 
     // MARK: - Script
@@ -39,46 +107,6 @@ final class HookInstaller {
             try fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: scriptDest.path)
         } catch {
             print("[HookInstaller] failed to copy hook script: \(error)")
-        }
-    }
-
-    // MARK: - Claude Code settings.json
-
-    private static func registerClaudeHooks() {
-        let fm = FileManager.default
-        var settings: [String: Any] = [:]
-        if fm.fileExists(atPath: claudeSettings.path),
-           let data = try? Data(contentsOf: claudeSettings),
-           let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            settings = parsed
-        }
-
-        var hooks = settings["hooks"] as? [String: [[String: Any]]] ?? [:]
-        let command = "node \(scriptDest.path)"
-
-        for event in hookedEvents {
-            var entries = hooks[event] ?? []
-            // Only add if not already registered
-            let alreadyAdded = entries.contains { entry in
-                (entry["hooks"] as? [[String: Any]])?.contains { $0["command"] as? String == command } == true
-            }
-            if !alreadyAdded {
-                entries.append([
-                    "matcher": "",
-                    "hooks": [["type": "command", "command": command]],
-                ])
-            }
-            hooks[event] = entries
-        }
-
-        settings["hooks"] = hooks
-        guard let data = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys]) else { return }
-        try? fm.createDirectory(at: claudeSettings.deletingLastPathComponent(), withIntermediateDirectories: true)
-        do {
-            try data.write(to: claudeSettings)
-            print("[HookInstaller] hooks registered in \(claudeSettings.path)")
-        } catch {
-            print("[HookInstaller] failed to write settings: \(error)")
         }
     }
 
@@ -161,33 +189,4 @@ final class HookInstaller {
         }
     }
 
-    // MARK: - Permission hook (HTTP, blocking)
-
-    /// Upserts the PermissionRequest HTTP hook in settings.json pointing to squib's port.
-    /// Must be called after the server port is known (i.e. from the NWListener ready callback).
-    static func registerPermissionHook(port: UInt16) {
-        let fm  = FileManager.default
-        var settings: [String: Any] = [:]
-        if fm.fileExists(atPath: claudeSettings.path),
-           let data   = try? Data(contentsOf: claudeSettings),
-           let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            settings = parsed
-        }
-
-        var hooks = settings["hooks"] as? [String: [[String: Any]]] ?? [:]
-        hooks["PermissionRequest"] = [[
-            "matcher": "",
-            "hooks": [["type": "http", "url": "http://127.0.0.1:\(port)/permission", "timeout": 600]],
-        ]]
-        settings["hooks"] = hooks
-
-        guard let data = try? JSONSerialization.data(withJSONObject: settings,
-                                                     options: [.prettyPrinted, .sortedKeys]) else { return }
-        do {
-            try data.write(to: claudeSettings)
-            print("[HookInstaller] PermissionRequest hook → port \(port)")
-        } catch {
-            print("[HookInstaller] failed to write PermissionRequest hook: \(error)")
-        }
-    }
 }

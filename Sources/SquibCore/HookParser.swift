@@ -55,7 +55,7 @@ public struct HookParser {
         let cwd           = obj["cwd"]           as? String
         let isElicitation = toolName == "AskUserQuestion"
             || (obj["isElicitation"] as? NSNumber)?.boolValue ?? false
-        let suggestions   = obj["suggestions"]   as? [[String: Any]] ?? []
+        let suggestions   = obj["permission_suggestions"] as? [[String: Any]] ?? []
 
         var toolInput: String? = nil
         if let input = obj["tool_input"] {

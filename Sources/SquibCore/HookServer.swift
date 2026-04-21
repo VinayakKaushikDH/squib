@@ -112,7 +112,7 @@ public final class HookServer {
             return
         }
 
-        if method == "POST", path == "/permission" {
+        if method == "POST", path == "/squib/permission" {
             handlePermission(body, connection: connection)
             return
         }

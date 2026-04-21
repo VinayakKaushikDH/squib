@@ -1,5 +1,26 @@
 import Foundation
 
+/// Compile-time constants for hook event name strings.
+/// Use these instead of raw string literals to catch typos at build time.
+public enum HookEventName {
+    public static let sessionStart        = "SessionStart"
+    public static let sessionEnd          = "SessionEnd"
+    public static let userPromptSubmit    = "UserPromptSubmit"
+    public static let preToolUse          = "PreToolUse"
+    public static let postToolUse         = "PostToolUse"
+    public static let postToolUseFailure  = "PostToolUseFailure"
+    public static let stop                = "Stop"
+    public static let stopFailure         = "StopFailure"
+    public static let notification        = "Notification"
+    public static let postCompact         = "PostCompact"
+    public static let preCompact          = "PreCompact"
+    public static let subagentStart       = "SubagentStart"
+    public static let subagentStop        = "SubagentStop"
+    public static let worktreeCreate      = "WorktreeCreate"
+    public static let elicitation         = "Elicitation"
+    public static let permissionRequest   = "PermissionRequest"
+}
+
 public struct HookEvent: Codable {
     public let hookEventName: String
     public let sessionId: String?
