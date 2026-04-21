@@ -14,6 +14,8 @@ final class BubbleManager {
     var onOffsetChange: ((CGFloat) -> Void)?
     /// Fired when the user resolves a bubble (Allow, Deny, suggestion, elicitation submit).
     var onDecision: ((UUID, PermissionDecision) -> Void)?
+    /// Fired when the user chooses "Allow Session" — carries the request ID and session ID.
+    var onTrustSession: ((UUID, String?) -> Void)?
 
     // MARK: - Public API
 
@@ -23,10 +25,15 @@ final class BubbleManager {
             self?.onDecision?(request.id, decision)
             self?.remove(id: request.id)
         }
+        win.onTrustSession = { [weak self] in
+            self?.onTrustSession?(request.id, request.sessionId)
+            self?.remove(id: request.id)
+        }
         win.onHeightChanged = { [weak self] in
             self?.reposition()
         }
         stack.append((request, win))
+        installKeyMonitor()
         reposition()
     }
 
@@ -34,6 +41,7 @@ final class BubbleManager {
         guard let idx = stack.firstIndex(where: { $0.request.id == id }) else { return }
         stack[idx].window.close()
         stack.remove(at: idx)
+        if stack.isEmpty { removeKeyMonitor() }
         reposition()
     }
 
@@ -41,7 +49,33 @@ final class BubbleManager {
     func dismissAll() {
         stack.forEach { $0.window.close() }
         stack.removeAll()
+        removeKeyMonitor()
         onOffsetChange?(0)
+    }
+
+    // MARK: - Keyboard shortcuts
+
+    private var keyMonitor: Any?
+
+    private func installKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            DispatchQueue.main.async { self?.handleKey(event) }
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let m = keyMonitor { NSEvent.removeMonitor(m); keyMonitor = nil }
+    }
+
+    private func handleKey(_ event: NSEvent) {
+        guard let top = stack.last else { return }
+        switch event.charactersIgnoringModifiers?.lowercased() ?? "" {
+        case "y": top.window.allowViaKey()
+        case "n": top.window.denyViaKey()
+        case "a": top.window.allowSessionViaKey()
+        default:  break
+        }
     }
 
     // MARK: - Layout

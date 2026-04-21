@@ -53,6 +53,7 @@ async function main() {
         hook_event_name: event.hook_event_name ?? '',
         session_id:      event.session_id      ?? '',
         tool_name:       event.tool_name       ?? '',
+        agent_id:        'claude-code',
     });
 
     try {

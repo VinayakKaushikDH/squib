@@ -32,12 +32,10 @@ struct PetStateTests {
 
     // MARK: - Asset extension
 
-    @Test("idle and sleeping use SVG, everything else uses GIF")
+    @Test("all states use SVG")
     func assetExtension() {
-        #expect(PetState.idle.assetExtension    == "svg")
-        #expect(PetState.sleeping.assetExtension == "svg")
-        for state in PetState.allCases where state != .idle && state != .sleeping {
-            #expect(state.assetExtension == "gif", "expected gif for \(state)")
+        for state in PetState.allCases {
+            #expect(state.assetExtension == "svg", "expected svg for \(state)")
         }
     }
 

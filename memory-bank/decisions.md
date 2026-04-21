@@ -121,5 +121,23 @@ TrayMenu reads the full `[String: PetState]` snapshot. StateEngine gained an `on
 ## 2026-04-20 — Permission auto-dismiss: PostToolUse, not connection close
 When Claude Code resolves a permission in its own UI, it does NOT close the held HTTP connection — it resolves internally and proceeds. The `.cancelled` eviction path in `HookServer.stateUpdateHandler` never fires. Fix: `AppDelegate` tracks `pendingPermissionsBySession: [String: UUID]`; when a `PostToolUse` event arrives for a session that has a pending permission, it auto-dismisses (removes bubble, clears notification state, closes connection). Map populated on `onPermissionRequest`, cleared on `onPermissionEvicted` and auto-dismiss.
 
+## 2026-04-22 — Permission suggestions key: `permission_suggestions`, not `suggestions`
+Claude Code sends permission suggestions under the key `"permission_suggestions"` in the PermissionRequest payload. `HookParser.parsePermissionPayload` must read `obj["permission_suggestions"]` — reading `obj["suggestions"]` silently returns nil and suggestion buttons ("Allow all", "Always allow X", "Allow Bash in dir/") never appear.
+
+## 2026-04-22 — HookEventName: compile-time constants for all hook event name strings
+Added `HookEventName` enum to `HookEvent.swift` (SquibCore) with `static let` constants for all 16 event names. `hookedEvents` in `HookInstaller` references these instead of raw strings. Motivation: a typo like `"SessionStop"` (happened once) compiles silently and is never registered. The enum catches it at build time.
+
+## 2026-04-22 — Claude Code hook registration: single atomic settings.json write
+`installIfNeeded()` only copies the hook script. `registerClaudeHooks(port:)` does one read → update event hooks + PermissionRequest hook → one write, called from `hookServer.onReady` after the port is known. Previously two independent read/write cycles (one at launch, one in `onReady`) raced against each other and wrote the same file twice every launch.
+
+## 2026-04-22 — PermissionRequest hook: /squib/permission path + filter+replace upsert
+URL registered in settings.json is `http://127.0.0.1:{port}/squib/permission` (not `/permission`). The `/squib/` prefix is distinctive enough to identify our entry unambiguously. On each launch, registration filters existing entries by `url.contains("127.0.0.1") && url.hasSuffix("/squib/permission")` and removes them (stale port), then appends the new one. Other tools' PermissionRequest entries are preserved. HookServer routes `POST /squib/permission`.
+
+## 2026-04-22 — PiWatcher: seed pre-existing files on startup, never replay history
+`start()` calls `seedExistingFiles()` before scheduling the poll timer. This fast-forwards all existing JSONL files to their current byte size — no events are emitted for content that existed before squib launched. Regular polls then handle: (a) new bytes in known files → parse and emit; (b) files first seen after startup (lastOffset == nil) → emit SessionStart + process from byte 0. Without this, squib replayed entire pi-mono session histories on every launch, which reliably caused error state on startup if any historical session had ended with PostToolUseFailure.
+
+## 2026-04-22 — Allow Session: session-scoped trust, no new PermissionDecision case
+`A` key triggers "Allow Session" — future permission requests from the same session ID are approved silently without a bubble. Implemented as `trustedSessions: Set<String>` in AppDelegate, not a new `PermissionDecision` case. The bubble resolves with `.allow` (same wire format as a plain allow); the session trust is purely local state. Trust is cleared on `SessionEnd`. The "Allow Session" button is only shown in regular permission mode when `suggestions.length > 0` — in elicitation and plan-review modes the shortcut falls back to plain allow.
+
 ## 2026-04-20 — SquibCore module: all public-facing declarations need explicit `public`
 Moving types from the `squib` target to `SquibCore` requires `public` on every class/struct/enum/init/property/method that crosses the module boundary. Swift internals do not cross module boundaries — omitting `public` compiles within the module but produces "cannot find type" errors in the importing target. This applies to `HookEvent`, `HookServer`, `PermissionDecision`, `PermissionRequest`, `PetState`, `PiWatcher`, `StateEngine`, and any new SquibCore types.

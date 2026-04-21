@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Session 14 complete — PiJSONLParser bug fix, all 84 tests passing
-- **Last updated**: 2026-04-21 (Session 14)
+- **Phase**: Session 17 complete — permission suggestion buttons fixed, 87 tests passing
+- **Last updated**: 2026-04-22 (Session 18)
 
 ## Agent Instructions
 - Read this file first, every session
@@ -14,9 +14,13 @@ Read this file at the start of every session to restore context.
 
 ## Active Decisions
 - Swift/AppKit, SPM only, NWListener HTTP server, WKWebView
-- 12 states: idle (SVG+eye tracking), thinking/working/building/juggling/conducting/error/attention/notification/sweeping/carrying/sleeping (all GIF)
+- 12 states: idle (SVG+eye tracking), all others in-progress migration to SVG (were GIFs)
 - Idle: `clawd-idle-follow.svg` inline; eye tracking via `#eyes-js` translate, max 3.0 SVG units
 - Multi-session StateEngine: priority + stale eviction; synthetic sessions for subagent (juggling/conducting) and notification
+- Hook event names: use `HookEventName.*` constants (in SquibCore), never raw strings
+- Claude Code hooks: one atomic settings.json write via `registerClaudeHooks(port:)` from `onReady`
+- PermissionRequest URL: `/squib/permission` (distinctive path); filter+replace upsert preserves third-party entries
+- PiWatcher: `seedExistingFiles()` on startup seals pre-existing files — no history replay, starts idle cleanly
 
 ## Files
 | File | Contents |

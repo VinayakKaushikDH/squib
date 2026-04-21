@@ -121,6 +121,21 @@ struct HookParserTests {
         }
     }
 
+    @Test("permission_suggestions are parsed into suggestions array")
+    func permissionSuggestions() {
+        let json = #"{"tool_name":"Bash","permission_suggestions":[{"type":"addRules","destination":"localSettings","behavior":"allow","toolName":"Bash","ruleContent":"src/**"}]}"#
+        let req = parser.parsePermissionPayload(Data(json.utf8))
+        #expect(req?.suggestions.count == 1)
+        #expect(req?.suggestions.first?["type"] as? String == "addRules")
+    }
+
+    @Test("legacy suggestions key is ignored — only permission_suggestions is read")
+    func legacySuggestionsKeyIgnored() {
+        let json = #"{"tool_name":"Bash","suggestions":[{"type":"addRules"}]}"#
+        let req = parser.parsePermissionPayload(Data(json.utf8))
+        #expect(req?.suggestions.isEmpty == true)
+    }
+
     // MARK: - buildResponseBody
 
     @Test("allow decision serialises correctly")

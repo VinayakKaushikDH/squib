@@ -8,6 +8,7 @@ final class BubbleWindow: NSPanel {
 
     let request: PermissionRequest
     var onDecision:      ((PermissionDecision) -> Void)?
+    var onTrustSession:  (() -> Void)?
     /// Fired on main thread when JS reports the card's real rendered height.
     var onHeightChanged: (() -> Void)?
 
@@ -47,6 +48,30 @@ final class BubbleWindow: NSPanel {
         webView.navigationDelegate = handler
         webView.loadHTMLString(Self.bubbleHTML, baseURL: nil)
         contentView = webView
+    }
+
+    // MARK: - Keyboard shortcuts
+
+    private var isDecided = false
+
+    /// Called by BubbleManager's global key monitor. Delegates to the JS button handlers
+    /// so all existing disable/elicitation/plan-review logic still applies.
+    func allowViaKey() {
+        guard !isDecided else { return }
+        isDecided = true
+        webView.evaluateJavaScript("keyAllow()", completionHandler: nil)
+    }
+
+    func denyViaKey() {
+        guard !isDecided else { return }
+        isDecided = true
+        webView.evaluateJavaScript("keyDeny()", completionHandler: nil)
+    }
+
+    func allowSessionViaKey() {
+        guard !isDecided else { return }
+        isDecided = true
+        webView.evaluateJavaScript("keyAllowSession()", completionHandler: nil)
     }
 
     // MARK: - Called by message handler
@@ -157,6 +182,8 @@ private final class BubbleMsgHandler: NSObject, WKScriptMessageHandler, WKNaviga
             win.didDecide(.allow)
         case "deny", "deny-and-focus":
             win.didDecide(.deny)
+        case "trust-session":
+            win.onTrustSession?()
         default:
             guard value.hasPrefix("suggestion:"),
                   let idx = Int(value.dropFirst("suggestion:".count)),
@@ -479,6 +506,25 @@ body { padding: 6px; }
 .btn-sug:hover::after { opacity: 1; transform: translateX(0); }
 .btn-sug:active { filter: brightness(0.88); }
 .btn-sug:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Keyboard hint badges ── */
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+  opacity: 0.45;
+  border: 1px solid currentColor;
+  vertical-align: middle;
+  margin-left: 5px;
+  line-height: 1;
+  flex-shrink: 0;
+}
 </style>
 </head>
 <body>
@@ -491,10 +537,12 @@ body { padding: 6px; }
   <div class="cmd"   id="cmd"></div>
   <div class="eform" id="eform"></div>
   <div class="actions">
-    <button class="btn deny"  id="btnDeny">Deny</button>
-    <button class="btn allow" id="btnAllow">Allow</button>
+    <button class="btn deny"  id="btnDeny">Deny <span class="kbd-hint">N</span></button>
+    <button class="btn allow" id="btnAllow">Allow <span class="kbd-hint">Y</span></button>
   </div>
-  <div class="sugs" id="sugs"></div>
+  <div class="sugs" id="sugs">
+    <button class="btn-sug" id="btnAllowSession" style="display:none">Allow Session <span class="kbd-hint">A</span></button>
+  </div>
 </div>
 <script>
 const card     = document.getElementById("card");
@@ -505,7 +553,8 @@ const cmd      = document.getElementById("cmd");
 const eform    = document.getElementById("eform");
 const btnAllow = document.getElementById("btnAllow");
 const btnDeny  = document.getElementById("btnDeny");
-const sugs     = document.getElementById("sugs");
+const sugs            = document.getElementById("sugs");
+const btnAllowSession = document.getElementById("btnAllowSession");
 
 let elicitationMode = false;
 let elicitationQs   = [];
@@ -679,8 +728,9 @@ function renderElicitationForm(data) {
 // ── Disable all interactive elements ────────────────────────────────────
 
 function disableAll() {
-  btnAllow.disabled = true;
-  btnDeny.disabled  = true;
+  btnAllow.disabled        = true;
+  btnDeny.disabled         = true;
+  btnAllowSession.disabled = true;
   for (const b of sugs.children)             b.disabled = true;
   for (const i of eform.querySelectorAll("input")) i.disabled = true;
 }
@@ -743,6 +793,10 @@ function loadPermission(data) {
   pill.setAttribute("data-tool", name);
   cmd.textContent  = detail(name, data.toolInput);
   renderSuggestions(data.suggestions);
+  if (data.suggestions && data.suggestions.length > 0) {
+    sugs.prepend(btnAllowSession);
+    btnAllowSession.style.display = "";
+  }
   revealCard();
 }
 
@@ -764,6 +818,25 @@ btnDeny.addEventListener("click", () => {
   disableAll();
   post({ type: "decide", value: "deny" });
 });
+
+btnAllowSession.addEventListener("click", () => {
+  disableAll();
+  post({ type: "decide", value: "trust-session" });
+});
+
+// ── Keyboard shortcut entry points (called from Swift) ───────────────────
+
+function keyAllow() {
+  if (!btnAllow.disabled) btnAllow.click();
+}
+function keyDeny() {
+  if (!btnDeny.disabled) btnDeny.click();
+}
+function keyAllowSession() {
+  const btn = document.getElementById("btnAllowSession");
+  if (btn && !btn.disabled) { btn.click(); return; }
+  keyAllow();  // fallback when no session id or wrong mode
+}
 </script>
 </body>
 </html>

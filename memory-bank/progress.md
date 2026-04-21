@@ -170,7 +170,45 @@
 - **Fixed**: integration test fixtures in `PiWatcherIntegrationTests` updated from flat format to nested pi-mono format.
 - **Result**: 84/84 tests passing with correct pi-mono format fixtures.
 
+## 2026-04-22 — Session 15: Hook registration overhaul + PiWatcher startup fix
+
+- **HookEventName enum**: Added `HookEventName` to `HookEvent.swift` with compile-time string constants for all 16 event names including `PermissionRequest`. `hookedEvents` in `HookInstaller` now references `HookEventName.*` — typos caught at build time.
+- **Single settings.json write**: `installIfNeeded()` now only copies the script. New `registerClaudeHooks(port:)` merges event hooks + permission hook into one read/write pass; called from `hookServer.onReady` in AppDelegate. Old `registerClaudeHooks()` (no-arg) and `registerPermissionHook(port:)` deleted.
+- **PermissionRequest upsert**: URL changed from `/permission` to `/squib/permission` (distinctive, identifiable). Registration filters out existing entries where URL is on `127.0.0.1` + ends with `/squib/permission` (stale port from previous launch), then appends fresh entry. Third-party PermissionRequest entries preserved. HookServer routes `POST /squib/permission`.
+- **agent_id in clawd-hook.js**: Added `agent_id: 'claude-code'` to payload, matching the opencode plugin's `agent_id: 'opencode'`.
+- **opencode session.compacted fix**: Was mapped to `PostToolUse` with stale "v1 has no sweeping state" comment. Now correctly maps to `PostCompact`.
+- **settings.json cleanup**: Removed 56 duplicate clawd-on-desk hook entries that accumulated from the reference project's installer lacking idempotency.
+- **PiWatcher startup fix**: squib was showing error state on every launch because PiWatcher replayed all historical pi-mono JSONL data on startup. Fix: `start()` calls `seedExistingFiles()` first, which fast-forwards all pre-existing files to their current byte offset (no events). Regular polls then only process new bytes / truly new files (which still get `SessionStart` + full content). New "pre-existing file content is skipped on startup" regression test added.
+- **Tests**: 85/85 passing (1 new PiWatcher test; 3 PiWatcher tests restructured to create files after watcher starts).
+
+## 2026-04-22 — Session 16: Precise drag hitboxes
+
+- **Problem**: 65pt circle centered at (100,100) was too large and too high — clawd's body sits in the bottom half of the 200×200 frame, so users could drag by clicking empty space above the character's head.
+- **Fix**: Replaced circle with three state-aware rectangles ported directly from the reference's `theme.json` hitBoxes (same SVG viewBox, same geometry math):
+  - default `{x:-1,y:5,w:17,h:12}` → AppKit rect (50.7, 10.0, 98.6×69.6) — all idle/working states
+  - wide `{x:-3,y:3,w:21,h:14}` → AppKit rect (39.1, 10.0, 121.8×81.2) — conducting, error, notification
+  - sleeping `{x:-2,y:9,w:19,h:7}` → AppKit rect (44.9, 15.8, 110.2×40.6) — sleeping, idle-collapse
+- `PetView.currentSVGName` tracks the active SVG (updated in both `loadSVG` and `swapInlineSVG`)
+- `PetView.hitRect` is a synchronous computed property — no async needed
+- `PetWindow.hitTestPending` removed; `mouseMoved` handler simplified to direct `hitRect.contains(local)`
+
+## 2026-04-22 — Session 17: Permission suggestions key fix
+
+- **Bug**: Suggestion buttons ("Allow all", "Always allow X", "Allow Bash in dir/") never appeared in permission popups. `HookParser.parsePermissionPayload` read `obj["suggestions"]` but Claude Code sends the key as `"permission_suggestions"`.
+- **Fix**: One-line change in `Sources/SquibCore/HookParser.swift` line 58: `obj["suggestions"]` → `obj["permission_suggestions"]`.
+- **Tests**: 85 → 87 passing. Two new tests in both `HookParserTests.swift` files: one confirms `permission_suggestions` is parsed, one confirms the legacy `suggestions` key is ignored.
+
+## 2026-04-22 — Session 18: Allow Session shortcut
+
+- **Feature**: `A` key now triggers "Allow Session" instead of the first suggestion button's permanent rule.
+- **AppDelegate**: Added `trustedSessions: Set<String>`. `onPermissionRequest` checks this set first — if the session is trusted, calls `resolvePermission(.allow)` immediately and returns without showing a bubble. `onEvent` removes session from `trustedSessions` on `SessionEnd`. `onTrustSession` callback inserts session into `trustedSessions`, resolves the current permission, and clears notification + pending map entry.
+- **BubbleManager**: Added `onTrustSession: ((UUID, String?) -> Void)?`. Wired in `add()` via `win.onTrustSession`. `handleKey` case `"a"` → `allowSessionViaKey()`.
+- **BubbleWindow (Swift)**: `allowAllViaKey()` replaced by `allowSessionViaKey()` (calls `keyAllowSession()` in JS). `onTrustSession: (() -> Void)?` property added. `BubbleMsgHandler.handleStringDecide` handles `"trust-session"` by calling `win.onTrustSession?()` — does NOT call `didDecide`, so no `PermissionDecision` case needed.
+- **BubbleWindow (HTML/JS)**: `btnAllowSession` static button inside `<div id="sugs">` (hidden by default). `loadPermission()` regular mode: after `renderSuggestions`, prepends `btnAllowSession` and shows it when suggestions are present (session-scoped allow only meaningful alongside permanent options). `renderSuggestions` no longer attaches `[A]` kbd hint to the first suggestion. `keyAllowAll()` removed; `keyAllowSession()` added (clicks `btnAllowSession` if visible, falls back to `keyAllow()`). Click handler posts `{type:"decide", value:"trust-session"}`. `disableAll()` explicitly disables `btnAllowSession`.
+- **Decision**: "Allow Session" only shown when `suggestions.length > 0` — in plan review and elicitation modes the button is not shown (the shortcut falls back to `keyAllow()`).
+- **Build**: clean (4.29s).
+
 ## Current Status
-- **Phase**: Session 14 complete — PiJSONLParser now correctly parses real pi-mono sessions
-- **Next**: new feature work
+- **Phase**: Session 18 complete — Allow Session shortcut implemented
+- **Next**: complete SVG migration (pending changes in PetState/PetView/Resources with new working-state SVGs)
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it

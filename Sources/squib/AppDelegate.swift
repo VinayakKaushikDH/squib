@@ -13,6 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Claude Code resolves the permission in its own UI (PostToolUse fires
     /// before we get a connection-close event).
     private var pendingPermissionsBySession: [String: UUID] = [:]
+    /// Sessions for which the user has chosen "Allow Session" — future
+    /// permission requests from these sessions are approved immediately.
+    private var trustedSessions: Set<String> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -34,22 +37,33 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.stateEngine.handle(event)
             // PostToolUse means the tool ran — Claude Code resolved the permission
             // in its own UI without closing our connection. Auto-dismiss the bubble.
-            if event.hookEventName == "PostToolUse",
+            if event.hookEventName == HookEventName.postToolUse,
                let sessionId = event.sessionId,
                let id = self?.pendingPermissionsBySession.removeValue(forKey: sessionId) {
                 self?.bubbleManager.remove(id: id)
                 self?.stateEngine.setNotification(id: id, active: false)
                 self?.hookServer.resolvePermission(id: id, decision: .deny)
             }
+            // SessionEnd — revoke trust so the next session starts fresh.
+            if event.hookEventName == HookEventName.sessionEnd,
+               let sessionId = event.sessionId {
+                self?.trustedSessions.remove(sessionId)
+            }
         }
 
-        // Register the blocking HTTP permission hook once the port is known.
+        // Register all Claude Code hooks once the port is known (single settings.json write).
         hookServer.onReady = { port in
-            HookInstaller.registerPermissionHook(port: port)
+            HookInstaller.registerClaudeHooks(port: port)
         }
 
         // Show a bubble when Claude Code holds a connection open for approval.
         hookServer.onPermissionRequest = { [weak self] request in
+            // Trusted session — approve silently without showing a bubble.
+            if let sessionId = request.sessionId,
+               self?.trustedSessions.contains(sessionId) == true {
+                self?.hookServer.resolvePermission(id: request.id, decision: .allow)
+                return
+            }
             self?.bubbleManager.add(request)
             self?.stateEngine.setNotification(id: request.id, active: true)
             if let sessionId = request.sessionId {
@@ -72,6 +86,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Forward the user's decision back to Claude Code and clear the notification state.
         bubbleManager.onDecision = { [weak self] id, decision in
             self?.hookServer.resolvePermission(id: id, decision: decision)
+            self?.stateEngine.setNotification(id: id, active: false)
+            self?.pendingPermissionsBySession = self?.pendingPermissionsBySession.filter { $0.value != id } ?? [:]
+        }
+
+        // "Allow Session" — trust this session and approve the current request immediately.
+        bubbleManager.onTrustSession = { [weak self] id, sessionId in
+            if let sid = sessionId { self?.trustedSessions.insert(sid) }
+            self?.hookServer.resolvePermission(id: id, decision: .allow)
             self?.stateEngine.setNotification(id: id, active: false)
             self?.pendingPermissionsBySession = self?.pendingPermissionsBySession.filter { $0.value != id } ?? [:]
         }

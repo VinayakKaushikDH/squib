@@ -136,8 +136,7 @@ function translate(event) {
         }
 
         case 'session.compacted':
-            // squib v1 has no sweeping state — map to working (pet stays busy during compaction)
-            return 'PostToolUse';
+            return 'PostCompact';
 
         case 'session.idle':
             return 'Stop';
