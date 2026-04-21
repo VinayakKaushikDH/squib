@@ -1,14 +1,14 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.2
 import PackageDescription
 
 let package = Package(
     name: "squib",
-    platforms: [.macOS(.v14)],
+    platforms: [.macOS(.v26)],
     targets: [
         .target(
             name: "SquibCore",
             path: "Sources/SquibCore",
-            swiftSettings: [.swiftLanguageVersion(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         .executableTarget(
             name: "squib",
@@ -17,7 +17,7 @@ let package = Package(
             resources: [
                 .process("Resources")
             ],
-            swiftSettings: [.swiftLanguageVersion(.v5)]
+            swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         // squibTestRunner: standalone executable that calls Testing.__swiftPMEntryPoint()
         // directly, bypassing SPM's bundle runner which requires a formal Testing dependency
@@ -27,7 +27,7 @@ let package = Package(
             dependencies: ["SquibCore"],
             path: "Sources/squibTestRunner",
             swiftSettings: [
-                .swiftLanguageVersion(.v5),
+                .swiftLanguageMode(.v5),
                 .unsafeFlags([
                     "-F", "/Library/Developer/CommandLineTools/Library/Developer/Frameworks",
                     "-Xfrontend", "-disable-cross-import-overlays"
