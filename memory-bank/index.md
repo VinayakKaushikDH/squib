@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Session 17 complete — permission suggestion buttons fixed, 87 tests passing
-- **Last updated**: 2026-04-22 (Session 18)
+- **Phase**: Session 19 complete — Liquid Glass BubbleWindow (NSGlassEffectView + SwiftUI)
+- **Last updated**: 2026-04-22 (Session 19)
 
 ## Agent Instructions
 - Read this file first, every session

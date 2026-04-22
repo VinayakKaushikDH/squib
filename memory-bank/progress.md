@@ -208,7 +208,16 @@
 - **Decision**: "Allow Session" only shown when `suggestions.length > 0` — in plan review and elicitation modes the button is not shown (the shortcut falls back to `keyAllow()`).
 - **Build**: clean (4.29s).
 
+## 2026-04-22 — Session 19: Liquid Glass BubbleWindow
+
+- **BubbleWindow rewrite**: replaced WKWebView + 844-line bubbleHTML with `NSGlassEffectView(.regular)` + `NSHostingView<BubbleCardView>`. BubbleWindow.swift is now 78 lines. BubbleManager and AppDelegate untouched.
+- **BubbleViewModel** (`Sources/squib/BubbleViewModel.swift`): `ObservableObject` bridging Swift ↔ SwiftUI. Holds `PermissionRequest`, publishes `pendingKeyAction: BubbleKeyAction?` for Y/N/A key shortcuts, exposes `onDecision`/`onTrustSession`/`onHeightMeasured` callbacks outward.
+- **BubbleCardView** (`Sources/squib/BubbleCardView.swift`): full SwiftUI card with all 4 modes (regular, plan review, elicitation, default). Ports all JS logic: pill colours, `extractDetail`, `getSuggestionLabel`, `resolveSuggestion`. Height reported via `onGeometryChange`. Slide-in via `.opacity/.offset` animation on appear.
+- **Package.swift**: `platforms: [.macOS(.v14)]` → `.macOS(.v26)` to unlock `NSGlassEffectView`.
+- **Tests**: 87/87 passing, no changes needed.
+- **Plan**: `.omc/plans/liquid-glass-bubble.md`
+
 ## Current Status
-- **Phase**: Session 18 complete — Allow Session shortcut implemented
-- **Next**: complete SVG migration (pending changes in PetState/PetView/Resources with new working-state SVGs)
+- **Phase**: Session 19 complete — Liquid Glass BubbleWindow
+- **Next**: smoke test the live app (manual — see Task 5 checklist); then SVG migration for remaining working-state assets
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it

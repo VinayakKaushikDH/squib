@@ -70,10 +70,12 @@ final class BubbleManager {
 
     private func handleKey(_ event: NSEvent) {
         guard let top = stack.last else { return }
+        let mods = event.modifierFlags.intersection([.command, .shift, .control, .option])
+        guard mods == [.command, .shift] else { return }
         switch event.charactersIgnoringModifiers?.lowercased() ?? "" {
         case "y": top.window.allowViaKey()
         case "n": top.window.denyViaKey()
-        case "a": top.window.allowSessionViaKey()
+        case "s": top.window.allowSessionViaKey()
         default:  break
         }
     }
