@@ -69,7 +69,6 @@ Source code is licensed under the [MIT License](LICENSE).
 The artwork (`Sources/squib/Resources/`) is **not** covered by the MIT License. All rights reserved by their respective copyright holders.
 
 - Clawd is the property of Anthropic. This is an unofficial fan project, not affiliated with or endorsed by Anthropic.
-- Calico cat (三花猫) artwork by 鹿鹿 ([@rullerzhou-afk](https://github.com/rullerzhou-afk)). All rights reserved.
 - Third-party contributions: copyright retained by respective artists.
 
 ---
