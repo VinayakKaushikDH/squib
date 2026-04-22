@@ -1,6 +1,30 @@
 # squib
 
-A macOS desktop agent watcher — our variation on clawd-on-desk.
+A macOS desktop companion that watches your coding agents. Inspired by [clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk).
+
+A small character (Clawd) sits on your screen and reacts to what your AI coding agents are doing — typing when they write code, thinking when they reason, sleeping when idle. Permission requests float up as Liquid Glass cards you can approve with a keypress.
+
+## Features
+
+- **Companion pet** — SVG character with eye tracking in idle state
+- **Agent awareness** — reacts to Claude Code, opencode, and pi-mono via hook events
+- **Permission bubbles** — Liquid Glass (`NSGlassEffectView` + SwiftUI) floating cards for Claude Code permission requests
+  - `⌘⇧Y` allow · `⌘⇧N` deny · `⌘⇧A` trust session (auto-approves future requests)
+- **12 states** — idle, thinking, working, building, juggling, conducting, error, attention, notification, sweeping, carrying, sleeping
+- **Multi-session** — tracks concurrent agent sessions with priority-based state resolution
+
+## Requirements
+
+- macOS 26+ (Liquid Glass requires `NSGlassEffectView`)
+- Swift 6 + SPM
+
+## Running
+
+```bash
+swift run squib
+```
+
+On first launch, squib writes its hooks into `~/.claude/settings.json` automatically.
 
 ## Running Tests
 
