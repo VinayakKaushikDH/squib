@@ -5,7 +5,7 @@ CONTENTS  = $(APP_PATH)/Contents
 ICON_SVG  = Sources/squib/Resources/AppIcon.svg
 ICONSET   = $(DIST_DIR)/AppIcon.iconset
 
-.PHONY: app install clean
+.PHONY: app install uninstall clean
 
 app: ## Build a distributable .app bundle → dist/squib.app
 	swift build -c release --product squib
@@ -25,6 +25,10 @@ install: app ## Build and copy to ~/Applications/squib.app
 	@rm -rf ~/Applications/$(APP_NAME).app
 	@cp -r $(APP_PATH) ~/Applications/
 	@echo "Installed: ~/Applications/$(APP_NAME).app"
+
+uninstall: ## Remove ~/Applications/Squib.app
+	@rm -rf ~/Applications/$(APP_NAME).app
+	@echo "Removed: ~/Applications/$(APP_NAME).app"
 
 clean: ## Remove dist/ and .build/
 	rm -rf $(DIST_DIR) .build

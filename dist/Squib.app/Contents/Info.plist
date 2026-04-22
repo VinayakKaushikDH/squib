@@ -5,9 +5,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.squib.app</string>
     <key>CFBundleName</key>
-    <string>squib</string>
+    <string>Squib</string>
     <key>CFBundleDisplayName</key>
-    <string>squib</string>
+    <string>Squib</string>
     <key>CFBundleExecutable</key>
     <string>squib</string>
     <key>CFBundlePackageType</key>
