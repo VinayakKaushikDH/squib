@@ -1,9 +1,17 @@
 # squib
 
 <p align="center">
-  <img src="Sources/squib/Resources/clawd-working-typing.svg" width="130" alt="Clawd typing">
-  &nbsp;&nbsp;
-  <img src="Sources/squib/Resources/clawd-working-juggling.svg" width="130" alt="Clawd juggling">
+  <img src="Sources/squib/Resources/clawd-working-typing.svg" width="110" alt="typing">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-working-juggling.svg" width="110" alt="juggling">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-working-thinking.svg" width="110" alt="thinking">
+  <br><br>
+  <img src="Sources/squib/Resources/clawd-sleeping.svg" width="110" alt="sleeping">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-error.svg" width="110" alt="error">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-happy.svg" width="110" alt="happy">
 </p>
 
 A macOS desktop companion that watches your coding agents. Inspired by [clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk).
