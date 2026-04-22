@@ -1,5 +1,9 @@
 # squib
 
+<p align="center">
+  <img src="Sources/squib/Resources/clawd-idle-follow.svg" width="140" alt="Clawd">
+</p>
+
 A macOS desktop companion that watches your coding agents. Inspired by [clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk).
 
 A small character (Clawd) sits on your screen and reacts to what your AI coding agents are doing — typing when they write code, thinking when they reason, sleeping when idle. Permission requests float up as Liquid Glass cards you can approve with a keypress.
