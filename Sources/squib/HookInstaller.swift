@@ -8,7 +8,8 @@ final class HookInstaller {
     private static let hooksDir    = squibDir.appending(path: "hooks")
     private static let pluginsDir  = squibDir.appending(path: "plugins")
     private static let scriptDest  = hooksDir.appending(path: "clawd-hook.js")
-    private static let claudeSettings = URL.homeDirectory.appending(path: ".claude/settings.json")
+    private static let claudeSettings         = URL.homeDirectory.appending(path: ".claude/settings.json")
+    private static let claudePersonalSettings = URL.homeDirectory.appending(path: ".claude-personal/settings.json")
 
     private static let hookedEvents = [
         HookEventName.sessionStart,
@@ -36,10 +37,23 @@ final class HookInstaller {
     /// Registers all Claude Code hooks (event hooks + permission hook) in a single
     /// settings.json write. Call from the HookServer onReady callback once the port is known.
     static func registerClaudeHooks(port: UInt16) {
+        let targets = [claudeSettings, claudePersonalSettings]
+        for target in targets {
+            writeHooks(to: target, port: port)
+        }
+    }
+
+    private static func writeHooks(to settingsURL: URL, port: UInt16) {
         let fm = FileManager.default
+
+        // Skip config files whose parent directory doesn't exist (agent not installed).
+        guard fm.fileExists(atPath: settingsURL.deletingLastPathComponent().path) else {
+            return
+        }
+
         var settings: [String: Any] = [:]
-        if fm.fileExists(atPath: claudeSettings.path),
-           let data = try? Data(contentsOf: claudeSettings),
+        if fm.fileExists(atPath: settingsURL.path),
+           let data = try? Data(contentsOf: settingsURL),
            let parsed = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             settings = parsed
         }
@@ -83,12 +97,11 @@ final class HookInstaller {
 
         settings["hooks"] = hooks
         guard let data = try? JSONSerialization.data(withJSONObject: settings, options: [.prettyPrinted, .sortedKeys]) else { return }
-        try? fm.createDirectory(at: claudeSettings.deletingLastPathComponent(), withIntermediateDirectories: true)
         do {
-            try data.write(to: claudeSettings)
-            print("[HookInstaller] Claude hooks registered (port \(port))")
+            try data.write(to: settingsURL)
+            print("[HookInstaller] hooks registered in ~/\(settingsURL.deletingLastPathComponent().lastPathComponent) (port \(port))")
         } catch {
-            print("[HookInstaller] failed to write settings: \(error)")
+            print("[HookInstaller] failed to write \(settingsURL.path): \(error)")
         }
     }
 

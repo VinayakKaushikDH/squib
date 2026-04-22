@@ -1,0 +1,68 @@
+{
+  "global_entity_id": "HF_EG",
+  "timestamp": "2026-04-10T06:38:57.743219+00:00",
+  "event": {
+    "id": "326d15d1-053a-4dc1-bbf8-8e8d29a3b847",
+    "name": "[REDACTED]",
+    "details": {
+      "flow_version": "cfx_default",
+      "property": {
+        "conversation_id": "019d761d-1990-7580-9ec5-a71c98a876e4",
+        "conversation_group_id": "019d761c-aee5-7043-ac60-7ff21e0c3476",
+        "component_id": "page.delayedOrderVoucherClaim",
+        "form_request_url": "http://helpcenter-automations-fd7b-api.helpcenter-automations.svc.cluster.local:8000/automations/v2/reactive-compensation/apply",
+        "global_cr_code": "1C.5"
+      },
+      "release_tag": "vd298b36",
+      "session_id": "hc-5787342-HF_EG-2026-04-10T06:38:03.713Z",
+      "request_id": "019d761d-7c24-71d0-9724-2a50a732bbda",
+      "request_payload": {
+        "order_id": "3558273918",
+        "choice": "voucher",
+        "local_contact_reason": "107"
+      },
+      "response_payload": {
+        "type": "voucher_created",
+        "fallback": null,
+        "payload": {
+          "cases": null,
+          "vouchers": [
+            {
+              "id": "voucher_for_3558273918",
+              "type": "compensation",
+              "code": "voucher_for_3558273918",
+              "value": 45.0,
+              "currency": "EGP"
+            }
+          ],
+          "autocomp_recommendation_id": null,
+          "trigger_id": "e5ef273ae7460e9c1dbee24fe6c9e4f95524afb341747a1b5a7c6518dac8cad1",
+          "scheduled_compensation_id": null,
+          "transaction_id": "HF_EG-3558273918-1775803122459"
+        },
+        "automation_status": 200,
+        "automation_status_type": "voucher_created"
+      }
+    }
+  },
+  "product": { "name": "[REDACTED]", "version": "customer" },
+  "order": {
+    "id": "3558273918",
+    "details": {
+      "creation_time": "2026-04-10T06:02:31+00:00",
+      "order_id": "3558273918",
+      "original_promised_time": "2026-04-10T06:20:31+00:00",
+      "promised_time": "2026-04-10T06:20:31+00:00",
+      "status": "COURIER_LEFT_PICK_UP",
+      "updated_time": "2026-04-10T06:37:54.531000+00:00"
+    }
+  },
+  "user": {
+    "id": "5787342",
+    "details": {
+      "app_version": "iOS_v13.48.0",
+      "device_type": "ios",
+      "is_guest_user": false
+    }
+  } , {"global_entity_id":"HF_EG","timestamp":"2026-04-10T06:38:57.758196+00:00","event":{"id":"68e55580-e4d1-4f2b-9a69-82551bac58c7","name": "[REDACTED]","details":{"flow_version":"cfx_default","property":{"conversation_id":"019d761d-1990-7580-9ec5-a71c98a876e4","conversation_group_id":"019d761c-aee5-7043-ac60-7ff21e0c3476","request_url":"http://helpcenter-automations-fd7b-api.helpcenter-automations.svc.cluster.local:8000/automations/v2/reactive-compensation/evaluate","component_id":"page.navigateToVoucherCreatedPage","exception_type":"External API call failed","exception_detail":"Conflict","status_code":"409"},"release_tag":"vd298b36","session_id":"hc-5787342-HF_EG-2026-04-10T06:38:03.713Z","request_id":"019d761d-7c24-71d0-9724-2a50a732bbda"}},"product":{"name": "[REDACTED]","version":"customer"},"order":{"id":"3558273918","details":{"creation_time":"2026-04-10T06:02:31+00:00","order_id":"3558273918","original_promised_time":"2026-04-10T06:20:31+00:00","promised_time":"2026-04-10T06:20:31+00:00","status":"COURIER_LEFT_PICK_UP","updated_time":"2026-04-10T06:37:54.531000+00:00"}},"user":{"id":"5787342","details":{"app_version":"iOS_v13.48.0","device_type":"ios","is_guest_user":false}}}
+}

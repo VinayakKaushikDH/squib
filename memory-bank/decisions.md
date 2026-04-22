@@ -150,5 +150,14 @@ Moving types from the `squib` target to `SquibCore` requires `public` on every c
 ## 2026-04-22 — dist/ staging dir must not linger after make install (Session 20)
 `make app` creates `dist/squib.app` inside the project folder. Spotlight indexes it alongside `~/Applications/squib.app`, showing two squib entries in the app launcher. After `make install`, delete `dist/` (`make clean`) — it is a build artefact, not a distribution target. Never leave `dist/squib.app` on disk alongside the installed copy.
 
+## 2026-04-23 — Bubble keyboard shortcuts: addGlobalMonitorForEvents + Accessibility required
+`addLocalMonitorForEvents` cannot be used for bubble keyboard shortcuts — when Claude Code is frontmost (which it always is when a permission bubble appears), key events go to Claude Code's process, not Squib. `addGlobalMonitorForEvents` is the correct API but requires macOS Accessibility permission (`AXIsProcessTrustedWithOptions`). The app must request this at launch; without it the monitor installs silently and never fires. Additionally, every binary replacement (e.g. `make install`) invalidates the existing Accessibility grant — the user must re-grant in System Settings after each reinstall because macOS ties the grant to the binary hash.
+
+## 2026-04-23 — Bubble shortcut layout: ⌘⇧A on first suggestion, ⌘⇧S on Allow Session
+`⌘⇧A` triggers the first "Always allow..." suggestion button in `BubbleCardView` (the button that previously had no shortcut). `⌘⇧S` remains on the "Allow Session" button. These are distinct: suggestion buttons create permanent Claude Code rules; Allow Session creates session-scoped trust in squib only. User explicitly corrected an attempt to put `⌘⇧A` on Allow Session.
+
+## 2026-04-23 — Dual Claude config hook registration (Session 22)
+`registerClaudeHooks(port:)` writes hooks to both `~/.claude/settings.json` and `~/.claude-personal/settings.json` via a `writeHooks` helper. The helper checks that the target directory exists before writing — if `.claude-personal` is not installed on a machine it silently skips rather than creating a dangling file. This means any user with a personal Claude config gets squib hooks automatically without requiring the `.claude-personal` directory to exist everywhere.
+
 ## 2026-04-22 — Menubar icon: makeMenubarIcon() must always return non-nil (Session 20)
 If both SVG bundle loading and `cat.fill` SF Symbol lookup fail (e.g. wrong iOS-only symbol name on macOS), `statusItem.button?.image` stays nil — the statusItem is invisible with no title fallback. `makeMenubarIcon()` must have a guaranteed `NSBezierPath` programmatic fallback that draws the silhouette directly, so the menubar item always appears regardless of asset availability.

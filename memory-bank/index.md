@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Session 20 complete — distributable .app, menubar icon, auto-login toggle, app icon
-- **Last updated**: 2026-04-22 (Session 20, memory curator)
+- **Phase**: Session 22 complete — hooks registered in both ~/.claude and ~/.claude-personal
+- **Last updated**: 2026-04-23 (Session 22, memory curator)
 
 ## Agent Instructions
 - Read this file first, every session
@@ -18,9 +18,10 @@ Read this file at the start of every session to restore context.
 - Idle: `clawd-idle-follow.svg` inline; eye tracking via `#eyes-js` translate, max 3.0 SVG units
 - Multi-session StateEngine: priority + stale eviction; synthetic sessions for subagent (juggling/conducting) and notification
 - Hook event names: use `HookEventName.*` constants (in SquibCore), never raw strings
-- Claude Code hooks: one atomic settings.json write via `registerClaudeHooks(port:)` from `onReady`
+- Claude Code hooks: one atomic settings.json write via `registerClaudeHooks(port:)` from `onReady`; also writes to `~/.claude-personal/settings.json` if that directory exists (silently skips otherwise)
 - PermissionRequest URL: `/squib/permission` (distinctive path); filter+replace upsert preserves third-party entries
 - PiWatcher: `seedExistingFiles()` on startup seals pre-existing files — no history replay, starts idle cleanly
+- Bubble keyboard shortcuts: `addGlobalMonitorForEvents` + Accessibility permission required; every reinstall invalidates the grant
 
 ## Files
 | File | Contents |

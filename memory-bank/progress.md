@@ -225,7 +225,19 @@
 - **Makefile**: `make app` → `swift build -c release`, assembles `dist/squib.app` (Contents/MacOS/squib + Contents/Resources/*.bundle + Contents/Info.plist). `make install` copies to `~/Applications/`. `make clean` removes dist/ and .build/.
 - **Build**: clean, 1.89s.
 
+## 2026-04-23 — Session 21: Keyboard shortcut fix + ⌘⇧A for suggestion button
+
+- **Root cause fixed**: bubble keyboard shortcuts (`⌘⇧Y`/`⌘⇧N`/`⌘⇧S`) did nothing because `NSEvent.addGlobalMonitorForEvents` silently fires zero events without macOS Accessibility permission. App now requests Accessibility at launch via `AXIsProcessTrustedWithOptions`.
+- **Local monitor rejected**: attempted `addLocalMonitorForEvents` as a no-permission alternative — fails because Claude Code is frontmost when a bubble is shown, so key events go to Claude Code, not Squib.
+- **`⌘⇧A` added** (`BubbleManager`/`BubbleCardView`): triggers the first "Always allow..." suggestion button (the one without a prior shortcut). Hint shown inline on the button. `⌘⇧S` (Allow Session) and `⌘⇧Y`/`⌘⇧N` unchanged.
+- **Accessibility caveat**: every `make install` (binary replacement) invalidates the macOS Accessibility grant — user must re-grant in System Settings > Privacy & Security > Accessibility after each reinstall.
+
+## 2026-04-23 — Session 22: Dual Claude config hook registration
+
+- **Dual hook registration**: `writeHooks` helper extracted so hooks are written to both `~/.claude/settings.json` and `~/.claude-personal/settings.json`. If `.claude-personal` directory doesn't exist on the machine, the write is silently skipped.
+- `registerClaudeHooks(port:)` now calls `writeHooks` for both paths; `.claude-personal/settings.json` had a stale port (`56227`) that was updated to match the live session port.
+
 ## Current Status
-- **Phase**: Session 20 complete — distributable .app, menubar icon, auto-login toggle
-- **Next**: smoke test the live app (manual — see Task 5 checklist); then SVG migration for remaining working-state assets
+- **Phase**: Session 22 complete — squib hooks registered in both ~/.claude and ~/.claude-personal
+- **Next**: smoke test the live app; SVG migration for remaining working-state assets
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it
