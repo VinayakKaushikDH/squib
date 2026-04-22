@@ -58,6 +58,22 @@ All tests live in `Sources/squibTestRunner/` and import `SquibCore` directly.
 | `HookServer Integration` | `HookServerIntegrationTests.swift` | Health check, event dispatch, bad JSON → 400, StateEngine wiring, 404, debug routes |
 | `PiWatcher Integration` | `PiWatcherIntegrationTests.swift` | New file → SessionStart, JSONL parsing, appended lines, non-.jsonl ignored |
 
+## Acknowledgments
+
+Clawd pixel art reference from [clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk) by [@rullerzhou-afk](https://github.com/rullerzhou-afk), originally inspired by clawd-tank by [@marciogranzotto](https://github.com/marciogranzotto). Shared on LINUX DO community.
+
+## License
+
+Source code is licensed under the [MIT License](LICENSE).
+
+The artwork (`Sources/squib/Resources/`) is **not** covered by the MIT License. All rights reserved by their respective copyright holders.
+
+- Clawd is the property of Anthropic. This is an unofficial fan project, not affiliated with or endorsed by Anthropic.
+- Calico cat (三花猫) artwork by 鹿鹿 ([@rullerzhou-afk](https://github.com/rullerzhou-afk)). All rights reserved.
+- Third-party contributions: copyright retained by respective artists.
+
+---
+
 ## Why a standalone runner?
 
 `swift test` uses a bundle runner that only activates Swift Testing when `Testing` is a
