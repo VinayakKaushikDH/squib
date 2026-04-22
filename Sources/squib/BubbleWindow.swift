@@ -58,11 +58,13 @@ final class BubbleWindow: NSPanel {
     // MARK: - Keyboard shortcuts
 
     /// Called by BubbleManager's global key monitor (Y key).
-    func allowViaKey()        { viewModel.triggerAllow() }
+    func allowViaKey()           { viewModel.triggerAllow() }
     /// Called by BubbleManager's global key monitor (N key).
-    func denyViaKey()         { viewModel.triggerDeny() }
+    func denyViaKey()            { viewModel.triggerDeny() }
+    /// Called by BubbleManager's global key monitor (S key).
+    func allowSessionViaKey()    { viewModel.triggerAllowSession() }
     /// Called by BubbleManager's global key monitor (A key).
-    func allowSessionViaKey() { viewModel.triggerAllowSession() }
+    func firstSuggestionViaKey() { viewModel.triggerFirstSuggestion() }
 
     // MARK: - Positioning
 

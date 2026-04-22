@@ -1,7 +1,7 @@
 import Foundation
 import SquibCore
 
-enum BubbleKeyAction { case allow, deny, allowSession }
+enum BubbleKeyAction { case allow, deny, allowSession, firstSuggestion }
 
 @MainActor
 final class BubbleViewModel: ObservableObject {
@@ -20,9 +20,10 @@ final class BubbleViewModel: ObservableObject {
 
     // MARK: - Inbound triggers (called by BubbleWindow)
 
-    func triggerAllow()        { pendingKeyAction = .allow }
-    func triggerDeny()         { pendingKeyAction = .deny }
-    func triggerAllowSession() { pendingKeyAction = .allowSession }
+    func triggerAllow()           { pendingKeyAction = .allow }
+    func triggerDeny()            { pendingKeyAction = .deny }
+    func triggerAllowSession()    { pendingKeyAction = .allowSession }
+    func triggerFirstSuggestion() { pendingKeyAction = .firstSuggestion }
 
     // MARK: - Outbound decisions (called by BubbleCardView)
 

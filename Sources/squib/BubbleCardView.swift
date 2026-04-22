@@ -169,9 +169,10 @@ struct BubbleCardView: View {
                 model.pendingKeyAction = nil; return
             }
             switch action {
-            case .allow:        handleAllow()
-            case .deny:         handleDeny()
-            case .allowSession: handleAllowSession()
+            case .allow:           handleAllow()
+            case .deny:            handleDeny()
+            case .allowSession:    handleAllowSession()
+            case .firstSuggestion: handleFirstSuggestion()
             }
             model.pendingKeyAction = nil
         }
@@ -223,7 +224,10 @@ struct BubbleCardView: View {
                     handleAllowSession()
                 }
                 ForEach(dedupedSuggestions, id: \.index) { item in
-                    BubbleSuggestionButton(label: item.label) {
+                    BubbleSuggestionButton(
+                        label: item.label,
+                        hint: item.index == dedupedSuggestions.first?.index ? "⌘⇧A" : nil
+                    ) {
                         if let resolved = resolveSuggestion(item.raw) {
                             model.decide(.allowWithPermissions(updatedPermissions: [resolved]))
                         } else {
@@ -303,6 +307,15 @@ struct BubbleCardView: View {
             model.trustSession()
         } else {
             model.decide(.allow)   // fallback: no suggestions → plain allow
+        }
+    }
+
+    private func handleFirstSuggestion() {
+        guard !model.isDecided, let first = dedupedSuggestions.first else { return }
+        if let resolved = resolveSuggestion(first.raw) {
+            model.decide(.allowWithPermissions(updatedPermissions: [resolved]))
+        } else {
+            model.decide(.allow)
         }
     }
 
@@ -462,6 +475,7 @@ private struct BubbleSuggestionButton: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .background(

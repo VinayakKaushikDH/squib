@@ -18,7 +18,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var trustedSessions: Set<String> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
+        // Global key monitor requires Accessibility permission.
+        // Prompt only if not already granted — macOS silently ignores the global
+        // monitor without this, so we request it upfront.
+        if !AXIsProcessTrusted() {
+            let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+            AXIsProcessTrustedWithOptions(opts)
+        }
 
         petWindow = PetWindow()
         petWindow?.orderFront(nil)

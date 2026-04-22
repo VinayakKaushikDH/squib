@@ -59,6 +59,8 @@ final class BubbleManager {
 
     private func installKeyMonitor() {
         guard keyMonitor == nil else { return }
+        // Global monitor intercepts key events while another app is frontmost.
+        // Requires Accessibility permission — requested at app launch.
         keyMonitor = NSEvent.addGlobalMonitorForEvents(matching: .keyDown) { [weak self] event in
             DispatchQueue.main.async { self?.handleKey(event) }
         }
@@ -76,6 +78,7 @@ final class BubbleManager {
         case "y": top.window.allowViaKey()
         case "n": top.window.denyViaKey()
         case "s": top.window.allowSessionViaKey()
+        case "a": top.window.firstSuggestionViaKey()
         default:  break
         }
     }
