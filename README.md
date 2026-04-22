@@ -1,17 +1,19 @@
 # squib
 
 <p align="center">
-  <img src="Sources/squib/Resources/clawd-working-typing.svg" width="110" alt="typing">
+  <img src="Sources/squib/Resources/clawd-working-typing.svg" width="90" alt="typing">
   &nbsp;
-  <img src="Sources/squib/Resources/clawd-working-juggling.svg" width="110" alt="juggling">
+  <img src="Sources/squib/Resources/clawd-working-juggling.svg" width="90" alt="juggling">
   &nbsp;
-  <img src="Sources/squib/Resources/clawd-working-thinking.svg" width="110" alt="thinking">
-  <br><br>
-  <img src="Sources/squib/Resources/clawd-sleeping.svg" width="110" alt="sleeping">
+  <img src="Sources/squib/Resources/clawd-working-thinking.svg" width="90" alt="thinking">
   &nbsp;
-  <img src="Sources/squib/Resources/clawd-error.svg" width="110" alt="error">
+  <img src="Sources/squib/Resources/clawd-sleeping.svg" width="90" alt="sleeping">
   &nbsp;
-  <img src="Sources/squib/Resources/clawd-happy.svg" width="110" alt="happy">
+  <img src="Sources/squib/Resources/clawd-error.svg" width="90" alt="error">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-happy.svg" width="90" alt="happy">
+  &nbsp;
+  <img src="Sources/squib/Resources/clawd-mini-typing.svg" width="90" alt="mini coding">
 </p>
 
 A macOS desktop companion that watches your coding agents. Inspired by [clawd-on-desk](https://github.com/rullerzhou-afk/clawd-on-desk).
