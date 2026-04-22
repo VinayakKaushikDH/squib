@@ -1,4 +1,4 @@
-# squib
+# Squib
 
 <p align="center">
   <img src="Sources/squib/Resources/clawd-working-typing.svg" width="110" alt="typing">
@@ -36,7 +36,7 @@ A small character (Clawd) sits on your screen and reacts to what your AI coding 
 swift run squib
 ```
 
-On first launch, squib writes its hooks into `~/.claude/settings.json` automatically.
+On first launch, Squib writes its hooks into `~/.claude/settings.json` automatically.
 
 ## Running Tests
 

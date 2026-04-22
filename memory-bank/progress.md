@@ -217,7 +217,15 @@
 - **Tests**: 87/87 passing, no changes needed.
 - **Plan**: `.omc/plans/liquid-glass-bubble.md`
 
+## 2026-04-22 — Session 20: Distributable app + menubar icon + auto-login toggle
+
+- **Info.plist** (`Sources/squib/Info.plist`): Added app bundle metadata — `CFBundleIdentifier: com.squib.app`, `LSUIElement: true` (menubar-only, no Dock icon), `NSHighResolutionCapable`. Excluded from SPM resources via `exclude: ["Info.plist"]` in Package.swift so SPM doesn't warn.
+- **LoginItemManager.swift** (`Sources/squib/LoginItemManager.swift`): Wraps `SMAppService.mainApp.register()`/`unregister()`. `isEnabled` checks `.status == .enabled`. `toggle()` flips state and returns new value. Requires app to be running from a proper .app bundle.
+- **TrayMenu.swift**: Replaced `statusItem.button?.title = "squib"` with `cat.fill` SF Symbol (16pt, medium weight, template image). Slot exists: drop `menubar-icon.png` (16×16 template) in `Sources/squib/Resources/` to override. Menu layout: Launch at Login (checkmark toggle) → separator → session list → separator → Quit. `NSMenuDelegate.menuWillOpen` calls `rebuild()` so checkmark is always fresh. `toggleLaunchAtLogin` calls `LoginItemManager.toggle()` then `rebuild()`.
+- **Makefile**: `make app` → `swift build -c release`, assembles `dist/squib.app` (Contents/MacOS/squib + Contents/Resources/*.bundle + Contents/Info.plist). `make install` copies to `~/Applications/`. `make clean` removes dist/ and .build/.
+- **Build**: clean, 1.89s.
+
 ## Current Status
-- **Phase**: Session 19 complete — Liquid Glass BubbleWindow
+- **Phase**: Session 20 complete — distributable .app, menubar icon, auto-login toggle
 - **Next**: smoke test the live app (manual — see Task 5 checklist); then SVG migration for remaining working-state assets
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it

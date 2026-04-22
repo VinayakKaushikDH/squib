@@ -14,6 +14,7 @@ let package = Package(
             name: "squib",
             dependencies: ["SquibCore"],
             path: "Sources/squib",
+            exclude: ["Info.plist"],
             resources: [
                 .process("Resources")
             ],

@@ -141,3 +141,14 @@ URL registered in settings.json is `http://127.0.0.1:{port}/squib/permission` (n
 
 ## 2026-04-20 — SquibCore module: all public-facing declarations need explicit `public`
 Moving types from the `squib` target to `SquibCore` requires `public` on every class/struct/enum/init/property/method that crosses the module boundary. Swift internals do not cross module boundaries — omitting `public` compiles within the module but produces "cannot find type" errors in the importing target. This applies to `HookEvent`, `HookServer`, `PermissionDecision`, `PermissionRequest`, `PetState`, `PiWatcher`, `StateEngine`, and any new SquibCore types.
+
+## 2026-04-22 — SMAppService login item (Session 20)
+- Used `SMAppService.mainApp` (macOS 13+) — no helper app needed; registers the running app itself.
+- Requires app to be a proper .app bundle with CFBundleIdentifier. Running bare from swift run will not persist the login item correctly.
+- `SMAppService.mainApp.status` is the source of truth; menu checkmark refreshed on every `menuWillOpen`.
+
+## 2026-04-22 — dist/ staging dir must not linger after make install (Session 20)
+`make app` creates `dist/squib.app` inside the project folder. Spotlight indexes it alongside `~/Applications/squib.app`, showing two squib entries in the app launcher. After `make install`, delete `dist/` (`make clean`) — it is a build artefact, not a distribution target. Never leave `dist/squib.app` on disk alongside the installed copy.
+
+## 2026-04-22 — Menubar icon: makeMenubarIcon() must always return non-nil (Session 20)
+If both SVG bundle loading and `cat.fill` SF Symbol lookup fail (e.g. wrong iOS-only symbol name on macOS), `statusItem.button?.image` stays nil — the statusItem is invisible with no title fallback. `makeMenubarIcon()` must have a guaranteed `NSBezierPath` programmatic fallback that draws the silhouette directly, so the menubar item always appears regardless of asset availability.

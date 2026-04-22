@@ -3,8 +3,8 @@
 Read this file at the start of every session to restore context.
 
 ## Status
-- **Phase**: Session 19 complete — Liquid Glass BubbleWindow (NSGlassEffectView + SwiftUI)
-- **Last updated**: 2026-04-22 (Session 19)
+- **Phase**: Session 20 complete — distributable .app, menubar icon, auto-login toggle, app icon
+- **Last updated**: 2026-04-22 (Session 20, memory curator)
 
 ## Agent Instructions
 - Read this file first, every session
