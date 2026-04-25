@@ -1,0 +1,17 @@
+{
+  "id": "permission-glob-rule",
+  "tool_name": "Edit",
+  "tool_input": "{\"file_path\":\"/Users/me/myrepo/src/App.tsx\",\"old_string\":\"foo\",\"new_string\":\"bar\"}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "bcd-567-efg",
+  "is_elicitation": false,
+  "permission_suggestions": [
+    {
+      "type": "addRules",
+      "toolName": "Edit",
+      "ruleContent": "/Users/me/myrepo/src/**",
+      "destination": "localSettings",
+      "behavior": "allow"
+    }
+  ]
+}

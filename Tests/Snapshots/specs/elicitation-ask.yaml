@@ -5,26 +5,41 @@ fixture: elicitation-ask.json
 expect:
   card_kind: elicitation
   width_pt: 380
+  title_text: "Needs Input"
   tool_pill:
-    visible: false
+    text: "Ask"
+    color: neutral
+    visible: true
   session_tag:
     visible: true
     contains: "myrepo"
   questions:
-    - text: "Which database should I use?"
+    - header: "DATABASE"
+      text: "Which database should I use?"
       type: single_select
-      options: ["PostgreSQL", "SQLite", "MongoDB"]
-    - text: "Which features do you need?"
+      options:
+        - { label: "PostgreSQL", description: "Robust relational database, great for production." }
+        - { label: "SQLite",     description: "Embedded, zero-config, ideal for local dev." }
+        - { label: "MongoDB",    description: "Document store with a flexible schema." }
+    - header: "FEATURES"
+      text: "Which features do you need?"
       type: multi_select
-      options: ["Auth", "File uploads", "Webhooks"]
+      options:
+        - { label: "Auth",         description: "User authentication and session management." }
+        - { label: "File uploads", description: "S3-compatible file storage integration." }
+        - { label: "Webhooks",     description: "Outbound HTTP event notifications." }
   submit_button:
     visible: true
-    label: "Submit"
+    label: "Submit Answer"
     enabled: false
-  buttons: []
+  skip_button:
+    visible: true
+    label: "Skip"
 
 notes: |
   Elicitation layout is distinct from regular permission. Width is 380pt not 340pt.
-  No tool pill, no Allow/Deny buttons. Instead shows a question form.
-  Submit button is disabled until all questions have answers.
-  First question is single-select (radio-style), second is multi-select (checkbox-style).
+  Ask pill shown top-right. No Allow/Deny buttons — Skip + Submit Answer instead.
+  Submit is disabled until all questions have answers (both questions unanswered on load).
+  First question is single-select (radio circles), second is multi-select (checkboxes).
+  Header labels show above each question in uppercase monospaced ("DATABASE", "FEATURES").
+  Options include label + description text below each label.

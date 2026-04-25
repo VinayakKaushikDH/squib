@@ -1,0 +1,32 @@
+id: plan-review
+title: "Plan review — ExitPlanMode card"
+fixture: plan-review.json
+
+expect:
+  card_kind: plan_review
+  width_pt: 340
+  title_text: "Plan Review"
+  tool_pill:
+    text: "Plan"
+    color: neutral
+  session_tag:
+    visible: true
+    contains: "myrepo"
+  command_block:
+    visible: true
+    contains: "Migrate auth"
+    contains_also: "Remove legacy sessionStore"
+    truncated: false
+  buttons:
+    - { label: "Edit Plan", hint: "⌘⇧E", style: secondary }
+    - { label: "Approve",   hint: "⌘⇧Y", style: primary }
+  allow_session_button: false
+  suggestions: []
+
+notes: |
+  Plan review is the third distinct layout mode (regular / plan_review / elicitation).
+  Plan pill uses neutral styling — white-12% background + border stroke, same as Ask.
+  Buttons are "Edit Plan" (secondary, deny role) and "Approve" (primary, allow role).
+  No suggestion buttons in plan review mode.
+  CommandBlock shows the plan body; fixture uses the "result" key in tool_input.
+  Reference HTML (section 02) shows a "›" prompt prefix — currently not rendered.

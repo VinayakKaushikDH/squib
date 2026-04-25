@@ -9,14 +9,17 @@ expect:
     text: "WRITE"
     color: tan
   session_tag:
-    visible: false
+    visible: true
+    contains: "#opq"
+    note: "cwd is '/' so folder component is suppressed; only session id suffix shows"
   command_block:
     visible: true
     contains: "/etc/hosts"
     truncated: false
+  title_text: "Permission Request"
   buttons:
-    - { label: "Allow", style: primary }
-    - { label: "Deny",  style: secondary }
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
   allow_session_button: false
   suggestions: []
 

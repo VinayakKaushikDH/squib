@@ -16,13 +16,14 @@ expect:
     prefix: "$"
     contains: "ls -la"
     truncated: false
+  title_text: "Permission Request"
   buttons:
-    - { label: "Allow", style: primary }
-    - { label: "Deny",  style: secondary }
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
   allow_session_button: false
   suggestions: []
 
 notes: |
-  Single-line command. CommandBlock should show "$  ls -la" with no scrollbar.
+  Single-line command. CommandBlock shows "$ ls -la" with no truncation.
   "Allow Session" button should not appear (no suggestions, regular permission).
   Session tag shows "myrepo · #xyz" from cwd + session_id suffix.

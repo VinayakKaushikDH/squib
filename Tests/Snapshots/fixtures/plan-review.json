@@ -1,0 +1,9 @@
+{
+  "id": "plan-review",
+  "tool_name": "ExitPlanMode",
+  "tool_input": "{\"result\":\"Migrate auth to OAuth2\\n1. Add oauth2-proxy service\\n2. Update auth.ts client\\n3. Add callback routes in server/api.ts\\n4. Migrate existing JWT tokens\\n5. Remove legacy sessionStore.ts\"}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "vwx-234-yza",
+  "is_elicitation": false,
+  "permission_suggestions": []
+}

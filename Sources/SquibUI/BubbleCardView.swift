@@ -132,7 +132,7 @@ public struct BubbleCardView: View {
         var parts: [String] = []
         if let cwd = request.cwd, !cwd.isEmpty {
             let folder = URL(fileURLWithPath: cwd).lastPathComponent
-            if !folder.isEmpty { parts.append(folder) }
+            if !folder.isEmpty && folder != "/" { parts.append(folder) }
         }
         if let sid = request.sessionId, !sid.isEmpty {
             parts.append("#" + String(sid.suffix(3)))
@@ -411,27 +411,26 @@ private struct CommandBlock: View {
     let text: String
     var isBash: Bool = false
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            Group {
-                if isBash {
-                    HStack(alignment: .firstTextBaseline, spacing: 0) {
-                        Text("$ ")
-                            .foregroundStyle(Color(hex: "#d8724e"))
-                        Text(text)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
+        Group {
+            if isBash {
+                HStack(alignment: .firstTextBaseline, spacing: 0) {
+                    Text("$ ")
+                        .foregroundStyle(Color(hex: "#d8724e"))
                     Text(text)
                         .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .lineLimit(8)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            } else {
+                Text(text)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(8)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .font(.system(size: 11, design: .monospaced))
-            .padding(.horizontal, 12)
-            .padding(.vertical, 10)
         }
-        .frame(maxHeight: 100)
+        .font(.system(size: 11, design: .monospaced))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
     }
 }
@@ -503,6 +502,39 @@ private struct BubbleActionButtonStyle: ButtonStyle {
 
 // MARK: - BubbleSuggestionButton
 
+/// Parses backtick-delimited spans in `label` and returns an AttributedString
+/// where plain text uses the system UI font and `` `code` `` spans use monospace.
+private func sugLabelAttributed(_ label: String) -> AttributedString {
+    var result    = AttributedString()
+    var remaining = label[...]
+    while let tickOpen = remaining.range(of: "`") {
+        let plainPart = String(remaining[..<tickOpen.lowerBound])
+        if !plainPart.isEmpty {
+            var a = AttributedString(plainPart)
+            a.font = .system(size: 12)
+            result.append(a)
+        }
+        let afterOpen = remaining[tickOpen.upperBound...]
+        if let tickClose = afterOpen.range(of: "`") {
+            var a = AttributedString(String(afterOpen[..<tickClose.lowerBound]))
+            a.font = .system(size: 11, design: .monospaced)
+            result.append(a)
+            remaining = afterOpen[tickClose.upperBound...]
+        } else {
+            var a = AttributedString("`" + String(afterOpen))
+            a.font = .system(size: 12)
+            result.append(a)
+            remaining = remaining[remaining.endIndex...]
+        }
+    }
+    if !remaining.isEmpty {
+        var a = AttributedString(String(remaining))
+        a.font = .system(size: 12)
+        result.append(a)
+    }
+    return result
+}
+
 private struct BubbleSuggestionButton: View {
     let label:  String
     let hint:   String?
@@ -520,8 +552,7 @@ private struct BubbleSuggestionButton: View {
         Button(action: action) {
             HStack(spacing: 0) {
                 HStack(spacing: 6) {
-                    Text(label)
-                        .font(.system(size: 12, design: .monospaced))
+                    Text(sugLabelAttributed(label))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     if let hint {

@@ -255,12 +255,38 @@
 - **Location**: `Sources/squib/AppDelegate.swift` lines 69–71.
 - **Build**: clean (85/82 targets, 35.86s).
 
+## 2026-04-25 — Session 24: Snapshot harness bugs + spec audit
+
+**Code fixes (BubbleCardView.swift):**
+- **CommandBlock blank in ImageRenderer**: `ScrollView` doesn't render content in `ImageRenderer` — replaced with plain `Text`/`HStack` + `.lineLimit(8)` for bash and `.lineLimit(8)` for non-bash (was 4, raised to show full plan content). All 7 scenarios now render command text.
+- **Session tag "/" for root cwd**: `URL(fileURLWithPath:"/").lastPathComponent` returns `"/"` (non-empty), so write-file showed `"/ · #opq"`. Added `&& folder != "/"` guard in `sessionTag`. Now shows `"#opq"` only.
+- **Suggestion labels fully monospaced**: Added `sugLabelAttributed()` helper that parses backtick spans — plain text renders in system font, `` `code` `` spans render in monospace. Matches reference HTML `.sq-sug` + `code` styling.
+
+**Fixture fix:**
+- `elicitation-ask.json`: was using `options: [string]` + `allowMultiple` key — wrong format. Updated to correct `AskUserQuestion` format: `options: [{label, description}]` + `multiSelect` key + `header` field. All 6 options now render with radio/checkbox controls and descriptions.
+
+**Spec fixes (all 7 existing specs):**
+- Button order corrected in all 6 regular-permission specs: was `Allow, Deny`; correct is `Deny (left), Allow (right)`.
+- Added `title_text` assertion to all specs.
+- Added hint text (`⌘⇧N`, `⌘⇧Y`, etc.) to button entries.
+- `bash-long.yaml`: `truncated: true` → `truncated: false` + `wrapped: true`; notes updated.
+- `write-file.yaml`: `contains: "opq"` → `contains: "#opq"` (includes sigil); `session_tag: visible: false` → `visible: true`.
+- `permission-with-suggestions.yaml`: added `session_tag`; restructured to `suggestion_buttons` list with explicit `position` ordering (Allow Session at position 1).
+- `elicitation-ask.yaml`: added `color: neutral` to Ask pill; updated options to match corrected fixture format.
+
+**New scenarios added (covering previously untested code paths):**
+- `plan-review.json` + `plan-review.yaml`: exercises `planReviewContent` (ExitPlanMode) — "Plan Review" title, neutral Plan pill, "Edit Plan"/"Approve" buttons, multi-line plan body.
+- `permission-glob-rule.json` + `permission-glob-rule.yaml`: exercises `addRules` label branch with `**` glob ruleContent — produces `"Allow Edit in src/"` label format.
+
+**Harness now: 9 fixtures, 9 specs covering all 3 layout modes (regular / plan_review / elicitation).**
+
 ## Current Status
-- **Phase**: Session 23 complete — trusted-session elicitation guard fixed
+- **Phase**: Session 24 complete — snapshot harness fully operational, all spec gaps closed
 - **Next**: smoke test the live app; SVG migration for remaining working-state assets
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it
 
 ## Backlog / Future Ideas
 - Show full command to be executed in the permission prompt (currently only tool pill + partial detail is shown)
 - Syntax highlight commands in the permission prompt
-- Responsive layout in permission bubble so long commands are visible in full (no truncation)
+- Plan review "› " prompt prefix (reference shows `›` before plan title; currently not rendered)
+- Suggestion deduplication test scenario

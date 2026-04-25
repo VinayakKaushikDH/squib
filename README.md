@@ -70,9 +70,9 @@ Clawd pixel art reference from [clawd-on-desk](https://github.com/rullerzhou-afk
 
 ## License
 
-Source code is licensed under the [MIT License](LICENSE).
+Source code is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
-The artwork (`Sources/squib/Resources/`) is **not** covered by the MIT License. All rights reserved by their respective copyright holders.
+The artwork (`Sources/squib/Resources/`) is **not** covered by the AGPL-3.0. All rights reserved by their respective copyright holders.
 
 - Clawd is the property of Anthropic. This is an unofficial fan project, not affiliated with or endorsed by Anthropic.
 - Third-party contributions: copyright retained by respective artists.

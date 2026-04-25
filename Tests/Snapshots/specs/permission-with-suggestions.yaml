@@ -8,16 +8,20 @@ expect:
   tool_pill:
     text: "BASH"
     color: orange
+  session_tag:
+    visible: true
+    contains: "myrepo"
   command_block:
     visible: true
     contains: "npm install"
+  title_text: "Permission Request"
   buttons:
-    - { label: "Allow", style: primary }
-    - { label: "Deny",  style: secondary }
-  allow_session_button: true
-  suggestions:
-    - contains: "npm install"
-    - contains: "Auto-accept edits"
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
+  suggestion_buttons:
+    - { label: "Allow Session", hint: "⌘⇧S", position: 1 }
+    - { contains: "npm install", hint: "⌘⇧A", position: 2 }
+    - { contains: "Auto-accept edits", position: 3 }
 
 notes: |
   Two suggestion buttons should appear below the main Allow/Deny row.

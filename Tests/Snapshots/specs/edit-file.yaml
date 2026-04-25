@@ -15,9 +15,10 @@ expect:
     visible: true
     contains: "ViewController.swift"
     truncated: false
+  title_text: "Permission Request"
   buttons:
-    - { label: "Allow", style: primary }
-    - { label: "Deny",  style: secondary }
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
   allow_session_button: false
   suggestions: []
 

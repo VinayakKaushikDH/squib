@@ -1,0 +1,30 @@
+id: permission-glob-rule
+title: "Edit with glob-path addRules suggestion"
+fixture: permission-glob-rule.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  title_text: "Permission Request"
+  tool_pill:
+    text: "EDIT"
+    color: blue
+  session_tag:
+    visible: true
+    contains: "myrepo"
+  command_block:
+    visible: true
+    contains: "App.tsx"
+    truncated: false
+  buttons:
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
+  suggestion_buttons:
+    - { label: "Allow Session",    hint: "⌘⇧S", position: 1 }
+    - { contains: "Allow Edit in src/", hint: "⌘⇧A", position: 2 }
+
+notes: |
+  addRules suggestion with ruleContent "/Users/me/myrepo/src/**" (contains "**")
+  triggers the directory-label branch: extracts last component before "**" → "src".
+  Rendered label: "Allow Edit in src/" — distinct from the simple ruleContent branch
+  tested in permission-with-suggestions which produces "Always allow `npm install`".

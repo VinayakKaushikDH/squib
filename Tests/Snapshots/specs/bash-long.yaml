@@ -15,14 +15,15 @@ expect:
     visible: true
     prefix: "$"
     contains: "find ."
-    truncated: true
+    truncated: false
+    wrapped: true
+  title_text: "Permission Request"
   buttons:
-    - { label: "Allow", style: primary }
-    - { label: "Deny",  style: secondary }
+    - { label: "Deny",  hint: "⌘⇧N", style: secondary }
+    - { label: "Allow", hint: "⌘⇧Y", style: primary }
   allow_session_button: false
   suggestions: []
 
 notes: |
-  Long command should wrap within the CommandBlock. The block may show a scrollbar
-  or clip/truncate the text — either is acceptable as long as the command is not
-  fully hidden. The cwd folder label shows the last path component "structure".
+  Long command wraps across multiple lines within CommandBlock (lineLimit 8, no ellipsis).
+  The cwd folder label shows the last path component "structure".

@@ -4,7 +4,7 @@ Read this file at the start of every session to restore context.
 
 ## Status
 - **Phase**: Session 22 complete — hooks registered in both ~/.claude and ~/.claude-personal
-- **Last updated**: 2026-04-23 (Session 22, memory curator)
+- **Last updated**: 2026-04-25 (Session 24, snapshot harness bugs + spec audit)
 
 ## Agent Instructions
 - Read this file first, every session
