@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>squib — 50 pixel pets</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  :root {
+    --bg: #0b0c10;
+    --bg-2: #0f1116;
+    --panel: #161920;
+    --panel-2: #1d212a;
+    --border: rgba(255,255,255,0.07);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #ebe7db;
+    --text-mute: rgba(235,231,219,0.55);
+    --text-dim: rgba(235,231,219,0.32);
+    --accent: #d8724e;
+    --accent-2: #78c08a;
+    --violet: #b48cf0;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --ui: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin:0; padding:0;
+    font-family: var(--ui);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1340px; margin: 0 auto; padding: 40px 28px 140px; }
+
+  .masthead {
+    border-top: 2px solid var(--text);
+    border-bottom: 2px solid var(--text);
+    padding: 14px 0;
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .masthead .l, .masthead .r { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mute); }
+  .masthead .t { font-family: var(--mono); font-size: 32px; font-weight: 700; letter-spacing: -0.02em; text-align: center; margin: 0; }
+  .masthead .t .dot { color: var(--accent); }
+  .masthead .r { text-align: right; }
+
+  .lede {
+    border: 1px dashed var(--border-strong);
+    padding: 16px 22px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 32px;
+    background: var(--bg-2);
+  }
+  .lede b { color: var(--accent); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 40px 0 14px;
+  }
+  .section-label::after { content:""; flex:1; height:1px; background: var(--border-strong); }
+  .section-label .n { padding: 2px 7px; border: 1px solid var(--border-strong); color: var(--text); letter-spacing: 0; }
+  h2.heading { font-family: var(--mono); font-size: 20px; font-weight: 700; margin: 0 0 2px; letter-spacing: -0.01em; }
+  .subhead { color: var(--text-mute); font-size: 12.5px; margin-bottom: 20px; max-width: 680px; line-height: 1.55; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 1200px) { .grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 900px)  { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .card .num {
+    position: absolute;
+    top: 8px; left: 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 0.18em;
+  }
+  .card .tag {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 1px 5px;
+    border-radius: 2px;
+    opacity: 0.9;
+  }
+  .card .tag.pick { color: var(--accent-2); border-color: var(--accent-2); }
+  .card .tag.risk { color: var(--violet); border-color: var(--violet); }
+  .card .stage {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    position: relative;
+    background:
+      linear-gradient(45deg, #0a0b0f 25%, transparent 25%) 0 0/14px 14px,
+      linear-gradient(-45deg, #0a0b0f 25%, transparent 25%) 0 7px/14px 14px,
+      linear-gradient(45deg, transparent 75%, #0a0b0f 75%) 7px -7px/14px 14px,
+      linear-gradient(-45deg, transparent 75%, #0a0b0f 75%) -7px 0/14px 14px,
+      #13151c;
+    border-bottom: 1px solid var(--border);
+  }
+  .card .meta {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .card .name {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .card .name .sp {
+    color: var(--text-mute); font-weight: 400; font-size: 9.5px;
+    margin-left: 4px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .card .why { font-size: 11px; line-height: 1.45; color: var(--text-mute); }
+
+  svg.pet { display: block; image-rendering: pixelated; image-rendering: crisp-edges; }
+
+  /* --- animation primitives (timing names; durations defined later) --- */
+  @keyframes blink{ 0%,92%,100% { transform: scaleY(1);} 95%,98% { transform: scaleY(0.05);} }
+  @keyframes spin { from { transform: rotate(0);} to { transform: rotate(360deg);} }
+  @keyframes tapL { 0%,100% { transform: translateY(0);} 50% { transform: translateY(1px);} }
+  @keyframes tapR { 0%,100% { transform: translateY(0);} 50% { transform: translateY(1px);} }
+  @keyframes flap { 0%,100% { transform: scaleY(1);} 50% { transform: scaleY(0.6);} }
+  @keyframes glow { 0%,100% { opacity: 0.5;} 50% { opacity: 1;} }
+  @keyframes orbit{ 0% { transform: rotate(0) translateX(5px);} 100% { transform: rotate(360deg) translateX(5px);} }
+
+  .a-bob   { animation: bob   2.8s ease-in-out infinite; transform-origin: center; }
+  .a-bob2  { animation: bob2  2.4s ease-in-out infinite; transform-origin: center; }
+  .a-drift { animation: drift 3.6s ease-in-out infinite; transform-origin: center; }
+  .a-sway  { animation: sway  3.6s ease-in-out infinite; transform-origin: center bottom; }
+  .a-blink { animation: blink 4.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .a-spin  { animation: spin  4s   linear      infinite; transform-origin: center; }
+  .a-tapL  { animation: tapL  0.6s ease-in-out infinite; transform-origin: center; }
+  .a-tapR  { animation: tapR  0.6s ease-in-out infinite 0.3s; transform-origin: center; }
+  .a-flap  { animation: flap  0.4s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+  .a-glow  { animation: glow  1.8s ease-in-out infinite; }
+  .a-orbit { animation: orbit 3s   linear      infinite; transform-origin: 0 0; }
+
+  /* shelf callout */
+  .shelf {
+    margin-top: 50px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 900px) { .shelf { grid-template-columns: 1fr; } }
+  .panel-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .panel-card h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  .panel-card ul { padding-left: 18px; margin: 6px 0; }
+  .panel-card li { margin-bottom: 5px; }
+  .panel-card .k { color: var(--accent-2); }
+
+  .ask {
+    margin-top: 24px;
+    padding: 18px 24px;
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    background: rgba(216,114,78,0.08);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .ask b { color: var(--accent); }
+
+  /* ============================================================ */
+  /* Tweak hooks. Three expressive knobs reshape the whole page.   */
+  /* ============================================================ */
+
+  /* PULSE — global animation tempo + amplitude */
+  :root {
+    --pulse-speed: 1;       /* multiplier on duration: high = slow, low = fast */
+    --pulse-amp:   1;       /* multiplier on movement amount */
+    --bob-y:       calc(-1px * var(--pulse-amp));
+    --bob2-y:      calc(-2px * var(--pulse-amp));
+    --drift-y:     calc(-3px * var(--pulse-amp));
+    --sway-deg:    calc(2deg * var(--pulse-amp));
+  }
+  @keyframes bob   { 0%,100% { transform: translateY(0);}      50% { transform: translateY(var(--bob-y));} }
+  @keyframes bob2  { 0%,100% { transform: translateY(0);}      50% { transform: translateY(var(--bob2-y));} }
+  @keyframes drift { 0%,100% { transform: translateY(0);}      50% { transform: translateY(var(--drift-y));} }
+  @keyframes sway  { 0%,100% { transform: rotate(calc(-1 * var(--sway-deg)));} 50% { transform: rotate(var(--sway-deg));} }
+
+  .a-bob   { animation-duration: calc(2.8s * var(--pulse-speed)); }
+  .a-bob2  { animation-duration: calc(2.4s * var(--pulse-speed)); }
+  .a-drift { animation-duration: calc(3.6s * var(--pulse-speed)); }
+  .a-sway  { animation-duration: calc(3.6s * var(--pulse-speed)); }
+  .a-blink { animation-duration: calc(4.6s * var(--pulse-speed)); }
+  .a-spin  { animation-duration: calc(4s   * var(--pulse-speed)); }
+  .a-tapL,.a-tapR { animation-duration: calc(0.6s * var(--pulse-speed)); }
+  .a-flap  { animation-duration: calc(0.4s * var(--pulse-speed)); }
+  .a-glow  { animation-duration: calc(1.8s * var(--pulse-speed)); }
+  .a-orbit { animation-duration: calc(3s   * var(--pulse-speed)); }
+
+  /* LENS — page layout reshape */
+  /* Default = catalog (already styled). Variants override. */
+  html[data-lens="contact"] .grid { grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  html[data-lens="contact"] .card { border-radius: 4px; }
+  html[data-lens="contact"] .card .stage { padding: 6px; }
+  html[data-lens="contact"] .card .num { font-size: 8px; top: 4px; left: 5px; }
+  html[data-lens="contact"] .card .tag { display: none; }
+  html[data-lens="contact"] .card .meta { padding: 6px 7px 7px; }
+  html[data-lens="contact"] .card .name { font-size: 10px; line-height: 1.2; }
+  html[data-lens="contact"] .card .name .sp { display: block; margin: 1px 0 0; font-size: 8px; }
+  html[data-lens="contact"] .card .why { display: none; }
+  html[data-lens="contact"] .panel-card .why { display: block; }
+  @media (max-width: 1100px) { html[data-lens="contact"] .grid { grid-template-columns: repeat(6, 1fr); } }
+  @media (max-width: 700px)  { html[data-lens="contact"] .grid { grid-template-columns: repeat(4, 1fr); } }
+
+  html[data-lens="spotlight"] .grid { grid-template-columns: repeat(2, 1fr); gap: 28px; }
+  html[data-lens="spotlight"] .card .stage { padding: 56px; aspect-ratio: 16/9; }
+  html[data-lens="spotlight"] .card .stage svg.pet { width: 220px; height: 220px; }
+  html[data-lens="spotlight"] .card .meta { padding: 18px 22px 22px; }
+  html[data-lens="spotlight"] .card .name { font-size: 18px; }
+  html[data-lens="spotlight"] .card .why { font-size: 13px; line-height: 1.6; }
+  html[data-lens="spotlight"] .card .num { font-size: 11px; }
+  @media (max-width: 700px) { html[data-lens="spotlight"] .grid { grid-template-columns: 1fr; } }
+
+  html[data-lens="scatter"] .grid {
+    display: block;
+    position: relative;
+    min-height: 1400px;
+    overflow: visible;
+  }
+  html[data-lens="scatter"] .grid .card {
+    position: absolute;
+    width: 200px;
+    transform: rotate(var(--scatter-rot, 0deg));
+    transition: transform 0.2s ease, z-index 0s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  html[data-lens="scatter"] .grid .card:hover {
+    transform: rotate(0deg) scale(1.06);
+    z-index: 50;
+  }
+
+  /* STAGE — world / chrome treatment */
+  html[data-stage="graveyard"] {
+    /* Default — keep current dark zine palette */
+  }
+
+  html[data-stage="blueprint"] {
+    --bg: #0a2747;
+    --bg-2: #0e3158;
+    --panel: #103966;
+    --panel-2: #154276;
+    --border: rgba(180,210,255,0.16);
+    --border-strong: rgba(180,210,255,0.32);
+    --text: #d8e9ff;
+    --text-mute: rgba(216,233,255,0.6);
+    --text-dim: rgba(216,233,255,0.35);
+    --accent: #ffd070;
+    --accent-2: #8ad8ff;
+  }
+  html[data-stage="blueprint"] body {
+    background:
+      linear-gradient(rgba(180,210,255,0.06) 1px, transparent 1px) 0 0/24px 24px,
+      linear-gradient(90deg, rgba(180,210,255,0.06) 1px, transparent 1px) 0 0/24px 24px,
+      var(--bg);
+  }
+  html[data-stage="blueprint"] .card .stage {
+    background:
+      linear-gradient(rgba(180,210,255,0.08) 1px, transparent 1px) 0 0/12px 12px,
+      linear-gradient(90deg, rgba(180,210,255,0.08) 1px, transparent 1px) 0 0/12px 12px,
+      #0c2c52;
+  }
+
+  html[data-stage="riso"] {
+    --bg: #f0e6d2;
+    --bg-2: #e6dac0;
+    --panel: #f7eedc;
+    --panel-2: #ede2ca;
+    --border: rgba(40,30,20,0.14);
+    --border-strong: rgba(40,30,20,0.26);
+    --text: #2a1f12;
+    --text-mute: rgba(42,31,18,0.6);
+    --text-dim: rgba(42,31,18,0.35);
+    --accent: #d62828;
+    --accent-2: #2e7d32;
+  }
+  html[data-stage="riso"] body {
+    background:
+      radial-gradient(rgba(214,40,40,0.07) 1px, transparent 1.5px) 0 0/8px 8px,
+      var(--bg);
+  }
+  html[data-stage="riso"] .card .stage {
+    background:
+      radial-gradient(rgba(214,40,40,0.10) 1px, transparent 1.5px) 0 0/6px 6px,
+      #ede2c8;
+  }
+  html[data-stage="riso"] svg.pet { mix-blend-mode: multiply; }
+  html[data-stage="riso"] .masthead { border-color: var(--text); }
+
+  html[data-stage="void"] {
+    --bg: #050507;
+    --bg-2: #0a0a0d;
+    --panel: #0f0f14;
+    --panel-2: #15151c;
+    --border: rgba(255,255,255,0.04);
+    --border-strong: rgba(255,255,255,0.10);
+    --text: #f5f5f8;
+    --text-mute: rgba(245,245,248,0.5);
+    --accent: #ff3b3b;
+    --accent-2: #00ffaa;
+  }
+  html[data-stage="void"] body { background: #050507; }
+  html[data-stage="void"] .card .stage { background: #08080b; }
+  html[data-stage="void"] svg.pet { filter: drop-shadow(0 0 8px rgba(255,60,60,0.25)); }
+
+  html[data-stage="dungeon"] {
+    --bg: #1a1410;
+    --bg-2: #221a14;
+    --panel: #2c2118;
+    --panel-2: #382a1e;
+    --border: rgba(255,210,160,0.08);
+    --border-strong: rgba(255,210,160,0.18);
+    --text: #f5e6cc;
+    --text-mute: rgba(245,230,204,0.55);
+    --accent: #ff9a3c;
+    --accent-2: #b8e066;
+  }
+  html[data-stage="dungeon"] body {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,150,60,0.10), transparent 60%),
+      var(--bg);
+  }
+  html[data-stage="dungeon"] .card .stage {
+    background:
+      radial-gradient(ellipse at 50% 50%, rgba(255,150,60,0.08), transparent 70%),
+      linear-gradient(135deg, #1f1812 0%, #2a2018 100%);
+  }
+
+  /* Tag colors auto-track the accent */
+  .card .tag.pick   { color: var(--accent-2); border-color: var(--accent-2); }
+  .card .tag        { color: var(--accent);   border-color: var(--accent); }
+  .card .tag.risk   { color: var(--violet);   border-color: var(--violet); }
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="masthead">
+    <div class="l">BAKEOFF · ISS. 004</div>
+    <h1 class="t">pixel<span class="dot">.</span>50</h1>
+    <div class="r">50 sprites · rpg · roguelike · sci-fi</div>
+  </header>
+
+  <div class="lede">
+    <b>brief.</b> 50 pixel-sprite pet candidates. terraria / dead cells / stardew / necrodancer / delver energy.
+    every design has rig-points for the reference's 6 states — <b>head bob</b>, <b>blink</b>, and at least one <b>limb or free-floating prop</b>
+    so we can do the arm-wave / typing / drag interactions you liked. even the ghosts get "floating hands" (rayman-style) so they can type.
+  </div>
+
+  <!-- ========== ROW 01 · CLASSIC DUNGEON ========== -->
+  <div class="section-label"><span class="n">01</span> Classic dungeon · RPG staples</div>
+  <h2 class="heading">Dungeon regulars.</h2>
+  <div class="subhead">Familiar archetypes from every roguelike. Instantly readable silhouettes. High memeability.</div>
+  <div class="grid">
+
+    <!-- 1 Slime King -->
+    <div class="card"><span class="num">01</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob2">
+            <rect x="5" y="4" width="6" height="1" fill="#7dc88a"/>
+            <rect x="3" y="5" width="10" height="1" fill="#7dc88a"/>
+            <rect x="2" y="6" width="12" height="6" fill="#7dc88a"/>
+            <rect x="3" y="12" width="2" height="1" fill="#7dc88a"/>
+            <rect x="7" y="12" width="2" height="1" fill="#7dc88a"/>
+            <rect x="11" y="12" width="2" height="1" fill="#7dc88a"/>
+            <!-- crown -->
+            <rect x="5" y="3" width="1" height="1" fill="#f5ca3a"/>
+            <rect x="7" y="2" width="2" height="2" fill="#f5ca3a"/>
+            <rect x="10" y="3" width="1" height="1" fill="#f5ca3a"/>
+            <rect x="5" y="4" width="6" height="1" fill="#c99a1f"/>
+            <!-- shine -->
+            <rect x="4" y="7" width="2" height="1" fill="#a5e0a8" opacity="0.7"/>
+            <!-- face -->
+            <rect x="5" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="6" y="10" width="4" height="1" fill="#000"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Gloop <span class="sp">slime king</span></div><div class="why">Starter-dungeon boss energy. Crown jiggles when it bobs. Zero limbs to rig but squishes for emotion.</div></div>
+    </div>
+
+    <!-- 2 Skeleton -->
+    <div class="card"><span class="num">02</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- skull -->
+            <rect x="4" y="3" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="3" y="4" width="10" height="5" fill="#ebe4d0"/>
+            <rect x="4" y="9" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="6" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="6" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="6" y="9" width="1" height="1" fill="#000"/>
+            <rect x="8" y="9" width="1" height="1" fill="#000"/>
+            <rect x="9" y="9" width="1" height="1" fill="#000"/>
+            <!-- body rib -->
+            <rect x="5" y="11" width="6" height="1" fill="#ebe4d0"/>
+            <rect x="6" y="13" width="4" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="10" width="2" height="5" fill="#ebe4d0"/>
+            <!-- arms -->
+            <g class="a-tapL"><rect x="3" y="11" width="2" height="1" fill="#ebe4d0"/><rect x="3" y="12" width="1" height="1" fill="#ebe4d0"/></g>
+            <g class="a-tapR"><rect x="11" y="11" width="2" height="1" fill="#ebe4d0"/><rect x="12" y="12" width="1" height="1" fill="#ebe4d0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Bones <span class="sp">skeleton</span></div><div class="why">Classic dungeon mob. Rattles when it types. No flesh to animate = simple & consistent.</div></div>
+    </div>
+
+    <!-- 3 Mimic chest -->
+    <div class="card"><span class="num">03</span><span class="tag">novel</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob2">
+            <rect x="2" y="7" width="12" height="7" fill="#7a4a28"/>
+            <rect x="2" y="6" width="12" height="1" fill="#9a6a3e"/>
+            <rect x="3" y="8" width="10" height="1" fill="#d8724e"/>
+            <rect x="3" y="9" width="10" height="3" fill="#2a150a"/>
+            <!-- teeth -->
+            <rect x="4" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="6" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="9" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="11" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="4" y="11" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="11" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="10" y="11" width="1" height="1" fill="#ebe4d0"/>
+            <!-- tongue -->
+            <rect x="7" y="10" width="2" height="1" fill="#d8724e"/>
+            <!-- eyes (peering over lid) -->
+            <rect x="5" y="6" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <!-- lock -->
+            <rect x="7" y="11" width="2" height="2" fill="#f5ca3a"/>
+            <rect x="7" y="12" width="2" height="1" fill="#c99a1f"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Chomp <span class="sp">mimic</span></div><div class="why">Yawning wooden maw. Opens/closes = built-in "thinking/talking" rig. Deeply coded: lives in your file tree.</div></div>
+    </div>
+
+    <!-- 4 Bat -->
+    <div class="card"><span class="num">04</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- wings -->
+            <g class="a-flap">
+              <rect x="1" y="6" width="3" height="2" fill="#4a2a6a"/>
+              <rect x="0" y="7" width="2" height="3" fill="#4a2a6a"/>
+              <rect x="12" y="6" width="3" height="2" fill="#4a2a6a"/>
+              <rect x="14" y="7" width="2" height="3" fill="#4a2a6a"/>
+            </g>
+            <!-- body -->
+            <rect x="5" y="5" width="6" height="6" fill="#6a3a8a"/>
+            <!-- ears -->
+            <rect x="5" y="4" width="1" height="1" fill="#6a3a8a"/>
+            <rect x="10" y="4" width="1" height="1" fill="#6a3a8a"/>
+            <!-- fangs -->
+            <rect x="6" y="10" width="1" height="1" fill="#fff"/>
+            <rect x="9" y="10" width="1" height="1" fill="#fff"/>
+            <!-- eyes -->
+            <rect x="6" y="7" width="1" height="2" fill="#f5ca3a" class="a-blink"/>
+            <rect x="9" y="7" width="1" height="2" fill="#f5ca3a" class="a-blink"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Nyx <span class="sp">dungeon bat</span></div><div class="why">Flaps in place. Nocturnal = matches late-night coding. Fangs add personality; wings auto-animate.</div></div>
+    </div>
+
+    <!-- 5 Rat -->
+    <div class="card"><span class="num">05</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="3" y="8" width="9" height="4" fill="#6a6a6a"/>
+            <rect x="2" y="9" width="1" height="2" fill="#6a6a6a"/>
+            <!-- head -->
+            <rect x="10" y="6" width="4" height="4" fill="#7a7a7a"/>
+            <rect x="14" y="7" width="1" height="2" fill="#e39b7b"/>
+            <!-- ears -->
+            <rect x="11" y="5" width="1" height="1" fill="#7a7a7a"/>
+            <rect x="13" y="5" width="1" height="1" fill="#7a7a7a"/>
+            <rect x="11" y="5" width="1" height="1" fill="#e39b7b"/>
+            <!-- eye -->
+            <rect x="12" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- tail -->
+            <rect x="1" y="9" width="2" height="1" fill="#e39b7b"/>
+            <rect x="0" y="10" width="1" height="1" fill="#e39b7b"/>
+            <!-- feet -->
+            <g class="a-tapL"><rect x="4" y="12" width="1" height="1" fill="#4a4a4a"/></g>
+            <g class="a-tapR"><rect x="9" y="12" width="1" height="1" fill="#4a4a4a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Pip <span class="sp">rat familiar</span></div><div class="why">Tiny scurrier. Long tail gives a natural secondary animation. Lab-rat energy — perfect for a coding helper.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 02 · SCI-FI / ROBOTS ========== -->
+  <div class="section-label"><span class="n">02</span> Sci-fi · robots · digital</div>
+  <h2 class="heading">Circuits and servos.</h2>
+  <div class="subhead">Sci-fi companions. Match the "coding agent" metaphor literally — it's already a bot, why not look like one.</div>
+  <div class="grid">
+
+    <!-- 6 TV-head robot -->
+    <div class="card"><span class="num">06</span><span class="tag pick">strong</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="5" y="11" width="6" height="3" fill="#4a5a6a"/>
+            <rect x="4" y="12" width="1" height="2" fill="#3a4a5a"/>
+            <rect x="11" y="12" width="1" height="2" fill="#3a4a5a"/>
+            <!-- tv head -->
+            <rect x="2" y="4" width="12" height="7" fill="#3a4050"/>
+            <rect x="3" y="5" width="10" height="5" fill="#1a2a3a"/>
+            <rect x="3" y="5" width="10" height="1" fill="#78c08a" class="a-glow"/>
+            <!-- scan face -->
+            <rect x="4" y="7" width="1" height="2" fill="#78c08a" class="a-blink"/>
+            <rect x="11" y="7" width="1" height="2" fill="#78c08a" class="a-blink"/>
+            <rect x="6" y="9" width="4" height="1" fill="#78c08a"/>
+            <!-- antenna -->
+            <rect x="7" y="2" width="2" height="2" fill="#6a7a8a"/>
+            <rect x="7" y="1" width="1" height="1" fill="#d8724e" class="a-glow"/>
+            <!-- arms -->
+            <g class="a-tapL"><rect x="1" y="12" width="3" height="1" fill="#6a7a8a"/></g>
+            <g class="a-tapR"><rect x="12" y="12" width="3" height="1" fill="#6a7a8a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">CRT <span class="sp">tv-head bot</span></div><div class="why">Face IS a screen — can show ASCII eyes, progress bars, error !. Endless state vocabulary baked into the head.</div></div>
+    </div>
+
+    <!-- 7 Floating orb drone -->
+    <div class="card"><span class="num">07</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- orb -->
+            <rect x="5" y="5" width="6" height="1" fill="#8aa0c0"/>
+            <rect x="4" y="6" width="8" height="5" fill="#8aa0c0"/>
+            <rect x="5" y="11" width="6" height="1" fill="#8aa0c0"/>
+            <rect x="5" y="6" width="2" height="2" fill="#aac0e0" opacity="0.8"/>
+            <!-- single eye -->
+            <rect x="7" y="7" width="2" height="3" fill="#0a0a1a"/>
+            <rect x="7" y="7" width="2" height="1" fill="#d8724e" class="a-glow"/>
+            <!-- floating thruster dots -->
+            <rect x="6" y="13" width="1" height="1" fill="#d8724e" class="a-glow"/>
+            <rect x="9" y="13" width="1" height="1" fill="#d8724e" class="a-glow"/>
+            <!-- orbit dot -->
+            <g transform="translate(8 8)">
+              <rect x="5" y="0" width="1" height="1" fill="#78c08a" class="a-orbit"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Iris <span class="sp">sentry drone</span></div><div class="why">HK-style single-eye drone. Floats = no walk rig. Orbiting particle = always-alive idle.</div></div>
+    </div>
+
+    <!-- 8 Cube robot (portal companion) -->
+    <div class="card"><span class="num">08</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="3" y="3" width="10" height="10" fill="#d0d0d0"/>
+            <rect x="4" y="4" width="8" height="8" fill="#a0a0a0"/>
+            <!-- heart face -->
+            <rect x="6" y="6" width="1" height="1" fill="#ff6a8a"/>
+            <rect x="9" y="6" width="1" height="1" fill="#ff6a8a"/>
+            <rect x="5" y="7" width="6" height="1" fill="#ff6a8a"/>
+            <rect x="6" y="8" width="4" height="1" fill="#ff6a8a"/>
+            <rect x="7" y="9" width="2" height="1" fill="#ff6a8a"/>
+            <!-- corners shade -->
+            <rect x="3" y="3" width="1" height="1" fill="#707070"/>
+            <rect x="12" y="3" width="1" height="1" fill="#707070"/>
+            <rect x="3" y="12" width="1" height="1" fill="#707070"/>
+            <rect x="12" y="12" width="1" height="1" fill="#707070"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="5" y="13" width="2" height="1" fill="#808080"/></g>
+            <g class="a-tapR"><rect x="9" y="13" width="2" height="1" fill="#808080"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Cube <span class="sp">companion</span></div><div class="why">Blocky friend with a heart. Won't leave you. No personality-coded face means the heart carries it all.</div></div>
+    </div>
+
+    <!-- 9 Satellite -->
+    <div class="card"><span class="num">09</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- dish -->
+            <rect x="5" y="3" width="6" height="1" fill="#c0c0c0"/>
+            <rect x="4" y="4" width="8" height="1" fill="#a0a0a0"/>
+            <rect x="5" y="5" width="6" height="1" fill="#808080"/>
+            <rect x="7" y="6" width="2" height="2" fill="#606060"/>
+            <!-- body -->
+            <rect x="6" y="8" width="4" height="4" fill="#4a5a6a"/>
+            <rect x="6" y="9" width="4" height="1" fill="#78c08a" class="a-glow"/>
+            <rect x="7" y="10" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="8" y="10" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- solar panels as arms -->
+            <g class="a-tapL"><rect x="1" y="9" width="5" height="2" fill="#3a5a9a"/><rect x="1" y="9" width="5" height="1" fill="#6a8aca"/></g>
+            <g class="a-tapR"><rect x="10" y="9" width="5" height="2" fill="#3a5a9a"/><rect x="10" y="9" width="5" height="1" fill="#6a8aca"/></g>
+            <!-- signal dots -->
+            <rect x="1" y="4" width="1" height="1" fill="#d8724e" class="a-glow"/>
+            <rect x="14" y="4" width="1" height="1" fill="#d8724e" class="a-glow"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Relay <span class="sp">tiny satellite</span></div><div class="why">Solar panels double as arms. Dish wobbles for "listening" (agent thinking).</div></div>
+    </div>
+
+    <!-- 10 Wall-E-style -->
+    <div class="card"><span class="num">10</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- treads -->
+            <rect x="2" y="12" width="12" height="2" fill="#4a4a4a"/>
+            <rect x="3" y="13" width="1" height="1" fill="#808080"/>
+            <rect x="6" y="13" width="1" height="1" fill="#808080"/>
+            <rect x="9" y="13" width="1" height="1" fill="#808080"/>
+            <rect x="12" y="13" width="1" height="1" fill="#808080"/>
+            <!-- body -->
+            <rect x="4" y="7" width="8" height="5" fill="#d89a4e"/>
+            <rect x="4" y="7" width="8" height="1" fill="#e8b878"/>
+            <!-- head binoculars -->
+            <rect x="5" y="4" width="2" height="3" fill="#3a3a3a"/>
+            <rect x="9" y="4" width="2" height="3" fill="#3a3a3a"/>
+            <rect x="5" y="5" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="9" y="5" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="5" y="5" width="2" height="1" fill="#000" class="a-blink"/>
+            <rect x="9" y="5" width="2" height="1" fill="#000" class="a-blink"/>
+            <rect x="7" y="5" width="2" height="1" fill="#3a3a3a"/>
+            <!-- arms -->
+            <g class="a-tapL"><rect x="3" y="8" width="1" height="3" fill="#808080"/></g>
+            <g class="a-tapR"><rect x="12" y="8" width="1" height="3" fill="#808080"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Rivet <span class="sp">trashbot</span></div><div class="why">Binocular eyes track cursor beautifully. Treads = no walk-cycle needed. Warm industrial vibe.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 03 · GHOSTS, WISPS, SPIRITS ========== -->
+  <div class="section-label"><span class="n">03</span> Ghosts · wisps · spirits (with floating hands)</div>
+  <h2 class="heading">Limbless, but riggable.</h2>
+  <div class="subhead">No arms? No problem. <b>Detached floating hands</b> — the classic Rayman / Reaper trick. They drift beside the body and move independently to type, wave, hold tools.</div>
+  <div class="grid">
+
+    <!-- 11 Ghost with hands -->
+    <div class="card"><span class="num">11</span><span class="tag pick">your fave</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <rect x="4" y="2" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="3" y="3" width="10" height="1" fill="#ebe4d0"/>
+            <rect x="3" y="4" width="10" height="7" fill="#ebe4d0"/>
+            <rect x="3" y="11" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="6" y="11" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="9" y="11" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="12" y="11" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="6" width="1" height="2" fill="#1a1a2a" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="2" fill="#1a1a2a" class="a-blink"/>
+            <rect x="6" y="9" width="4" height="1" fill="#1a1a2a"/>
+            <!-- cheek blush -->
+            <rect x="4" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.6"/>
+            <rect x="11" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.6"/>
+          </g>
+          <!-- detached hands -->
+          <g class="a-tapL"><rect x="0" y="7" width="2" height="2" fill="#ebe4d0"/></g>
+          <g class="a-tapR"><rect x="14" y="7" width="2" height="2" fill="#ebe4d0"/></g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Boo <span class="sp">ghost + hands</span></div><div class="why">Detached hands solve the limbless problem. Now it can type, wave, hold books. The hands can orbit when idle.</div></div>
+    </div>
+
+    <!-- 12 Wisp -->
+    <div class="card"><span class="num">12</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- flame body -->
+            <rect x="7" y="3" width="1" height="1" fill="#aaf0ff"/>
+            <rect x="6" y="4" width="3" height="1" fill="#7ad8ff"/>
+            <rect x="5" y="5" width="5" height="4" fill="#4aaaff"/>
+            <rect x="6" y="9" width="3" height="1" fill="#4aaaff"/>
+            <!-- core -->
+            <rect x="6" y="6" width="3" height="2" fill="#aaf0ff" class="a-glow"/>
+            <!-- eyes -->
+            <rect x="6" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="8" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- trail -->
+            <rect x="6" y="11" width="1" height="1" fill="#4aaaff" opacity="0.7"/>
+            <rect x="8" y="11" width="1" height="1" fill="#4aaaff" opacity="0.7"/>
+            <rect x="7" y="12" width="1" height="1" fill="#4aaaff" opacity="0.4"/>
+            <!-- hands (tiny flames) -->
+            <g class="a-tapL"><rect x="2" y="7" width="1" height="2" fill="#aaf0ff"/></g>
+            <g class="a-tapR"><rect x="13" y="7" width="1" height="2" fill="#aaf0ff"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Wisp <span class="sp">soul flame</span></div><div class="why">Hollow Knight / Dead Cells energy. Flickers constantly. Tiny flame-hands replace arms.</div></div>
+    </div>
+
+    <!-- 13 Pumpkin ghost -->
+    <div class="card"><span class="num">13</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <rect x="5" y="3" width="1" height="1" fill="#4a3a2a"/>
+            <rect x="6" y="2" width="2" height="2" fill="#4a3a2a"/>
+            <rect x="4" y="4" width="8" height="1" fill="#d8724e"/>
+            <rect x="3" y="5" width="10" height="6" fill="#d8724e"/>
+            <rect x="4" y="11" width="8" height="1" fill="#d8724e"/>
+            <!-- ribs -->
+            <rect x="5" y="5" width="1" height="6" fill="#a85030" opacity="0.7"/>
+            <rect x="10" y="5" width="1" height="6" fill="#a85030" opacity="0.7"/>
+            <!-- face carving -->
+            <rect x="5" y="7" width="2" height="2" fill="#f5ca3a" class="a-glow"/>
+            <rect x="9" y="7" width="2" height="2" fill="#f5ca3a" class="a-glow"/>
+            <rect x="5" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="5" y="10" width="6" height="1" fill="#f5ca3a"/>
+            <rect x="6" y="10" width="1" height="1" fill="#000"/>
+            <rect x="9" y="10" width="1" height="1" fill="#000"/>
+            <!-- floating hands -->
+            <g class="a-tapL"><rect x="0" y="8" width="2" height="2" fill="#4a3a2a"/></g>
+            <g class="a-tapR"><rect x="14" y="8" width="2" height="2" fill="#4a3a2a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Jack <span class="sp">jack-o-lantern</span></div><div class="why">Seasonal-friendly. Glowing carved face has its own blink rhythm. Floating dark-gloved hands = spooky-cute.</div></div>
+    </div>
+
+    <!-- 14 Eyeball spirit -->
+    <div class="card"><span class="num">14</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <rect x="5" y="3" width="6" height="1" fill="#ebe4d0"/>
+            <rect x="4" y="4" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="3" y="5" width="10" height="6" fill="#ebe4d0"/>
+            <rect x="4" y="11" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="12" width="6" height="1" fill="#ebe4d0"/>
+            <!-- veins -->
+            <rect x="4" y="6" width="1" height="2" fill="#d8724e" opacity="0.6"/>
+            <rect x="11" y="7" width="1" height="2" fill="#d8724e" opacity="0.6"/>
+            <!-- iris -->
+            <rect x="5" y="6" width="6" height="4" fill="#6a9bd8"/>
+            <rect x="6" y="7" width="4" height="3" fill="#2a5ab0"/>
+            <rect x="7" y="8" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="7" y="7" width="1" height="1" fill="#fff"/>
+            <!-- wings as hands -->
+            <g class="a-flap"><rect x="0" y="6" width="3" height="4" fill="#ebe4d0" opacity="0.8"/></g>
+            <g class="a-flap"><rect x="13" y="6" width="3" height="4" fill="#ebe4d0" opacity="0.8"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Pupil <span class="sp">eyeball spirit</span></div><div class="why">Iris literally tracks the cursor (built-in gaze rig). Wings substitute for arms. Terraria-coded.</div></div>
+    </div>
+
+    <!-- 15 Candle -->
+    <div class="card"><span class="num">15</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- flame -->
+            <g class="a-flap">
+              <rect x="7" y="2" width="2" height="1" fill="#fff5aa"/>
+              <rect x="6" y="3" width="4" height="2" fill="#f5ca3a"/>
+              <rect x="7" y="5" width="2" height="1" fill="#d8724e"/>
+            </g>
+            <!-- wax -->
+            <rect x="5" y="6" width="6" height="7" fill="#ebe4d0"/>
+            <rect x="5" y="6" width="1" height="7" fill="#d4ccb0"/>
+            <rect x="4" y="13" width="8" height="1" fill="#a89878"/>
+            <!-- drip -->
+            <rect x="10" y="8" width="1" height="2" fill="#d4ccb0"/>
+            <!-- face -->
+            <rect x="6" y="9" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="9" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="7" y="11" width="2" height="1" fill="#000"/>
+            <!-- tiny wax hands -->
+            <g class="a-tapL"><rect x="3" y="10" width="2" height="1" fill="#ebe4d0"/></g>
+            <g class="a-tapR"><rect x="11" y="10" width="2" height="1" fill="#ebe4d0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Taper <span class="sp">candle spirit</span></div><div class="why">Flame animates itself. Melts (shrinks) when sleeping; flares on attention. Cozy library vibes.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 04 · CUTE MONSTERS ========== -->
+  <div class="section-label"><span class="n">04</span> Cute monsters · pocket-pet energy</div>
+  <h2 class="heading">Pocket monsters.</h2>
+  <div class="subhead">Original creatures. Round, cute, unmistakable silhouettes. Pokémon / Cave Story / Shovel Knight pet slot.</div>
+  <div class="grid">
+
+    <!-- 16 Round blob monster -->
+    <div class="card"><span class="num">16</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob2">
+            <rect x="4" y="2" width="1" height="2" fill="#d8724e"/>
+            <rect x="11" y="2" width="1" height="2" fill="#d8724e"/>
+            <rect x="5" y="3" width="1" height="1" fill="#d8724e"/>
+            <rect x="10" y="3" width="1" height="1" fill="#d8724e"/>
+            <rect x="4" y="4" width="8" height="1" fill="#d8724e"/>
+            <rect x="3" y="5" width="10" height="7" fill="#d8724e"/>
+            <rect x="4" y="12" width="8" height="1" fill="#d8724e"/>
+            <!-- cheeks -->
+            <rect x="4" y="8" width="1" height="1" fill="#f5ca3a"/>
+            <rect x="11" y="8" width="1" height="1" fill="#f5ca3a"/>
+            <!-- face -->
+            <rect x="5" y="7" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="7" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="5" y="7" width="1" height="1" fill="#fff"/>
+            <rect x="9" y="7" width="1" height="1" fill="#fff"/>
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <!-- feet -->
+            <g class="a-tapL"><rect x="4" y="13" width="2" height="1" fill="#a85030"/></g>
+            <g class="a-tapR"><rect x="10" y="13" width="2" height="1" fill="#a85030"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Embo <span class="sp">ember pup</span></div><div class="why">Little horned blob monster. Cheek-glow indicates mood. Pocket-sized fire spirit.</div></div>
+    </div>
+
+    <!-- 17 Dragon whelp -->
+    <div class="card"><span class="num">17</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- tail -->
+            <rect x="13" y="10" width="2" height="1" fill="#7a6aa8"/>
+            <rect x="14" y="9" width="1" height="1" fill="#b48cf0"/>
+            <!-- body -->
+            <rect x="5" y="7" width="8" height="5" fill="#7a6aa8"/>
+            <rect x="6" y="12" width="6" height="1" fill="#5a4a88"/>
+            <!-- belly -->
+            <rect x="6" y="9" width="6" height="2" fill="#a894d0"/>
+            <!-- head -->
+            <rect x="3" y="5" width="5" height="4" fill="#7a6aa8"/>
+            <rect x="2" y="6" width="1" height="2" fill="#7a6aa8"/>
+            <!-- horns -->
+            <rect x="3" y="4" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="4" width="1" height="1" fill="#ebe4d0"/>
+            <!-- eye -->
+            <rect x="5" y="6" width="1" height="2" fill="#f5ca3a" class="a-blink"/>
+            <!-- wings -->
+            <g class="a-flap"><rect x="7" y="4" width="4" height="3" fill="#5a4a88"/><rect x="7" y="3" width="1" height="1" fill="#5a4a88"/><rect x="10" y="3" width="1" height="1" fill="#5a4a88"/></g>
+            <!-- feet -->
+            <g class="a-tapL"><rect x="6" y="13" width="1" height="1" fill="#ebe4d0"/></g>
+            <g class="a-tapR"><rect x="10" y="13" width="1" height="1" fill="#ebe4d0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Vyr <span class="sp">baby dragon</span></div><div class="why">Wyvern whelp on your desktop. Wings flap, eye blinks, horns. Fantasy RPG familiar.</div></div>
+    </div>
+
+    <!-- 18 Jelly -->
+    <div class="card"><span class="num">18</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- bell -->
+            <rect x="4" y="4" width="8" height="1" fill="#f589c0"/>
+            <rect x="3" y="5" width="10" height="4" fill="#f589c0"/>
+            <rect x="3" y="9" width="1" height="1" fill="#f589c0"/>
+            <rect x="5" y="9" width="1" height="1" fill="#f589c0"/>
+            <rect x="7" y="9" width="2" height="1" fill="#f589c0"/>
+            <rect x="10" y="9" width="1" height="1" fill="#f589c0"/>
+            <rect x="12" y="9" width="1" height="1" fill="#f589c0"/>
+            <!-- inner glow -->
+            <rect x="4" y="5" width="2" height="1" fill="#ffb8dd" opacity="0.7"/>
+            <!-- face -->
+            <rect x="5" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="7" y="7" width="2" height="1" fill="#000"/>
+            <!-- tentacles / hands -->
+            <g class="a-tapL"><rect x="3" y="10" width="1" height="3" fill="#f589c0"/><rect x="3" y="13" width="2" height="1" fill="#f589c0"/></g>
+            <rect x="5" y="10" width="1" height="2" fill="#f589c0"/>
+            <rect x="7" y="10" width="2" height="3" fill="#f589c0"/>
+            <rect x="10" y="10" width="1" height="2" fill="#f589c0"/>
+            <g class="a-tapR"><rect x="12" y="10" width="1" height="3" fill="#f589c0"/><rect x="11" y="13" width="2" height="1" fill="#f589c0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Lumen <span class="sp">jellyfish</span></div><div class="why">Tentacles are the arms! Pink glow, drifts naturally. Relaxing to have on screen.</div></div>
+    </div>
+
+    <!-- 19 Dust bunny / soot -->
+    <div class="card"><span class="num">19</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob2">
+            <!-- fluff body -->
+            <rect x="4" y="5" width="1" height="1" fill="#2a2a2a"/>
+            <rect x="7" y="4" width="2" height="1" fill="#2a2a2a"/>
+            <rect x="11" y="5" width="1" height="1" fill="#2a2a2a"/>
+            <rect x="3" y="6" width="10" height="6" fill="#2a2a2a"/>
+            <rect x="4" y="12" width="8" height="1" fill="#2a2a2a"/>
+            <!-- fluff edges -->
+            <rect x="2" y="7" width="1" height="1" fill="#2a2a2a"/>
+            <rect x="2" y="10" width="1" height="1" fill="#2a2a2a"/>
+            <rect x="13" y="7" width="1" height="1" fill="#2a2a2a"/>
+            <rect x="13" y="10" width="1" height="1" fill="#2a2a2a"/>
+            <!-- eyes (big white) -->
+            <rect x="5" y="8" width="2" height="2" fill="#ebe4d0" class="a-blink"/>
+            <rect x="9" y="8" width="2" height="2" fill="#ebe4d0" class="a-blink"/>
+            <rect x="6" y="8" width="1" height="1" fill="#000"/>
+            <rect x="10" y="8" width="1" height="1" fill="#000"/>
+            <!-- tiny hands -->
+            <g class="a-tapL"><rect x="2" y="11" width="1" height="2" fill="#2a2a2a"/></g>
+            <g class="a-tapR"><rect x="13" y="11" width="1" height="2" fill="#2a2a2a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Soot <span class="sp">dust spirit</span></div><div class="why">Studio Ghibli soot sprite. Deeply cute. Big eyes carry all emotion. Works on any background.</div></div>
+    </div>
+
+    <!-- 20 Dog pet -->
+    <div class="card"><span class="num">20</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="3" y="9" width="10" height="4" fill="#ebc89a"/>
+            <rect x="3" y="13" width="10" height="1" fill="#a8895a"/>
+            <!-- tail -->
+            <rect x="13" y="8" width="2" height="1" fill="#ebc89a"/>
+            <rect x="14" y="7" width="1" height="1" fill="#ebc89a"/>
+            <!-- head -->
+            <rect x="2" y="5" width="5" height="5" fill="#ebc89a"/>
+            <rect x="1" y="7" width="1" height="2" fill="#ebc89a"/>
+            <!-- ears -->
+            <rect x="2" y="4" width="2" height="1" fill="#a8895a"/>
+            <rect x="5" y="4" width="2" height="1" fill="#a8895a"/>
+            <rect x="1" y="5" width="1" height="2" fill="#a8895a"/>
+            <rect x="6" y="5" width="1" height="2" fill="#a8895a"/>
+            <!-- snout -->
+            <rect x="1" y="8" width="2" height="1" fill="#d8b87a"/>
+            <rect x="2" y="9" width="1" height="1" fill="#000"/>
+            <!-- eye -->
+            <rect x="4" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="4" y="13" width="2" height="1" fill="#a8895a"/></g>
+            <g class="a-tapR"><rect x="9" y="13" width="2" height="1" fill="#a8895a"/></g>
+            <!-- collar -->
+            <rect x="5" y="9" width="2" height="1" fill="#d8724e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Biscuit <span class="sp">good boy</span></div><div class="why">Corgi-proportion pup. Tail wags. Ear flops. Warmest possible energy for a coding companion.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 05 · BUGS & CRITTERS ========== -->
+  <div class="section-label"><span class="n">05</span> Bugs &amp; critters · nature coded</div>
+  <h2 class="heading">Small things with many legs.</h2>
+  <div class="subhead">Bugs read great at tiny sizes. Already have repeatable limbs for rigs. Built-in pun territory ("debugger").</div>
+  <div class="grid">
+
+    <!-- 21 Ladybug -->
+    <div class="card"><span class="num">21</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="4" y="5" width="8" height="6" fill="#c42828"/>
+            <rect x="3" y="6" width="1" height="4" fill="#c42828"/>
+            <rect x="12" y="6" width="1" height="4" fill="#c42828"/>
+            <!-- head -->
+            <rect x="5" y="4" width="6" height="1" fill="#1a1a1a"/>
+            <rect x="4" y="3" width="2" height="1" fill="#1a1a1a"/>
+            <rect x="10" y="3" width="2" height="1" fill="#1a1a1a"/>
+            <!-- spots -->
+            <rect x="5" y="7" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="7" y="6" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="9" y="8" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="6" y="9" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="10" y="6" width="1" height="1" fill="#1a1a1a"/>
+            <!-- centerline -->
+            <rect x="7" y="4" width="2" height="7" fill="#1a1a1a"/>
+            <!-- eyes -->
+            <rect x="4" y="3" width="1" height="1" fill="#fff" class="a-blink"/>
+            <rect x="11" y="3" width="1" height="1" fill="#fff" class="a-blink"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="2" y="8" width="2" height="1" fill="#1a1a1a"/></g>
+            <g class="a-tapR"><rect x="12" y="8" width="2" height="1" fill="#1a1a1a"/></g>
+            <rect x="3" y="11" width="2" height="1" fill="#1a1a1a"/>
+            <rect x="11" y="11" width="2" height="1" fill="#1a1a1a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Spot <span class="sp">ladybug</span></div><div class="why">Reads as "bug" from across the room. Red accent color is the app color. Kid-friendly.</div></div>
+    </div>
+
+    <!-- 22 Snail -->
+    <div class="card"><span class="num">22</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="1" y="10" width="11" height="3" fill="#d8a87a"/>
+            <rect x="0" y="11" width="1" height="2" fill="#d8a87a"/>
+            <rect x="12" y="9" width="2" height="3" fill="#d8a87a"/>
+            <!-- shell -->
+            <rect x="4" y="4" width="6" height="7" fill="#d8724e"/>
+            <rect x="3" y="5" width="1" height="5" fill="#d8724e"/>
+            <rect x="10" y="5" width="1" height="5" fill="#d8724e"/>
+            <rect x="5" y="5" width="4" height="5" fill="#f5a878"/>
+            <rect x="6" y="6" width="2" height="3" fill="#d8724e"/>
+            <!-- head -->
+            <rect x="13" y="8" width="2" height="1" fill="#d8a87a"/>
+            <!-- antennae / eyes -->
+            <rect x="13" y="6" width="1" height="2" fill="#d8a87a"/>
+            <rect x="15" y="6" width="1" height="2" fill="#d8a87a"/>
+            <rect x="13" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="15" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- trail -->
+            <rect x="0" y="13" width="16" height="1" fill="#6a8aca" opacity="0.4"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Slug <span class="sp">shelled snail</span></div><div class="why">Shell swirl pattern carries the accent. Eye-stalks are arms. Slow = patient, like a good helper.</div></div>
+    </div>
+
+    <!-- 23 Firefly -->
+    <div class="card"><span class="num">23</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- wings -->
+            <g class="a-flap">
+              <rect x="2" y="5" width="3" height="3" fill="#aaf0aa" opacity="0.7"/>
+              <rect x="11" y="5" width="3" height="3" fill="#aaf0aa" opacity="0.7"/>
+            </g>
+            <!-- body -->
+            <rect x="5" y="5" width="6" height="6" fill="#2a3a2a"/>
+            <rect x="6" y="4" width="4" height="1" fill="#2a3a2a"/>
+            <!-- glow tail -->
+            <rect x="5" y="11" width="6" height="2" fill="#f5ca3a" class="a-glow"/>
+            <rect x="6" y="13" width="4" height="1" fill="#fff5aa" class="a-glow"/>
+            <!-- face -->
+            <rect x="6" y="6" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <rect x="9" y="6" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <rect x="7" y="8" width="2" height="1" fill="#f5ca3a"/>
+            <!-- antennae -->
+            <rect x="5" y="3" width="1" height="1" fill="#2a3a2a"/>
+            <rect x="10" y="3" width="1" height="1" fill="#2a3a2a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Glim <span class="sp">firefly</span></div><div class="why">Glowing tail pulses with agent state — bright for attention, dim for sleep. Built-in status indicator.</div></div>
+    </div>
+
+    <!-- 24 Beetle -->
+    <div class="card"><span class="num">24</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- shell -->
+            <rect x="4" y="4" width="8" height="8" fill="#2a6a8a"/>
+            <rect x="3" y="5" width="1" height="6" fill="#2a6a8a"/>
+            <rect x="12" y="5" width="1" height="6" fill="#2a6a8a"/>
+            <rect x="4" y="12" width="8" height="1" fill="#2a6a8a"/>
+            <!-- shell shine -->
+            <rect x="5" y="5" width="2" height="2" fill="#5aaaca" opacity="0.7"/>
+            <!-- shell seam -->
+            <rect x="7" y="4" width="2" height="9" fill="#1a4a6a"/>
+            <!-- horn -->
+            <rect x="6" y="2" width="1" height="2" fill="#1a1a1a"/>
+            <rect x="9" y="2" width="1" height="2" fill="#1a1a1a"/>
+            <!-- eyes -->
+            <rect x="5" y="7" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="2" y="7" width="2" height="1" fill="#1a1a1a"/></g>
+            <g class="a-tapR"><rect x="12" y="7" width="2" height="1" fill="#1a1a1a"/></g>
+            <rect x="3" y="10" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="12" y="10" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="3" y="13" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="12" y="13" width="1" height="1" fill="#1a1a1a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Carapace <span class="sp">rhinoceros beetle</span></div><div class="why">Literal "bug." Armored silhouette reads tough+small. Metallic shell color options.</div></div>
+    </div>
+
+    <!-- 25 Spider (friendly) -->
+    <div class="card"><span class="num">25</span><span class="tag risk">risky</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- legs -->
+            <g class="a-tapL">
+              <rect x="1" y="7" width="2" height="1" fill="#1a1a1a"/>
+              <rect x="2" y="9" width="2" height="1" fill="#1a1a1a"/>
+              <rect x="1" y="11" width="2" height="1" fill="#1a1a1a"/>
+            </g>
+            <g class="a-tapR">
+              <rect x="13" y="7" width="2" height="1" fill="#1a1a1a"/>
+              <rect x="12" y="9" width="2" height="1" fill="#1a1a1a"/>
+              <rect x="13" y="11" width="2" height="1" fill="#1a1a1a"/>
+            </g>
+            <rect x="2" y="8" width="1" height="1" fill="#1a1a1a"/>
+            <rect x="13" y="8" width="1" height="1" fill="#1a1a1a"/>
+            <!-- body -->
+            <rect x="4" y="7" width="8" height="4" fill="#6a3a8a"/>
+            <rect x="5" y="6" width="6" height="1" fill="#6a3a8a"/>
+            <rect x="5" y="11" width="6" height="1" fill="#6a3a8a"/>
+            <!-- eyes (cute pattern) -->
+            <rect x="5" y="8" width="2" height="1" fill="#f5ca3a"/>
+            <rect x="9" y="8" width="2" height="1" fill="#f5ca3a"/>
+            <rect x="5" y="8" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="8" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- smile -->
+            <rect x="7" y="10" width="2" height="1" fill="#f5ca3a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Webby <span class="sp">jumping spider</span></div><div class="why">Friendly jumping spider. 8 legs = 8 rig points. Big cute eyes offset the "spider" reflex.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 06 · AQUATIC ========== -->
+  <div class="section-label"><span class="n">06</span> Aquatic · strange fish</div>
+  <h2 class="heading">Things from the depths.</h2>
+  <div class="subhead">Strange sea creatures — always a little surreal. Subnautica / Yume Nikki energy.</div>
+  <div class="grid">
+
+    <!-- 26 Axolotl -->
+    <div class="card"><span class="num">26</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- gills -->
+            <g class="a-flap">
+              <rect x="1" y="5" width="2" height="1" fill="#ff8fa8"/>
+              <rect x="1" y="7" width="2" height="1" fill="#ff8fa8"/>
+              <rect x="1" y="9" width="2" height="1" fill="#ff8fa8"/>
+              <rect x="13" y="5" width="2" height="1" fill="#ff8fa8"/>
+              <rect x="13" y="7" width="2" height="1" fill="#ff8fa8"/>
+              <rect x="13" y="9" width="2" height="1" fill="#ff8fa8"/>
+            </g>
+            <!-- body -->
+            <rect x="3" y="5" width="10" height="7" fill="#f5b7c5"/>
+            <rect x="2" y="6" width="1" height="5" fill="#f5b7c5"/>
+            <rect x="13" y="6" width="1" height="5" fill="#f5b7c5"/>
+            <rect x="4" y="12" width="8" height="1" fill="#f5b7c5"/>
+            <!-- tail -->
+            <rect x="7" y="13" width="2" height="1" fill="#f5b7c5"/>
+            <!-- eyes -->
+            <rect x="5" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <!-- smile -->
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <!-- cheek blush -->
+            <rect x="4" y="9" width="1" height="1" fill="#ff8fa8"/>
+            <rect x="11" y="9" width="1" height="1" fill="#ff8fa8"/>
+            <!-- arms -->
+            <g class="a-tapL"><rect x="3" y="12" width="1" height="1" fill="#f5b7c5"/></g>
+            <g class="a-tapR"><rect x="12" y="12" width="1" height="1" fill="#f5b7c5"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Axo <span class="sp">axolotl</span></div><div class="why">Pink, gills flutter. Perma-smile matches the "helper" vibe. Distinctive silhouette.</div></div>
+    </div>
+
+    <!-- 27 Crab pixel (reskin) -->
+    <div class="card"><span class="num">27</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="4" y="6" width="8" height="5" fill="#d8724e"/>
+            <rect x="3" y="7" width="1" height="3" fill="#d8724e"/>
+            <rect x="12" y="7" width="1" height="3" fill="#d8724e"/>
+            <!-- legs -->
+            <rect x="4" y="11" width="1" height="2" fill="#d8724e"/>
+            <rect x="6" y="11" width="1" height="2" fill="#d8724e"/>
+            <rect x="9" y="11" width="1" height="2" fill="#d8724e"/>
+            <rect x="11" y="11" width="1" height="2" fill="#d8724e"/>
+            <!-- eyes -->
+            <rect x="5" y="5" width="1" height="2" fill="#ebe4d0"/>
+            <rect x="10" y="5" width="1" height="2" fill="#ebe4d0"/>
+            <rect x="5" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- smile -->
+            <rect x="7" y="9" width="2" height="1" fill="#1a0a05"/>
+            <!-- pincers -->
+            <g class="a-tapL"><rect x="1" y="7" width="2" height="2" fill="#d8724e"/><rect x="0" y="8" width="1" height="1" fill="#d8724e"/></g>
+            <g class="a-tapR"><rect x="13" y="7" width="2" height="2" fill="#d8724e"/><rect x="15" y="8" width="1" height="1" fill="#d8724e"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Pinch <span class="sp">crab</span></div><div class="why">Zero-BS pixel crab, but with rust-orange instead of peach. Matches the app's accent color naturally.</div></div>
+    </div>
+
+    <!-- 28 Anglerfish -->
+    <div class="card"><span class="num">28</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- lure -->
+            <rect x="6" y="1" width="1" height="3" fill="#2a2a3a"/>
+            <rect x="5" y="1" width="3" height="1" fill="#f5ca3a" class="a-glow"/>
+            <!-- body -->
+            <rect x="2" y="5" width="10" height="7" fill="#3a2a4a"/>
+            <rect x="3" y="12" width="8" height="1" fill="#3a2a4a"/>
+            <!-- teeth -->
+            <rect x="3" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="9" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <!-- eye (big single) -->
+            <rect x="3" y="6" width="3" height="3" fill="#f5ca3a"/>
+            <rect x="4" y="7" width="2" height="2" fill="#000" class="a-blink"/>
+            <!-- tail -->
+            <rect x="12" y="6" width="3" height="1" fill="#3a2a4a"/>
+            <rect x="13" y="7" width="2" height="3" fill="#3a2a4a"/>
+            <rect x="14" y="10" width="1" height="1" fill="#3a2a4a"/>
+            <!-- fin (hand) -->
+            <g class="a-tapL"><rect x="5" y="12" width="2" height="2" fill="#3a2a4a"/></g>
+            <g class="a-tapR"><rect x="9" y="12" width="2" height="2" fill="#3a2a4a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Lure <span class="sp">anglerfish</span></div><div class="why">Glowing lure = ambient status light. Deep-sea vibe. Teeth give personality at tiny sizes.</div></div>
+    </div>
+
+    <!-- 29 Squid -->
+    <div class="card"><span class="num">29</span><span class="tag pick">on-brand</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- mantle top -->
+            <rect x="6" y="1" width="4" height="1" fill="#8a7ab0"/>
+            <rect x="5" y="2" width="6" height="5" fill="#8a7ab0"/>
+            <rect x="4" y="3" width="1" height="3" fill="#8a7ab0"/>
+            <rect x="11" y="3" width="1" height="3" fill="#8a7ab0"/>
+            <!-- fins -->
+            <g class="a-flap">
+              <rect x="3" y="3" width="1" height="2" fill="#6a5a98"/>
+              <rect x="12" y="3" width="1" height="2" fill="#6a5a98"/>
+            </g>
+            <!-- face -->
+            <rect x="5" y="7" width="6" height="2" fill="#6a5a98"/>
+            <rect x="6" y="4" width="1" height="2" fill="#fff" class="a-blink"/>
+            <rect x="9" y="4" width="1" height="2" fill="#fff" class="a-blink"/>
+            <!-- tentacles -->
+            <g class="a-tapL">
+              <rect x="4" y="9" width="1" height="4" fill="#8a7ab0"/>
+              <rect x="3" y="13" width="2" height="1" fill="#8a7ab0"/>
+            </g>
+            <rect x="6" y="9" width="1" height="5" fill="#8a7ab0"/>
+            <rect x="9" y="9" width="1" height="5" fill="#8a7ab0"/>
+            <g class="a-tapR">
+              <rect x="11" y="9" width="1" height="4" fill="#8a7ab0"/>
+              <rect x="11" y="13" width="2" height="1" fill="#8a7ab0"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Squib <span class="sp">baby squid</span></div><div class="why">THE name pick. Mantle, fins, two tentacle-hands, tiny grump face. Fully on-brand.</div></div>
+    </div>
+
+    <!-- 30 Seahorse -->
+    <div class="card"><span class="num">30</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- curled tail -->
+            <rect x="9" y="11" width="3" height="1" fill="#f5ca3a"/>
+            <rect x="11" y="10" width="1" height="1" fill="#f5ca3a"/>
+            <rect x="12" y="9" width="1" height="1" fill="#f5ca3a"/>
+            <!-- body -->
+            <rect x="6" y="6" width="3" height="6" fill="#f5ca3a"/>
+            <rect x="7" y="12" width="2" height="1" fill="#f5ca3a"/>
+            <!-- head -->
+            <rect x="5" y="4" width="4" height="3" fill="#f5ca3a"/>
+            <rect x="4" y="5" width="1" height="2" fill="#f5ca3a"/>
+            <!-- snout -->
+            <rect x="3" y="6" width="2" height="1" fill="#f5ca3a"/>
+            <!-- crown spikes -->
+            <rect x="6" y="3" width="1" height="1" fill="#d89a1f"/>
+            <rect x="8" y="3" width="1" height="1" fill="#d89a1f"/>
+            <!-- eye -->
+            <rect x="6" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- dorsal fin -->
+            <g class="a-flap"><rect x="9" y="6" width="1" height="4" fill="#d89a1f"/></g>
+            <!-- belly stripes -->
+            <rect x="7" y="8" width="1" height="1" fill="#d89a1f"/>
+            <rect x="7" y="10" width="1" height="1" fill="#d89a1f"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Tilde <span class="sp">seahorse</span></div><div class="why">Shape literally looks like a <b>~</b>. Subtle code pun. Curls into itself when sleeping.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 07 · MYTHIC / ARCANE ========== -->
+  <div class="section-label"><span class="n">07</span> Mythic · arcane · elemental</div>
+  <h2 class="heading">Small arcane beings.</h2>
+  <div class="subhead">Familiars and elementals. Stardew Junimos / Zelda fairies energy.</div>
+  <div class="grid">
+
+    <!-- 31 Junimo-style -->
+    <div class="card"><span class="num">31</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob2">
+            <rect x="4" y="5" width="8" height="1" fill="#78c08a"/>
+            <rect x="3" y="6" width="10" height="6" fill="#78c08a"/>
+            <rect x="4" y="12" width="8" height="1" fill="#78c08a"/>
+            <rect x="4" y="13" width="2" height="1" fill="#78c08a"/>
+            <rect x="10" y="13" width="2" height="1" fill="#78c08a"/>
+            <!-- leaf sprout -->
+            <rect x="7" y="3" width="2" height="2" fill="#5aaa6a"/>
+            <rect x="7" y="2" width="1" height="1" fill="#5aaa6a"/>
+            <!-- big eyes -->
+            <rect x="5" y="8" width="2" height="2" fill="#1a1a1a" class="a-blink"/>
+            <rect x="9" y="8" width="2" height="2" fill="#1a1a1a" class="a-blink"/>
+            <rect x="5" y="8" width="1" height="1" fill="#fff"/>
+            <rect x="9" y="8" width="1" height="1" fill="#fff"/>
+            <!-- hands -->
+            <g class="a-tapL"><rect x="2" y="9" width="1" height="2" fill="#78c08a"/></g>
+            <g class="a-tapR"><rect x="13" y="9" width="1" height="2" fill="#78c08a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Sprout <span class="sp">forest sprite</span></div><div class="why">Junimo-adjacent. Rotating accessory (leaf) can swap seasonally. Huge eyes = huge emotion.</div></div>
+    </div>
+
+    <!-- 32 Fairy -->
+    <div class="card"><span class="num">32</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- wings -->
+            <g class="a-flap">
+              <rect x="1" y="4" width="3" height="5" fill="#aaeaff" opacity="0.6"/>
+              <rect x="12" y="4" width="3" height="5" fill="#aaeaff" opacity="0.6"/>
+              <rect x="0" y="6" width="1" height="2" fill="#aaeaff" opacity="0.4"/>
+              <rect x="15" y="6" width="1" height="2" fill="#aaeaff" opacity="0.4"/>
+            </g>
+            <!-- body -->
+            <rect x="6" y="5" width="4" height="6" fill="#f5ca3a"/>
+            <rect x="5" y="6" width="1" height="4" fill="#f5ca3a"/>
+            <rect x="10" y="6" width="1" height="4" fill="#f5ca3a"/>
+            <rect x="7" y="11" width="2" height="1" fill="#f5ca3a"/>
+            <!-- glow -->
+            <rect x="6" y="5" width="4" height="2" fill="#fff5aa" class="a-glow"/>
+            <!-- eyes -->
+            <rect x="6" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="9" y="7" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="7" y="9" width="2" height="1" fill="#000"/>
+            <!-- sparkles orbit -->
+            <rect x="3" y="11" width="1" height="1" fill="#aaeaff" class="a-glow"/>
+            <rect x="12" y="11" width="1" height="1" fill="#aaeaff" class="a-glow"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Navi <span class="sp">orb fairy</span></div><div class="why">Zelda-coded. Wing flaps + body glow. Sparkle particles loop. Ambient attention magnet.</div></div>
+    </div>
+
+    <!-- 33 Dragon egg (hatching) -->
+    <div class="card"><span class="num">33</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="5" y="3" width="6" height="1" fill="#c0b0d0"/>
+            <rect x="4" y="4" width="8" height="1" fill="#c0b0d0"/>
+            <!-- zigzag crack -->
+            <rect x="5" y="5" width="1" height="1" fill="#c0b0d0"/>
+            <rect x="6" y="6" width="1" height="1" fill="#c0b0d0"/>
+            <rect x="7" y="5" width="1" height="1" fill="#c0b0d0"/>
+            <rect x="8" y="6" width="1" height="1" fill="#c0b0d0"/>
+            <rect x="9" y="5" width="1" height="1" fill="#c0b0d0"/>
+            <rect x="10" y="5" width="1" height="1" fill="#c0b0d0"/>
+            <!-- body -->
+            <rect x="3" y="7" width="10" height="5" fill="#c0b0d0"/>
+            <rect x="4" y="12" width="8" height="1" fill="#c0b0d0"/>
+            <!-- peek -->
+            <rect x="6" y="8" width="4" height="3" fill="#6a3a8a"/>
+            <rect x="7" y="8" width="1" height="2" fill="#f5ca3a" class="a-blink"/>
+            <rect x="8" y="8" width="1" height="2" fill="#f5ca3a" class="a-blink"/>
+            <!-- spots -->
+            <rect x="4" y="9" width="1" height="1" fill="#8a7aa0"/>
+            <rect x="11" y="10" width="1" height="1" fill="#8a7aa0"/>
+            <!-- peeking claws -->
+            <g class="a-tapL"><rect x="5" y="11" width="1" height="1" fill="#6a3a8a"/></g>
+            <g class="a-tapR"><rect x="10" y="11" width="1" height="1" fill="#6a3a8a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Hatchling <span class="sp">dragon egg</span></div><div class="why">Growth-over-time metaphor: egg at day 1, full dragon by year 1 of using squib. Evolves.</div></div>
+    </div>
+
+    <!-- 34 Mushroom cap -->
+    <div class="card"><span class="num">34</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-sway">
+            <!-- cap -->
+            <rect x="4" y="2" width="8" height="1" fill="#c42828"/>
+            <rect x="3" y="3" width="10" height="4" fill="#c42828"/>
+            <rect x="2" y="4" width="1" height="2" fill="#c42828"/>
+            <rect x="13" y="4" width="1" height="2" fill="#c42828"/>
+            <!-- spots -->
+            <rect x="4" y="4" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="9" y="3" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="11" y="5" width="1" height="1" fill="#ebe4d0"/>
+            <!-- gills shadow -->
+            <rect x="3" y="7" width="10" height="1" fill="#a82828"/>
+            <!-- stem -->
+            <rect x="5" y="8" width="6" height="5" fill="#ebe4d0"/>
+            <rect x="4" y="9" width="1" height="3" fill="#ebe4d0"/>
+            <rect x="11" y="9" width="1" height="3" fill="#ebe4d0"/>
+            <rect x="5" y="13" width="6" height="1" fill="#d4ccb0"/>
+            <!-- face -->
+            <rect x="6" y="10" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="9" y="10" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="7" y="11" width="2" height="1" fill="#000"/>
+            <rect x="5" y="11" width="1" height="1" fill="#ff9ab0"/>
+            <rect x="10" y="11" width="1" height="1" fill="#ff9ab0"/>
+            <!-- hands -->
+            <g class="a-tapL"><rect x="3" y="10" width="1" height="1" fill="#ebe4d0"/></g>
+            <g class="a-tapR"><rect x="12" y="10" width="1" height="1" fill="#ebe4d0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Cap <span class="sp">toadstool</span></div><div class="why">Mario-shroom meets forest sprite. Cap wobbles on sway. Dot pattern carries theme color.</div></div>
+    </div>
+
+    <!-- 35 Crystal creature -->
+    <div class="card"><span class="num">35</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- crystal body -->
+            <rect x="6" y="2" width="1" height="2" fill="#8aeaf0"/>
+            <rect x="7" y="1" width="1" height="3" fill="#aaeaff"/>
+            <rect x="8" y="2" width="1" height="2" fill="#8aeaf0"/>
+            <rect x="10" y="3" width="1" height="2" fill="#8aeaf0"/>
+            <rect x="5" y="3" width="1" height="2" fill="#8aeaf0"/>
+            <!-- base blob -->
+            <rect x="4" y="5" width="8" height="7" fill="#5aaaca"/>
+            <rect x="3" y="7" width="1" height="3" fill="#5aaaca"/>
+            <rect x="12" y="7" width="1" height="3" fill="#5aaaca"/>
+            <rect x="5" y="12" width="6" height="1" fill="#5aaaca"/>
+            <!-- shine -->
+            <rect x="5" y="6" width="2" height="2" fill="#aaeaff" opacity="0.7"/>
+            <!-- face -->
+            <rect x="6" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <!-- hands (crystal shards) -->
+            <g class="a-tapL"><rect x="2" y="8" width="1" height="2" fill="#8aeaf0"/></g>
+            <g class="a-tapR"><rect x="13" y="8" width="1" height="2" fill="#8aeaf0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Geo <span class="sp">crystal sprite</span></div><div class="why">Growing crystal creature. Sharp silhouette, reads at tiny sizes. Color swap = personality.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 08 · FOOD / OBJECTS ========== -->
+  <div class="section-label"><span class="n">08</span> Food · objects · anthropomorphic</div>
+  <h2 class="heading">Inanimate, but alive.</h2>
+  <div class="subhead">Things with faces on them. Risky territory — can feel cheesy — but some hit.</div>
+  <div class="grid">
+
+    <!-- 36 Coffee mug -->
+    <div class="card"><span class="num">36</span><span class="tag">on-nose</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- steam -->
+            <rect x="5" y="2" width="1" height="2" fill="#ebe4d0" opacity="0.5" class="a-glow"/>
+            <rect x="8" y="1" width="1" height="3" fill="#ebe4d0" opacity="0.5" class="a-glow"/>
+            <rect x="10" y="2" width="1" height="2" fill="#ebe4d0" opacity="0.5" class="a-glow"/>
+            <!-- handle -->
+            <rect x="11" y="7" width="3" height="1" fill="#ebe4d0"/>
+            <rect x="13" y="8" width="1" height="3" fill="#ebe4d0"/>
+            <rect x="11" y="11" width="3" height="1" fill="#ebe4d0"/>
+            <rect x="12" y="8" width="1" height="3" fill="#14151c"/>
+            <!-- mug -->
+            <rect x="3" y="5" width="8" height="1" fill="#ebe4d0"/>
+            <rect x="3" y="6" width="8" height="7" fill="#ebe4d0"/>
+            <rect x="3" y="13" width="8" height="1" fill="#d4ccb0"/>
+            <!-- coffee -->
+            <rect x="4" y="6" width="6" height="1" fill="#4a2a10"/>
+            <!-- face -->
+            <rect x="4" y="9" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="9" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="6" y="11" width="2" height="1" fill="#000"/>
+            <rect x="3" y="10" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <rect x="10" y="10" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Mug <span class="sp">coffee friend</span></div><div class="why">On-nose but warm. Handle can wave. Steam = "thinking." Deeply code-at-2am coded.</div></div>
+    </div>
+
+    <!-- 37 Floppy disk -->
+    <div class="card"><span class="num">37</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="2" y="3" width="12" height="10" fill="#3a5a9a"/>
+            <rect x="3" y="4" width="10" height="3" fill="#6a8aca"/>
+            <rect x="5" y="4" width="1" height="3" fill="#3a5a9a"/>
+            <!-- label -->
+            <rect x="3" y="8" width="10" height="4" fill="#ebe4d0"/>
+            <!-- face on label -->
+            <rect x="5" y="9" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="9" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="6" y="10" width="4" height="1" fill="#000"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="4" y="13" width="2" height="1" fill="#3a5a9a"/></g>
+            <g class="a-tapR"><rect x="10" y="13" width="2" height="1" fill="#3a5a9a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Floppy <span class="sp">3.5" disk</span></div><div class="why">Computer-nostalgia pet. Label face + little legs. Feels at home next to a terminal.</div></div>
+    </div>
+
+    <!-- 38 Bread loaf -->
+    <div class="card"><span class="num">38</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="3" y="5" width="10" height="1" fill="#d8a878"/>
+            <rect x="2" y="6" width="12" height="6" fill="#e8b888"/>
+            <rect x="3" y="12" width="10" height="1" fill="#d8a878"/>
+            <!-- scoring -->
+            <rect x="4" y="7" width="8" height="1" fill="#b88858" opacity="0.4"/>
+            <rect x="4" y="9" width="8" height="1" fill="#b88858" opacity="0.4"/>
+            <!-- crust -->
+            <rect x="2" y="6" width="1" height="6" fill="#c8986a"/>
+            <rect x="13" y="6" width="1" height="6" fill="#c8986a"/>
+            <!-- face -->
+            <rect x="5" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <!-- cheek -->
+            <rect x="4" y="10" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <rect x="11" y="10" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <!-- feet (tiny) -->
+            <g class="a-tapL"><rect x="4" y="13" width="2" height="1" fill="#b88858"/></g>
+            <g class="a-tapR"><rect x="10" y="13" width="2" height="1" fill="#b88858"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Loaf <span class="sp">bread</span></div><div class="why">Warm, soft, comforting. Makes zero sense as a coding helper, but that's the charm.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 09 · BIRDS & FLIERS ========== -->
+  <div class="section-label"><span class="n">09</span> Birds · fliers · perched</div>
+  <h2 class="heading">Things that perch.</h2>
+  <div class="subhead">Great for edge-mode. Naturally sits on the corner of windows.</div>
+  <div class="grid">
+
+    <!-- 39 Owl -->
+    <div class="card"><span class="num">39</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- tufts -->
+            <rect x="3" y="2" width="2" height="1" fill="#6a5a3a"/>
+            <rect x="11" y="2" width="2" height="1" fill="#6a5a3a"/>
+            <!-- head/body combined -->
+            <rect x="3" y="3" width="10" height="9" fill="#8a7a58"/>
+            <rect x="2" y="4" width="1" height="6" fill="#8a7a58"/>
+            <rect x="13" y="4" width="1" height="6" fill="#8a7a58"/>
+            <!-- belly -->
+            <rect x="5" y="8" width="6" height="4" fill="#d9c9a8"/>
+            <!-- eye discs -->
+            <rect x="3" y="5" width="4" height="4" fill="#f5ecd5"/>
+            <rect x="9" y="5" width="4" height="4" fill="#f5ecd5"/>
+            <rect x="4" y="6" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="6" width="2" height="2" fill="#000" class="a-blink"/>
+            <rect x="4" y="6" width="1" height="1" fill="#fff"/>
+            <rect x="10" y="6" width="1" height="1" fill="#fff"/>
+            <!-- beak -->
+            <rect x="7" y="9" width="2" height="2" fill="#d87f2e"/>
+            <!-- wings/hands -->
+            <g class="a-tapL"><rect x="2" y="10" width="2" height="2" fill="#6a5a3a"/></g>
+            <g class="a-tapR"><rect x="12" y="10" width="2" height="2" fill="#6a5a3a"/></g>
+            <!-- talons -->
+            <rect x="5" y="13" width="2" height="1" fill="#d87f2e"/>
+            <rect x="9" y="13" width="2" height="1" fill="#d87f2e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Hoot <span class="sp">owl</span></div><div class="why">Night-coded. Head can rotate 180°. Eye-disc silhouette reads at any size.</div></div>
+    </div>
+
+    <!-- 40 Raven -->
+    <div class="card"><span class="num">40</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="4" y="6" width="9" height="6" fill="#1a1a1a"/>
+            <rect x="3" y="7" width="1" height="4" fill="#1a1a1a"/>
+            <!-- tail -->
+            <rect x="13" y="8" width="2" height="2" fill="#1a1a1a"/>
+            <!-- head -->
+            <rect x="2" y="3" width="5" height="4" fill="#1a1a1a"/>
+            <rect x="1" y="4" width="1" height="2" fill="#1a1a1a"/>
+            <!-- beak -->
+            <rect x="0" y="4" width="1" height="1" fill="#4a4a4a"/>
+            <rect x="0" y="5" width="2" height="1" fill="#4a4a4a"/>
+            <!-- eye -->
+            <rect x="4" y="4" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <!-- wing -->
+            <g class="a-tapR"><rect x="7" y="7" width="5" height="4" fill="#0a0a0a"/></g>
+            <!-- legs -->
+            <rect x="6" y="12" width="1" height="2" fill="#4a4a4a"/>
+            <rect x="10" y="12" width="1" height="2" fill="#4a4a4a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Quoth <span class="sp">raven</span></div><div class="why">Deeply programmer-core. Perches on title bars. Golden eye against all-black body = instant readability.</div></div>
+    </div>
+
+    <!-- 41 Penguin -->
+    <div class="card"><span class="num">41</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- body -->
+            <rect x="4" y="3" width="8" height="10" fill="#1a1a2a"/>
+            <rect x="3" y="4" width="1" height="8" fill="#1a1a2a"/>
+            <rect x="12" y="4" width="1" height="8" fill="#1a1a2a"/>
+            <!-- belly -->
+            <rect x="5" y="6" width="6" height="7" fill="#ebe4d0"/>
+            <!-- eyes -->
+            <rect x="5" y="5" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="9" y="5" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="6" y="5" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="5" width="1" height="2" fill="#000" class="a-blink"/>
+            <!-- beak -->
+            <rect x="7" y="7" width="2" height="1" fill="#d87f2e"/>
+            <!-- flippers -->
+            <g class="a-tapL"><rect x="2" y="7" width="2" height="3" fill="#1a1a2a"/></g>
+            <g class="a-tapR"><rect x="12" y="7" width="2" height="3" fill="#1a1a2a"/></g>
+            <!-- feet -->
+            <rect x="4" y="13" width="2" height="1" fill="#d87f2e"/>
+            <rect x="10" y="13" width="2" height="1" fill="#d87f2e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Tux <span class="sp">penguin</span></div><div class="why">Unix mascot in spirit. Warm, round, belly-dominant silhouette. "Cute tuxedo" framing.</div></div>
+    </div>
+
+    <!-- 42 Moth with screen -->
+    <div class="card"><span class="num">42</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <!-- wings big -->
+            <g class="a-flap">
+              <rect x="1" y="4" width="5" height="5" fill="#a89880"/>
+              <rect x="0" y="5" width="1" height="3" fill="#a89880"/>
+              <rect x="2" y="5" width="2" height="3" fill="#c8b8a0"/>
+              <rect x="3" y="6" width="1" height="1" fill="#000"/>
+              <rect x="10" y="4" width="5" height="5" fill="#a89880"/>
+              <rect x="15" y="5" width="1" height="3" fill="#a89880"/>
+              <rect x="12" y="5" width="2" height="3" fill="#c8b8a0"/>
+              <rect x="12" y="6" width="1" height="1" fill="#000"/>
+            </g>
+            <!-- body -->
+            <rect x="6" y="4" width="4" height="8" fill="#5a4838"/>
+            <!-- fuzz -->
+            <rect x="5" y="5" width="1" height="1" fill="#5a4838"/>
+            <rect x="10" y="5" width="1" height="1" fill="#5a4838"/>
+            <!-- face -->
+            <rect x="7" y="5" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <rect x="8" y="5" width="1" height="1" fill="#f5ca3a" class="a-blink"/>
+            <!-- antennae -->
+            <rect x="6" y="2" width="1" height="2" fill="#5a4838"/>
+            <rect x="9" y="2" width="1" height="2" fill="#5a4838"/>
+            <rect x="5" y="1" width="1" height="1" fill="#5a4838"/>
+            <rect x="10" y="1" width="1" height="1" fill="#5a4838"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Dusty <span class="sp">luna moth</span></div><div class="why">Big soft wings animate beautifully. Drawn to screen glow. "Debugger" pun basically free.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== ROW 10 · WILDCARDS ========== -->
+  <div class="section-label"><span class="n">10</span> Wildcards · conceptual · weird</div>
+  <h2 class="heading">The weird bench.</h2>
+  <div class="subhead">Final row — concepts that lean into novelty over safety. Some win big if they click.</div>
+  <div class="grid">
+
+    <!-- 43 Cursor creature -->
+    <div class="card"><span class="num">43</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- cursor arrow body -->
+            <rect x="5" y="2" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="3" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="4" width="3" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="5" width="4" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="6" width="5" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="7" width="6" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="8" width="3" height="1" fill="#ebe4d0"/>
+            <rect x="8" y="8" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="9" y="9" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="9" width="1" height="2" fill="#ebe4d0"/>
+            <rect x="10" y="10" width="1" height="2" fill="#ebe4d0"/>
+            <rect x="8" y="11" width="2" height="1" fill="#ebe4d0"/>
+            <!-- black outline -->
+            <rect x="4" y="2" width="1" height="9" fill="#000"/>
+            <rect x="5" y="11" width="3" height="1" fill="#000"/>
+            <rect x="8" y="12" width="3" height="1" fill="#000"/>
+            <rect x="11" y="10" width="1" height="2" fill="#000"/>
+            <rect x="10" y="9" width="1" height="1" fill="#000"/>
+            <!-- face -->
+            <rect x="6" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="8" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- smile -->
+            <rect x="6" y="7" width="2" height="1" fill="#d8724e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Caret <span class="sp">cursor creature</span></div><div class="why">Literal mouse cursor with a face. Deeply coding-coded. Ownable identity; no other app has this.</div></div>
+    </div>
+
+    <!-- 44 Terminal window -->
+    <div class="card"><span class="num">44</span><span class="tag">meta</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="2" y="4" width="12" height="9" fill="#1a1a2a"/>
+            <rect x="2" y="4" width="12" height="2" fill="#2a2a3a"/>
+            <!-- traffic lights -->
+            <rect x="3" y="4" width="1" height="1" fill="#ff5f56"/>
+            <rect x="4" y="4" width="1" height="1" fill="#ffbd2e"/>
+            <rect x="5" y="4" width="1" height="1" fill="#27c93f"/>
+            <!-- face -->
+            <rect x="4" y="8" width="1" height="1" fill="#78c08a" class="a-blink"/>
+            <rect x="6" y="8" width="1" height="1" fill="#78c08a"/>
+            <rect x="5" y="10" width="3" height="1" fill="#78c08a"/>
+            <!-- cursor blink -->
+            <rect x="10" y="10" width="1" height="1" fill="#78c08a" class="a-glow"/>
+            <!-- feet -->
+            <g class="a-tapL"><rect x="4" y="13" width="2" height="1" fill="#2a2a3a"/></g>
+            <g class="a-tapR"><rect x="10" y="13" width="2" height="1" fill="#2a2a3a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Prompt <span class="sp">living terminal</span></div><div class="why">Meta as hell. A terminal that's the pet that runs a terminal. The screen IS the face — infinite expressions.</div></div>
+    </div>
+
+    <!-- 45 Fluffy cloud -->
+    <div class="card"><span class="num">45</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <rect x="4" y="5" width="1" height="1" fill="#ebe4d0"/>
+            <rect x="5" y="4" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="7" y="3" width="3" height="2" fill="#ebe4d0"/>
+            <rect x="10" y="4" width="2" height="2" fill="#ebe4d0"/>
+            <rect x="2" y="6" width="12" height="5" fill="#ebe4d0"/>
+            <rect x="3" y="11" width="10" height="1" fill="#ebe4d0"/>
+            <rect x="4" y="12" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="7" y="12" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="10" y="12" width="2" height="1" fill="#ebe4d0"/>
+            <!-- face -->
+            <rect x="5" y="8" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="10" y="8" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="6" y="9" width="4" height="1" fill="#000"/>
+            <rect x="4" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <rect x="11" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <!-- rain drop / hand -->
+            <g class="a-tapL"><rect x="3" y="13" width="1" height="1" fill="#5aaaca"/></g>
+            <g class="a-tapR"><rect x="12" y="13" width="1" height="1" fill="#5aaaca"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Nimbus <span class="sp">cloud</span></div><div class="why">Animal Crossing / Paper Mario cloud-creature. Rains little drops when upset.</div></div>
+    </div>
+
+    <!-- 46 Pixel cat -->
+    <div class="card"><span class="num">46</span><span class="tag pick">safe win</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- ears -->
+            <rect x="3" y="3" width="2" height="1" fill="#3a2a1a"/>
+            <rect x="3" y="4" width="1" height="1" fill="#3a2a1a"/>
+            <rect x="11" y="3" width="2" height="1" fill="#3a2a1a"/>
+            <rect x="12" y="4" width="1" height="1" fill="#3a2a1a"/>
+            <!-- head -->
+            <rect x="3" y="4" width="10" height="6" fill="#3a2a1a"/>
+            <!-- body -->
+            <rect x="3" y="10" width="10" height="3" fill="#3a2a1a"/>
+            <rect x="3" y="13" width="10" height="1" fill="#3a2a1a"/>
+            <!-- tail -->
+            <rect x="13" y="11" width="2" height="1" fill="#3a2a1a"/>
+            <rect x="14" y="10" width="1" height="1" fill="#3a2a1a"/>
+            <!-- eyes (big) -->
+            <rect x="4" y="6" width="3" height="3" fill="#f5ca3a"/>
+            <rect x="9" y="6" width="3" height="3" fill="#f5ca3a"/>
+            <rect x="5" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <!-- nose -->
+            <rect x="7" y="9" width="2" height="1" fill="#ff9ab0"/>
+            <!-- paws -->
+            <g class="a-tapL"><rect x="5" y="13" width="2" height="1" fill="#2a1a0a"/></g>
+            <g class="a-tapR"><rect x="9" y="13" width="2" height="1" fill="#2a1a0a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Espresso <span class="sp">black cat</span></div><div class="why">Big yellow eyes against black body — reads on any wallpaper. Classic pixel-art cat. Very hard to dislike.</div></div>
+    </div>
+
+    <!-- 47 Robot dog -->
+    <div class="card"><span class="num">47</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="2" y="6" width="10" height="5" fill="#c0c0c0"/>
+            <rect x="2" y="11" width="10" height="1" fill="#808080"/>
+            <!-- head -->
+            <rect x="10" y="4" width="5" height="5" fill="#c0c0c0"/>
+            <rect x="10" y="9" width="5" height="1" fill="#808080"/>
+            <!-- ear antennae -->
+            <rect x="11" y="3" width="1" height="1" fill="#d8724e"/>
+            <rect x="13" y="3" width="1" height="1" fill="#d8724e"/>
+            <!-- eye -->
+            <rect x="11" y="6" width="3" height="2" fill="#1a1a2a"/>
+            <rect x="12" y="6" width="1" height="1" fill="#d8724e" class="a-blink"/>
+            <!-- tail -->
+            <g class="a-tapR"><rect x="0" y="7" width="2" height="1" fill="#c0c0c0"/><rect x="0" y="6" width="1" height="1" fill="#c0c0c0"/></g>
+            <!-- legs -->
+            <rect x="3" y="12" width="2" height="2" fill="#808080"/>
+            <rect x="9" y="12" width="2" height="2" fill="#808080"/>
+            <rect x="3" y="14" width="2" height="0"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Bolt <span class="sp">robot dog</span></div><div class="why">Boston Dynamics cutie. Combines the "warm loyal" dog archetype with sci-fi surface.</div></div>
+    </div>
+
+    <!-- 48 Semicolon sprite -->
+    <div class="card"><span class="num">48</span><span class="tag">typography</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- dot -->
+            <rect x="6" y="3" width="4" height="4" fill="#d8724e"/>
+            <rect x="5" y="4" width="1" height="2" fill="#d8724e"/>
+            <rect x="10" y="4" width="1" height="2" fill="#d8724e"/>
+            <!-- comma -->
+            <rect x="6" y="9" width="4" height="3" fill="#d8724e"/>
+            <rect x="5" y="10" width="1" height="2" fill="#d8724e"/>
+            <rect x="10" y="10" width="1" height="2" fill="#d8724e"/>
+            <rect x="7" y="12" width="2" height="2" fill="#d8724e"/>
+            <rect x="6" y="13" width="1" height="1" fill="#d8724e"/>
+            <!-- eyes on dot -->
+            <rect x="6" y="4" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="9" y="4" width="1" height="2" fill="#000" class="a-blink"/>
+            <!-- smile on comma -->
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <!-- hands -->
+            <g class="a-tapL"><rect x="3" y="10" width="2" height="1" fill="#d8724e"/></g>
+            <g class="a-tapR"><rect x="11" y="10" width="2" height="1" fill="#d8724e"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Semi <span class="sp">semicolon</span></div><div class="why">A living semicolon. Two-body creature — dot and comma are separate, move independently. Pure code-core.</div></div>
+    </div>
+
+    <!-- 49 Pixel dino -->
+    <div class="card"><span class="num">49</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- tail -->
+            <rect x="13" y="9" width="2" height="1" fill="#5a8a5a"/>
+            <rect x="14" y="8" width="1" height="1" fill="#5a8a5a"/>
+            <!-- body -->
+            <rect x="5" y="7" width="9" height="5" fill="#5a8a5a"/>
+            <rect x="4" y="8" width="1" height="3" fill="#5a8a5a"/>
+            <!-- belly -->
+            <rect x="6" y="9" width="6" height="2" fill="#8aba8a"/>
+            <!-- head -->
+            <rect x="2" y="4" width="5" height="4" fill="#5a8a5a"/>
+            <rect x="1" y="5" width="1" height="2" fill="#5a8a5a"/>
+            <!-- spikes -->
+            <rect x="2" y="3" width="1" height="1" fill="#3a6a3a"/>
+            <rect x="4" y="3" width="1" height="1" fill="#3a6a3a"/>
+            <rect x="6" y="3" width="1" height="1" fill="#3a6a3a"/>
+            <rect x="8" y="6" width="1" height="1" fill="#3a6a3a"/>
+            <rect x="10" y="6" width="1" height="1" fill="#3a6a3a"/>
+            <rect x="12" y="6" width="1" height="1" fill="#3a6a3a"/>
+            <!-- eye -->
+            <rect x="4" y="5" width="1" height="1" fill="#000" class="a-blink"/>
+            <!-- legs -->
+            <g class="a-tapL"><rect x="6" y="12" width="2" height="2" fill="#3a6a3a"/></g>
+            <g class="a-tapR"><rect x="10" y="12" width="2" height="2" fill="#3a6a3a"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Rex <span class="sp">tiny dino</span></div><div class="why">Chrome offline-dino energy. Small stegosaurus. Limbs, tail, spines — all riggable.</div></div>
+    </div>
+
+    <!-- 50 Moogle-style tufted friend -->
+    <div class="card"><span class="num">50</span>
+      <div class="stage">
+        <svg class="pet" width="120" height="120" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <!-- pompom -->
+            <rect x="7" y="1" width="2" height="1" fill="#d8724e"/>
+            <rect x="7" y="2" width="1" height="1" fill="#d8724e"/>
+            <!-- pompom string -->
+            <rect x="7" y="3" width="1" height="2" fill="#ebe4d0"/>
+            <!-- body -->
+            <rect x="4" y="5" width="8" height="7" fill="#ebe4d0"/>
+            <rect x="3" y="6" width="1" height="5" fill="#ebe4d0"/>
+            <rect x="12" y="6" width="1" height="5" fill="#ebe4d0"/>
+            <!-- ears -->
+            <rect x="3" y="4" width="2" height="1" fill="#ebe4d0"/>
+            <rect x="11" y="4" width="2" height="1" fill="#ebe4d0"/>
+            <!-- face -->
+            <rect x="5" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="7" y="10" width="2" height="1" fill="#000"/>
+            <rect x="4" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <rect x="11" y="9" width="1" height="1" fill="#ff9ab0" opacity="0.5"/>
+            <!-- wings (small, on back) -->
+            <g class="a-flap">
+              <rect x="2" y="7" width="1" height="3" fill="#d4ccb0"/>
+              <rect x="13" y="7" width="1" height="3" fill="#d4ccb0"/>
+            </g>
+            <!-- feet -->
+            <g class="a-tapL"><rect x="5" y="12" width="2" height="1" fill="#d4ccb0"/></g>
+            <g class="a-tapR"><rect x="9" y="12" width="2" height="1" fill="#d4ccb0"/></g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta"><div class="name">Pom <span class="sp">moogle-like</span></div><div class="why">FF moogle-energy pet. Pompom on antenna is THE recognizable feature. Tiny wings animate.</div></div>
+    </div>
+
+  </div>
+
+  <!-- ========== FINAL TAKE ========== -->
+  <div class="shelf">
+    <div class="panel-card">
+      <h3>My shortlist (read before picking)</h3>
+      <ul>
+        <li><span class="k">11 Boo ghost+hands</span> — your love, now riggable. Detached hands solve everything.</li>
+        <li><span class="k">06 CRT tv-head</span> — face IS a screen; infinite state vocabulary.</li>
+        <li><span class="k">29 Squib baby squid</span> — name fit, ink creature, tentacles for arms.</li>
+        <li><span class="k">46 Espresso black cat</span> — the safest universally-loved option.</li>
+        <li><span class="k">03 Chomp mimic</span> — most original, opens/closes mouth = built-in talk rig.</li>
+        <li><span class="k">48 Semi semicolon</span> — most conceptually novel, pure code-core.</li>
+      </ul>
+    </div>
+    <div class="panel-card">
+      <h3>About riggability</h3>
+      <p style="margin: 0 0 10px;">Every candidate has at least these animation hooks:</p>
+      <ul>
+        <li>Head/body bob (breathing)</li>
+        <li>Eye blink (scaleY)</li>
+        <li>Two independently-moving limbs or props</li>
+      </ul>
+      <p style="margin: 10px 0 0;">Limbless creatures (11, 12, 13, 14) use <span class="k">detached floating hands</span> — the Rayman trick — so they can still type, wave, hold tools.</p>
+    </div>
+  </div>
+
+  <div class="ask">
+    <b>Your call →</b> give me one number (or a few) and I'll build 4–5 full-fidelity variants with all 6 animation states (idle / thinking / working / sleeping / error / attention). Or describe a mix: "11's body, 06's screen face, 29's tentacle-hands" works.
+  </div>
+
+</main>
+
+<div id="tweaks-root"></div>
+
+<script type="text/babel" data-presets="env,react">
+const { useEffect, useMemo } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "lens": "catalog",
+  "pulse": "drowsy",
+  "stage": "graveyard"
+}/*EDITMODE-END*/;
+
+const LENS = [
+  { id: "catalog",   label: "Catalog",    sub: "5-col zine spread (default)" },
+  { id: "contact",   label: "Contact",    sub: "8-col proof sheet, names only" },
+  { id: "spotlight", label: "Spotlight",  sub: "2-col gallery, big sprites" },
+  { id: "scatter",   label: "Pile",       sub: "loose scatter on the desk" },
+];
+
+const PULSE = [
+  { id: "drowsy", label: "Drowsy",  sub: "slow, low amplitude — aquarium",  speed: 2.0, amp: 0.5 },
+  { id: "calm",   label: "Calm",    sub: "default tempo",                    speed: 1.0, amp: 1.0 },
+  { id: "frantic",label: "Frantic", sub: "fast & jittery — arcade demo",    speed: 0.4, amp: 2.5 },
+];
+
+const STAGE = [
+  { id: "graveyard", label: "Yard",  sub: "default dark zine + checker" },
+  { id: "blueprint", label: "Blue",  sub: "engineer's grid paper" },
+  { id: "riso",      label: "Riso",  sub: "warm cream paper print" },
+  { id: "void",      label: "Void",  sub: "pure black, neon spec sheet" },
+  { id: "dungeon",   label: "Stone", sub: "torchlit catacomb stone" },
+];
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  // Apply lens + stage to <html>; pulse to CSS vars on root
+  useEffect(() => {
+    document.documentElement.dataset.lens  = tweaks.lens;
+    document.documentElement.dataset.stage = tweaks.stage;
+    const p = PULSE.find(x => x.id === tweaks.pulse) || PULSE[1];
+    document.documentElement.style.setProperty("--pulse-speed", p.speed);
+    document.documentElement.style.setProperty("--pulse-amp",   p.amp);
+  }, [tweaks.lens, tweaks.stage, tweaks.pulse]);
+
+  // Scatter mode: stamp positions onto each card
+  useEffect(() => {
+    const cards = document.querySelectorAll(".grid .card");
+    if (tweaks.lens !== "scatter") {
+      cards.forEach(c => {
+        c.style.left = ""; c.style.top = "";
+        c.style.removeProperty("--scatter-rot");
+      });
+      return;
+    }
+    // Deterministic pseudo-random per-card using index hash
+    const grids = document.querySelectorAll(".grid");
+    grids.forEach((grid, gi) => {
+      const w = grid.clientWidth;
+      const colCount = Math.max(3, Math.floor(w / 220));
+      const cs = grid.querySelectorAll(".card");
+      cs.forEach((c, i) => {
+        const seed = (gi * 97 + i * 53);
+        const col = i % colCount;
+        const row = Math.floor(i / colCount);
+        const jitterX = ((seed * 13) % 80) - 40;
+        const jitterY = ((seed * 31) % 60) - 30;
+        const rot = (((seed * 7) % 200) / 100 - 1) * 8; // -8..+8 deg
+        const x = col * (w / colCount) + jitterX;
+        const y = row * 240 + jitterY;
+        c.style.left = `${Math.max(0, Math.min(w - 200, x))}px`;
+        c.style.top  = `${y}px`;
+        c.style.setProperty("--scatter-rot", `${rot}deg`);
+      });
+      const rows = Math.ceil(cs.length / colCount);
+      grid.style.minHeight = `${rows * 260 + 40}px`;
+    });
+  }, [tweaks.lens]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Lens · how the catalog is framed">
+        <TweakRadio
+          label=""
+          value={tweaks.lens}
+          onChange={v => setTweak("lens", v)}
+          options={LENS.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+
+      <TweakSection label="Pulse · tempo & amplitude">
+        <TweakRadio
+          label=""
+          value={tweaks.pulse}
+          onChange={v => setTweak("pulse", v)}
+          options={PULSE.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+
+      <TweakSection label="Stage · the world they live in">
+        <TweakRadio
+          label=""
+          value={tweaks.stage}
+          onChange={v => setTweak("stage", v)}
+          options={STAGE.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("tweaks-root"));
+root.render(<App />);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+  </defs>
+
+  
+  <g class="shadow-main">
+    <rect x="3" y="15" width="9" height="1" fill="#000000"></rect>
+  </g>
+
+  
+  <g class="legs-idle" fill="#DE886D">
+    <rect x="3" y="12" width="1" height="3"></rect>
+    <rect x="5" y="12" width="1" height="3"></rect>
+    <rect x="9" y="12" width="1" height="3"></rect>
+    <rect x="11" y="12" width="1" height="3"></rect>
+  </g>
+
+  
+  <g class="body-main">
+
+    
+    <g class="legs-sneak" fill="#DE886D" opacity="0">
+      <rect class="leg-a" x="3" y="13" width="1" height="2"></rect>
+      <rect class="leg-b" x="5" y="13" width="1" height="2"></rect>
+      <rect class="leg-a" x="9" y="13" width="1" height="2"></rect>
+      <rect class="leg-b" x="11" y="13" width="1" height="2"></rect>
+    </g>
+
+    
+    <g class="breathe">
+      
+      <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+
+      
+      <g class="arm-l">
+        <rect x="0" y="9" width="2" height="2" fill="#DE886D"></rect>
+      </g>
+
+      
+      <g class="blink" fill="#000000">
+        
+        <g class="eye-squint">
+          <rect x="4" y="8" width="1" height="2"></rect>
+        </g>
+        
+        <rect x="10" y="8" width="1" height="2"></rect>
+      </g>
+
+      
+      <g class="arm-r">
+        <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+
+        
+        <g class="glass-vis" opacity="0">
+          <g class="glass-wobble">
+            <g transform="translate(13.5, 9.5)">
+              
+              <polygon points="0.5,1.5 1.5,0.5 -1,-2 -2,-1" fill="#795548"></polygon>
+              
+              <rect x="-6" y="-5" width="6" height="6" fill="#546E7A" rx="2"></rect>
+              
+              <rect x="-4" y="-3.5" width="2" height="3" fill="#000000"></rect>
+              
+              <rect x="-5.5" y="-4.5" width="5" height="5" fill="#E0F7FA" rx="1.5" opacity="0.6"></rect>
+              
+              <rect x="-4.5" y="-3.5" width="1.5" height="1.5" fill="#FFFFFF" opacity="0.8"></rect>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

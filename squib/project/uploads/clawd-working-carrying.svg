@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+  </defs>
+
+  <rect class="shadow-walk" x="3" y="15" width="9" height="1" fill="#000000" opacity="0.5"></rect>
+
+  <g transform="rotate(-2, 7.5, 15)">
+  <g class="body-walk">
+    
+    <g class="pack-swing">
+      <rect x="13" y="7" width="4" height="6" fill="#5C9CE6"></rect>
+      <rect x="12" y="8" width="5" height="4" fill="#5C9CE6"></rect>
+      <rect x="13" y="7" width="4" height="2" fill="#3D7AC7"></rect>
+      <rect x="13" y="10" width="4" height="1" fill="#3D7AC7"></rect>
+      <rect x="13" y="12" width="4" height="1" fill="#2D5FA5"></rect>
+      <rect x="15" y="9" width="1" height="1" fill="#FFD54F"></rect>
+    </g>
+
+    
+    <g fill="#DE886D">
+      <rect class="step-a" x="3" y="13" width="1" height="2"></rect>
+      <rect class="step-b" x="5" y="13" width="1" height="2"></rect>
+      <rect class="step-b" x="9" y="13" width="1" height="2"></rect>
+      <rect class="step-a" x="11" y="13" width="1" height="2"></rect>
+    </g>
+
+    
+    <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+
+    
+    <g class="arm-swing-l" fill="#DE886D">
+      <rect x="0" y="9" width="3" height="2"></rect>
+    </g>
+    <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+
+    
+    <rect x="13" y="7" width="1" height="4" fill="#3D7AC7"></rect>
+
+    
+    <g class="eyes-gaze">
+      <g class="eyes-rect" fill="#000000">
+        <rect x="4" y="8" width="1" height="2"></rect>
+        <rect x="10" y="8" width="1" height="2"></rect>
+      </g>
+      <g class="eyes-xmark" fill="none" stroke="#000000" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="4,8 5.5,9 4,10"></polyline>
+        <polyline points="11,8 9.5,9 11,10"></polyline>
+      </g>
+    </g>
+
+    
+    <g class="sweat-1" fill="#40C4FF">
+      <rect x="14" y="5" width="1" height="1.5"></rect>
+      <rect x="14.25" y="4.5" width="0.5" height="0.5"></rect>
+    </g>
+    <g class="sweat-2" fill="#40C4FF">
+      <rect x="16" y="4" width="1" height="1.5"></rect>
+      <rect x="16.25" y="3.5" width="0.5" height="0.5"></rect>
+    </g>
+
+    
+    <g class="cap-sway">
+      <g transform="rotate(-15, 6, 6.5)">
+        <rect x="1" y="4.5" width="7" height="2" fill="#5C9CE6"></rect>
+        <rect x="-1" y="5.5" width="4" height="1" fill="#3D7AC7"></rect>
+        <rect x="4" y="4.5" width="1" height="1" fill="#FFD54F"></rect>
+      </g>
+    </g>
+  </g>
+  </g>
+</svg>

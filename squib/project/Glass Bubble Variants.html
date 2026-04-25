@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>squib — glass variants</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --accent: #d8724e;
+  --accent-strong: #e8845e;
+  --accent-soft: rgba(216,114,78,0.18);
+  --accent-border: rgba(216,114,78,0.5);
+  --bg: #0a0a0c;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:#eee;font-family:var(--ui);font-size:14px;-webkit-font-smoothing:antialiased}
+.page{max-width:1340px;margin:0 auto;padding:40px 28px 140px}
+
+.masthead{
+  border-top:2px solid #f0e3c8;border-bottom:2px solid #f0e3c8;
+  padding:16px 0;margin-bottom:32px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;gap:18px;
+  color:#f0e3c8;
+}
+.masthead .l,.masthead .r{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(240,227,200,0.6)}
+.masthead .t{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:0}
+.masthead .t .dot{color:var(--accent)}
+.masthead .r{text-align:right}
+
+.lede{
+  border:1px dashed rgba(240,227,200,0.22);
+  padding:18px 24px;font-family:var(--mono);font-size:13px;line-height:1.7;
+  margin-bottom:36px;color:#f0e3c8;
+}
+.lede b{color:var(--accent)}
+
+.section-label{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+  color:rgba(240,227,200,0.6);display:flex;align-items:center;gap:12px;margin:48px 0 14px;
+}
+.section-label::after{content:"";flex:1;height:1px;background:rgba(240,227,200,0.22)}
+.section-label .n{padding:2px 7px;border:1px solid rgba(240,227,200,0.22);color:#f0e3c8;letter-spacing:0}
+h2.heading{font-family:var(--mono);font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;color:#f0e3c8}
+.subhead{color:rgba(240,227,200,0.65);font-size:13px;margin-bottom:22px;max-width:760px;line-height:1.65;font-family:var(--mono)}
+
+/* Three desktop stages side by side */
+.variant-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:14px;
+}
+@media(max-width:1100px){.variant-row{grid-template-columns:1fr}}
+
+.stage{
+  border-radius:18px;padding:50px 30px;min-height:480px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.06);
+}
+/* MacOS Sequoia/Tahoe-style wallpaper — saturated gradient with bokeh */
+.stage.wp1{
+  background:
+    radial-gradient(ellipse at 20% 10%, #ff7e5f 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 30%, #feb47b 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 90%, #4a44a8 0%, transparent 50%),
+    linear-gradient(160deg,#1a1a3e 0%,#3a2862 60%,#582844 100%);
+}
+.stage.wp2{
+  background:
+    radial-gradient(ellipse at 30% 20%, #2a4a8e 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 70%, #1a2a4a 0%, transparent 60%),
+    linear-gradient(180deg,#0a1428 0%,#1a2c48 70%,#2a3a5e 100%);
+}
+.stage.wp3{
+  background:
+    radial-gradient(ellipse at 50% 30%, #3a8e6a 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, #2a5e8a 0%, transparent 55%),
+    linear-gradient(170deg,#0e1a14 0%,#1a2e22 60%,#1e3242 100%);
+}
+.stage.wp-bokeh::before{
+  content:"";position:absolute;inset:0;background-image:
+    radial-gradient(circle at 22% 18%, rgba(255,255,255,0.06) 4px, transparent 5px),
+    radial-gradient(circle at 75% 25%, rgba(255,255,255,0.04) 7px, transparent 8px),
+    radial-gradient(circle at 30% 70%, rgba(255,255,255,0.03) 11px, transparent 12px),
+    radial-gradient(circle at 85% 65%, rgba(255,255,255,0.05) 5px, transparent 6px),
+    radial-gradient(circle at 55% 88%, rgba(255,255,255,0.04) 9px, transparent 10px);
+  pointer-events:none;filter:blur(2px);
+}
+
+.stage-label{
+  position:absolute;top:14px;left:16px;font-family:var(--mono);font-size:10px;letter-spacing:0.18em;
+  text-transform:uppercase;color:rgba(255,255,255,0.7);z-index:10;
+}
+.stage-stamp{
+  position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:9px;letter-spacing:0.15em;
+  color:#fff;border:1px solid rgba(255,255,255,0.4);padding:3px 7px;border-radius:3px;z-index:10;
+}
+
+/* ============================================================
+   GLASS VARIANTS — three flavors compared
+   ============================================================ */
+
+/* Common to all glass cards */
+.gc{
+  width:340px;border-radius:22px;color:#fff;font-family:var(--ui);
+  position:relative;overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+.gc.wide{width:380px}
+.gc.bigchat{width:460px;height:600px;display:flex;flex-direction:column}
+
+/* — VARIANT A — CRYSTAL: maximum transparency, vivid tint pickup, prismatic edge */
+.gc.crystal{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(40px) saturate(220%) brightness(1.05);
+  -webkit-backdrop-filter:blur(40px) saturate(220%) brightness(1.05);
+  border:1px solid rgba(255,255,255,0.14);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.4) inset,
+    0 0 0 0.5px rgba(255,255,255,0.10) inset,
+    0 -1px 0 rgba(255,255,255,0.06) inset,
+    0 24px 60px rgba(0,0,0,0.5),
+    0 6px 16px rgba(0,0,0,0.3);
+}
+.gc.crystal::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(255,255,255,0.18) 0%,rgba(255,255,255,0.04) 30%,transparent 50%,rgba(255,255,255,0.02) 80%,rgba(255,255,255,0.10) 100%);
+  pointer-events:none;mix-blend-mode:overlay;
+}
+.gc.crystal::after{
+  content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);
+  pointer-events:none;
+}
+
+/* — VARIANT B — FROSTED: balanced, refined version of current */
+.gc.frosted{
+  background:rgba(20,20,24,0.55);
+  backdrop-filter:blur(32px) saturate(190%);
+  -webkit-backdrop-filter:blur(32px) saturate(190%);
+  border:1px solid rgba(255,255,255,0.10);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 0 0 0.5px rgba(255,255,255,0.06) inset,
+    0 22px 50px rgba(0,0,0,0.5),
+    0 4px 14px rgba(0,0,0,0.3);
+}
+.gc.frosted::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+  pointer-events:none;
+}
+
+/* — VARIANT C — VAPOR: ultra-transparent, rim-light only, almost no fill */
+.gc.vapor{
+  background:rgba(255,255,255,0.03);
+  backdrop-filter:blur(24px) saturate(160%);
+  -webkit-backdrop-filter:blur(24px) saturate(160%);
+  border:1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.18) inset,
+    0 -1px 0 rgba(0,0,0,0.10) inset,
+    0 28px 70px rgba(0,0,0,0.45);
+}
+.gc.vapor::before{
+  /* subtle prismatic edge */
+  content:"";position:absolute;inset:-1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(180,200,255,0.25) 0%,transparent 30%,transparent 70%,rgba(255,180,200,0.20) 100%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  padding:1px;pointer-events:none;
+}
+
+/* — Common card chrome (text, buttons) — */
+.gc .ghead{padding:14px 16px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;z-index:2}
+.gc .htitle{font-size:15px;font-weight:600;letter-spacing:-0.01em;line-height:1.2}
+.gc .hmeta{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.55);margin-top:3px}
+.gc .hmeta .dot{opacity:0.5;padding:0 4px}
+
+.gpill{
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:6px;color:#fff;background:var(--accent);white-space:nowrap;flex-shrink:0;
+  box-shadow:0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.gpill.bash{background:#d8724e}
+.gpill.edit{background:#5b7fb8}
+.gpill.read{background:#6a9b7c}
+.gpill.write{background:#c79556}
+.gpill.plan{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)}
+.gpill.ask{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)}
+
+.gbody{padding:0 16px 12px;position:relative;z-index:2}
+.gcmd{
+  font-family:var(--mono);font-size:12px;line-height:1.55;
+  background:rgba(0,0,0,0.22);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:10px 12px;color:#fff;
+  max-height:180px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+}
+.gcmd .prompt{color:var(--accent);user-select:none}
+.gc.vapor .gcmd{background:rgba(0,0,0,0.18);border-color:rgba(255,255,255,0.10)}
+.gc.crystal .gcmd{background:rgba(0,0,0,0.16);border-color:rgba(255,255,255,0.12)}
+
+.gactions{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 10px 10px;position:relative;z-index:2;
+}
+.gactions.single{grid-template-columns:1fr}
+.gbtn{
+  font-family:var(--ui);  /* SF Pro / system, NOT mono */
+  font-size:13px;font-weight:600;letter-spacing:-0.005em;
+  padding:9px 14px;border-radius:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background 0.12s ease,transform 0.06s ease,border-color 0.12s ease;
+  border:1px solid rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.06);
+  color:#fff;user-select:none;
+}
+.gbtn:hover{background:rgba(255,255,255,0.12)}
+.gbtn:active{transform:translateY(0.5px)}
+.gbtn.primary{
+  background:var(--accent);color:#fff;border-color:rgba(0,0,0,0.18);
+  box-shadow:0 1px 0 rgba(255,255,255,0.25) inset,0 4px 10px rgba(216,114,78,0.4);
+}
+.gbtn.primary:hover{background:var(--accent-strong)}
+.gbtn .kbd{
+  font-family:var(--mono); /* keep keybinding monospace */
+  font-size:10px;font-weight:500;opacity:0.65;letter-spacing:0.02em;padding-left:2px;
+}
+.gbtn.primary .kbd{opacity:0.85;color:#fff}
+
+/* Suggestion pills — also non-mono labels (per request feel) */
+.gsuggest{padding:0 10px 10px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:2}
+.gsug{
+  width:100%;text-align:left;
+  font-family:var(--ui);  /* sans for the action label */
+  font-size:13px;font-weight:500;color:#fff;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px;padding:9px 13px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  transition:background 0.12s ease;
+}
+.gsug:hover{background:rgba(255,255,255,0.1)}
+.gsug code{font-family:var(--mono);font-size:11.5px;background:rgba(0,0,0,0.25);padding:1px 5px;border-radius:4px;font-weight:500}
+.gsug .kbd{font-family:var(--mono);font-size:10px;opacity:0.55;letter-spacing:0.02em}
+
+/* Elicitation form */
+.gform{
+  margin:0 14px 12px;
+  background:rgba(0,0,0,0.18);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:14px;padding:14px 14px 12px;position:relative;z-index:2;
+}
+.gform .section-lbl{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:8px}
+.gform .q{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-0.01em;margin-bottom:4px}
+.gform .hint{font-size:12px;color:rgba(255,255,255,0.55);margin-bottom:12px;font-family:var(--mono)}
+.gopt{
+  display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:10px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);cursor:pointer;margin-bottom:6px;
+  transition:background 0.12s,border-color 0.12s;
+}
+.gopt:hover{background:rgba(255,255,255,0.08)}
+.gopt.sel{border-color:var(--accent-border);background:var(--accent-soft)}
+.gopt .radio{width:16px;height:16px;border:1.5px solid rgba(255,255,255,0.55);border-radius:50%;flex-shrink:0;margin-top:2px;position:relative}
+.gopt.sel .radio{border-color:var(--accent)}
+.gopt.sel .radio::after{content:"";position:absolute;inset:3px;background:var(--accent);border-radius:50%}
+.gopt .otext .ot{font-size:14px;font-weight:600;line-height:1.25}
+.gopt .otext .od{font-size:12.5px;color:rgba(255,255,255,0.6);line-height:1.45;margin-top:3px}
+
+/* ============================================================
+   RICHER CHAT — claude-code-like
+   ============================================================ */
+.gc.bigchat .chead{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;position:relative;z-index:2;
+}
+.gc.bigchat .chead-l,.gc.bigchat .chead-r{display:flex;gap:6px;align-items:center}
+.cbtn{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;
+  transition:background 0.12s;
+}
+.cbtn:hover{background:rgba(255,255,255,0.12)}
+.cbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gc.bigchat .ctitle{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.gc.bigchat .ctitle .livedot{width:6px;height:6px;border-radius:50%;background:#78c08a;box-shadow:0 0 6px rgba(120,192,138,0.8)}
+.gc.bigchat .ctitle .branch{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.5);font-weight:500;letter-spacing:0.02em;margin-left:6px}
+
+.gc.bigchat .cbody{
+  flex:1;overflow-y:auto;padding:18px 18px 8px;
+  display:flex;flex-direction:column;gap:14px;position:relative;z-index:2;
+}
+.gc.bigchat .cbody::-webkit-scrollbar{width:6px}
+.gc.bigchat .cbody::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px}
+
+.cmsg{display:flex;flex-direction:column;gap:6px;max-width:88%}
+.cmsg.user{align-self:flex-end;align-items:flex-end}
+.cmsg.assistant{align-self:flex-start;width:100%;max-width:100%}
+.cmsg.user .cbubble{
+  padding:9px 14px;border-radius:16px 16px 4px 16px;font-size:13.5px;line-height:1.45;
+  background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.08);color:#fff;
+}
+.cmsg.assistant .cbubble{
+  font-size:14px;line-height:1.55;color:#fff;background:transparent;border:none;padding:0;
+}
+.cmsg.assistant .aglyph{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;background:var(--accent);
+  font-size:10px;color:#fff;margin-right:8px;vertical-align:-3px;
+}
+.cmsg.assistant .cbubble code{font-family:var(--mono);font-size:12.5px;background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:4px}
+
+/* Tool call cards — collapsible, claude-code-like */
+.toolcall{
+  background:rgba(0,0,0,0.22);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;
+  overflow:hidden;
+  font-family:var(--mono);
+}
+.toolcall .tc-head{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;
+  font-size:11.5px;color:#fff;
+  border-bottom:1px solid rgba(255,255,255,0);
+  transition:border-color 0.15s;
+}
+.toolcall.open .tc-head{border-bottom-color:rgba(255,255,255,0.08)}
+.toolcall .tc-head:hover{background:rgba(255,255,255,0.04)}
+.toolcall .tc-icon{
+  width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.toolcall .tc-icon.bash{background:#d8724e}
+.toolcall .tc-icon.edit{background:#5b7fb8}
+.toolcall .tc-icon.read{background:#6a9b7c}
+.toolcall .tc-icon.write{background:#c79556}
+.toolcall .tc-icon.grep{background:#b87c8e}
+.toolcall .tc-icon.glob{background:#8e78b6}
+.toolcall .tc-name{font-weight:600;color:#fff;letter-spacing:0.01em}
+.toolcall .tc-arg{color:rgba(255,255,255,0.7);font-weight:400;margin-left:4px}
+.toolcall .tc-arg em{color:rgba(255,255,255,0.95);font-style:normal;font-weight:500}
+.toolcall .tc-status{
+  margin-left:auto;display:flex;align-items:center;gap:6px;color:rgba(255,255,255,0.55);font-size:10.5px;
+}
+.toolcall .tc-status .ok{color:#78c08a}
+.toolcall .tc-status .err{color:#e85a5a}
+.toolcall .tc-status .running{color:var(--accent)}
+.toolcall .tc-caret{
+  width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);
+  transition:transform 0.18s;
+}
+.toolcall.open .tc-caret{transform:rotate(90deg)}
+.toolcall .tc-body{
+  font-size:11.5px;line-height:1.55;color:rgba(255,255,255,0.85);
+  padding:10px 12px 12px;background:rgba(0,0,0,0.18);
+  white-space:pre-wrap;word-break:break-word;
+  display:none;
+}
+.toolcall.open .tc-body{display:block}
+.toolcall .tc-body .lineno{color:rgba(255,255,255,0.3);user-select:none;display:inline-block;width:24px;text-align:right;padding-right:10px}
+.toolcall .tc-body .add{color:#78c08a;background:rgba(120,192,138,0.10);display:block;padding:0 4px;margin:0 -4px}
+.toolcall .tc-body .del{color:#e09480;background:rgba(224,148,128,0.10);display:block;padding:0 4px;margin:0 -4px;text-decoration:line-through;text-decoration-color:rgba(224,148,128,0.5)}
+.toolcall .tc-body .filehdr{color:rgba(255,255,255,0.55);font-size:10.5px;letter-spacing:0.04em;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.08)}
+.toolcall .tc-body .key{color:#7ab8e0}
+.toolcall .tc-body .str{color:#dabd6a}
+.toolcall .tc-body .com{color:rgba(255,255,255,0.4)}
+
+/* "thinking" preamble */
+.thinking{
+  font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.5);
+  padding:6px 10px;border-left:2px solid rgba(255,255,255,0.18);
+  font-style:italic;
+}
+
+.gc.bigchat .cfoot{
+  padding:10px 12px 12px;border-top:1px solid rgba(255,255,255,0.08);position:relative;z-index:2;
+}
+.gc.bigchat .cinput{
+  display:flex;align-items:center;gap:8px;padding:9px 9px 9px 14px;
+  background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.10);border-radius:18px;
+}
+.gc.bigchat .cinput .plus{
+  width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);
+  display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);cursor:pointer;flex-shrink:0;
+}
+.gc.bigchat .cinput .ph{flex:1;font-size:13.5px;color:rgba(255,255,255,0.5)}
+.gc.bigchat .cinput .mode{
+  font-family:var(--mono);font-size:11px;color:rgba(255,255,255,0.65);padding:4px 10px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:8px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;
+}
+.gc.bigchat .cinput .send{
+  width:28px;height:28px;border-radius:50%;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:#fff;
+}
+.gc.bigchat .cinput .send svg{width:11px;height:11px}
+.gc.bigchat .cmeta{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-top:8px;font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);padding:0 4px;
+}
+.gc.bigchat .cmeta .ctx-bar{display:flex;align-items:center;gap:6px}
+.gc.bigchat .cmeta .ctx-bar .b{width:36px;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);overflow:hidden}
+.gc.bigchat .cmeta .ctx-bar .b i{display:block;height:100%;width:42%;background:var(--accent)}
+
+/* full-width section (chat shows alone) */
+.full-row{margin-top:14px}
+.full-row .stage{min-height:760px}
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="masthead">
+    <div class="l">UI · ISS. 003</div>
+    <h1 class="t">squib<span class="dot">.</span>glass</h1>
+    <div class="r">three glass styles · richer chat</div>
+  </header>
+
+  <div class="lede">
+    <b>three glass treatments</b> across the same surfaces (permission, plan, elicitation, chat). pick one column. all action-button labels are now <b>SF Pro</b>; only keybindings stay mono. plan review drops the "Go to Terminal" affordance. chat is bigger and shows real claude-code tool-call cards (collapsed by default, click to expand).
+  </div>
+
+  <!-- =================== PERMISSION =================== -->
+  <div class="section-label"><span class="n">01</span> Permission · Bash</div>
+  <h2 class="heading">Tool permission.</h2>
+  <p class="subhead">Same content, three glass densities. Crystal pulls more wallpaper through. Frosted is the balanced default. Vapor is barely there.</p>
+
+  <div class="variant-row">
+    <div class="stage wp1 wp-bokeh">
+      <div class="stage-label">A · Crystal</div>
+      <div class="stage-stamp">VIVID</div>
+      <div id="p-crystal"></div>
+    </div>
+    <div class="stage wp1 wp-bokeh">
+      <div class="stage-label">B · Frosted</div>
+      <div class="stage-stamp">DEFAULT</div>
+      <div id="p-frosted"></div>
+    </div>
+    <div class="stage wp1 wp-bokeh">
+      <div class="stage-label">C · Vapor</div>
+      <div class="stage-stamp">SHEER</div>
+      <div id="p-vapor"></div>
+    </div>
+  </div>
+
+  <!-- =================== PLAN REVIEW (no terminal button) =================== -->
+  <div class="section-label"><span class="n">02</span> Plan review · single primary</div>
+  <h2 class="heading">Plan review.</h2>
+  <p class="subhead">"Go to Terminal" removed. Single primary action: Approve. A secondary "Edit Plan" fits better than nothing — but happy to drop that too if you want one button.</p>
+
+  <div class="variant-row">
+    <div class="stage wp2 wp-bokeh">
+      <div class="stage-label">A · Crystal</div>
+      <div id="pl-crystal"></div>
+    </div>
+    <div class="stage wp2 wp-bokeh">
+      <div class="stage-label">B · Frosted</div>
+      <div id="pl-frosted"></div>
+    </div>
+    <div class="stage wp2 wp-bokeh">
+      <div class="stage-label">C · Vapor</div>
+      <div id="pl-vapor"></div>
+    </div>
+  </div>
+
+  <!-- =================== ELICITATION =================== -->
+  <div class="section-label"><span class="n">03</span> Elicitation · needs input</div>
+  <h2 class="heading">Asking the user.</h2>
+  <p class="subhead">Wider card; selectable options. Submit Answer is now SF Pro.</p>
+
+  <div class="variant-row">
+    <div class="stage wp3 wp-bokeh">
+      <div class="stage-label">A · Crystal</div>
+      <div id="e-crystal"></div>
+    </div>
+    <div class="stage wp3 wp-bokeh">
+      <div class="stage-label">B · Frosted</div>
+      <div id="e-frosted"></div>
+    </div>
+    <div class="stage wp3 wp-bokeh">
+      <div class="stage-label">C · Vapor</div>
+      <div id="e-vapor"></div>
+    </div>
+  </div>
+
+  <!-- =================== CHAT — full-feature =================== -->
+  <div class="section-label"><span class="n">04</span> Chat · full claude-code window</div>
+  <h2 class="heading">Bigger. Real tool calls.</h2>
+  <p class="subhead">460×600. Header now shows branch + status + new/expand/close. Body has thinking preamble, expandable tool-call cards (Read with file header + lines, Edit with diff hunks, Bash with stdout, Grep with hit count), and a richer footer with model picker + token-context bar.</p>
+
+  <div class="full-row">
+    <div class="stage wp2 wp-bokeh" style="justify-content:center">
+      <div class="stage-label">FROSTED · default chat</div>
+      <div class="stage-stamp">FUTURE SHIP</div>
+      <div id="chat-frosted"></div>
+    </div>
+  </div>
+
+  <div class="full-row">
+    <div class="stage wp1 wp-bokeh" style="justify-content:center">
+      <div class="stage-label">CRYSTAL · same chat, different glass</div>
+      <div id="chat-crystal"></div>
+    </div>
+  </div>
+
+  <div class="full-row">
+    <div class="stage wp3 wp-bokeh" style="justify-content:center">
+      <div class="stage-label">VAPOR · same chat, sheer</div>
+      <div id="chat-vapor"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const ICONS = {
+  close:`<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>`,
+  edit:`<svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>`,
+  expand:`<svg viewBox="0 0 24 24"><path d="M4 14v6h6M20 10V4h-6M4 20l7-7M20 4l-7 7"/></svg>`,
+  history:`<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>`,
+  plus:`<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`,
+  stop:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>`,
+  caret:`<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>`,
+  chev:`<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`,
+};
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+/* ===== Permission card ===== */
+function permission(variant){
+  return `
+    <div class="gc ${variant}">
+      <div class="ghead">
+        <div>
+          <div class="htitle">Permission Request</div>
+          <div class="hmeta">self-service-frontend<span class="dot">·</span>#969</div>
+        </div>
+        <span class="gpill bash">Bash</span>
+      </div>
+      <div class="gbody">
+        <div class="gcmd"><span class="prompt">$ </span>brew update &amp;&amp; brew upgrade</div>
+      </div>
+      <div class="gactions">
+        <button class="gbtn">Deny <span class="kbd">[⌘⇧N]</span></button>
+        <button class="gbtn primary">Allow <span class="kbd">[⌘⇧Y]</span></button>
+      </div>
+      <div class="gsuggest">
+        <button class="gsug"><span>Allow Session</span><span class="kbd">[⌘⇧S]</span></button>
+        <button class="gsug"><span>Always allow <code>brew update:*</code></span></button>
+      </div>
+    </div>`;
+}
+
+/* ===== Plan review (no Go to Terminal) ===== */
+function plan(variant){
+  return `
+    <div class="gc ${variant}">
+      <div class="ghead">
+        <div>
+          <div class="htitle">Plan Review</div>
+          <div class="hmeta">self-service-frontend<span class="dot">·</span>#969</div>
+        </div>
+        <span class="gpill plan">Plan</span>
+      </div>
+      <div class="gbody">
+        <div class="gcmd"><span class="prompt">› </span>Migrate auth to OAuth2
+1. Add <span style="color:var(--accent-strong)">oauth2-proxy</span> service
+2. Update <span style="color:var(--accent-strong)">auth.ts</span> client
+3. Add callback routes in <span style="color:var(--accent-strong)">server/api.ts</span>
+4. Migrate existing JWT tokens
+5. Remove legacy <span style="color:var(--accent-strong)">sessionStore.ts</span></div>
+      </div>
+      <div class="gactions">
+        <button class="gbtn">Edit Plan <span class="kbd">[⌘⇧E]</span></button>
+        <button class="gbtn primary">Approve <span class="kbd">[⌘⇧Y]</span></button>
+      </div>
+    </div>`;
+}
+
+/* ===== Elicitation ===== */
+function elicit(variant){
+  return `
+    <div class="gc ${variant} wide">
+      <div class="ghead">
+        <div>
+          <div class="htitle">Needs Input</div>
+          <div class="hmeta">self-service-frontend<span class="dot">·</span>#969</div>
+        </div>
+        <span class="gpill ask">Ask</span>
+      </div>
+      <div class="gform">
+        <div class="section-lbl">Session goal</div>
+        <div class="q">What would you like to focus on in this session?</div>
+        <div class="hint">Choose one option</div>
+        <div class="gopt"><div class="radio"></div><div class="otext"><div class="ot">Code review</div><div class="od">Review recent changes and provide feedback on the implementation.</div></div></div>
+        <div class="gopt sel"><div class="radio"></div><div class="otext"><div class="ot">Bug fixing</div><div class="od">Investigate and fix a specific bug or unexpected behavior.</div></div></div>
+        <div class="gopt"><div class="radio"></div><div class="otext"><div class="ot">New feature</div><div class="od">Plan and implement a new feature or enhancement.</div></div></div>
+      </div>
+      <div class="gactions">
+        <button class="gbtn">Skip <span class="kbd">[⌘⇧N]</span></button>
+        <button class="gbtn primary">Submit Answer <span class="kbd">[⌘⇧Y]</span></button>
+      </div>
+    </div>`;
+}
+
+/* ===== Tool call card ===== */
+function tcall({tool,arg,arg2,status,body,open=false}){
+  const STATUS_HTML={
+    ok:`<span class="ok">✓ done</span>`,
+    err:`<span class="err">✕ failed</span>`,
+    running:`<span class="running">● running</span>`,
+  }[status]||'';
+  return `
+    <div class="toolcall ${open?'open':''}">
+      <div class="tc-head" onclick="this.parentElement.classList.toggle('open')">
+        <div class="tc-icon ${tool.toLowerCase()}">${tool[0]}</div>
+        <span class="tc-name">${esc(tool)}</span>
+        <span class="tc-arg">${arg||''}${arg2?` <em>${arg2}</em>`:''}</span>
+        <div class="tc-status">${STATUS_HTML}</div>
+        <div class="tc-caret">${ICONS.caret}</div>
+      </div>
+      <div class="tc-body">${body||''}</div>
+    </div>`;
+}
+
+/* ===== Chat ===== */
+function chat(variant){
+  const readBody=`<div class="filehdr">src/auth/LoginShell.tsx · 12 lines</div>` +
+    [
+      [42,'<span class="key">export function</span> <span class="key">LoginShell</span>() {',''],
+      [43,'  <span class="key">const</span> session = useSession();','',],
+      [44,'  <span class="key">const</span> router = useRouter();','',],
+      [45,'',''],
+      [46,'  useEffect(() => {','',],
+      [47,'    <span class="com">// fires twice when session refreshes</span>','',],
+      [48,'    <span class="key">if</span> (session?.user) router.push(<span class="str">"/app"</span>);','',],
+      [49,'  }, [session]);','',],
+    ].map(([n,t])=>`<span class="lineno">${n}</span>${t}`).join('\n');
+
+  const editBody=`<div class="filehdr">src/auth/LoginShell.tsx · +3 −2</div>` +
+    [
+      [46,'  useEffect(() => {','plain'],
+      [47,'    if (session?.user) router.push("/app");','del'],
+      [47,'    if (session?.user &amp;&amp; !redirected.current) {','add'],
+      [48,'      redirected.current = true;','add'],
+      [49,'      router.push("/app");','add'],
+      [50,'    }','add'],
+      [51,'  }, [session]);','plain'],
+    ].map(([n,t,k])=>`<span class="lineno">${n}</span><span class="${k}">${t}</span>`).join('\n');
+
+  const grepBody=`<div class="filehdr">pattern: redirect · 4 hits</div>` +
+`<span class="lineno">12</span>src/auth/LoginShell.tsx:  router.push("/app");
+<span class="lineno">28</span>src/auth/AuthProvider.tsx:  if (redirect) navigate(redirect);
+<span class="lineno">14</span>src/middleware.ts:  return NextResponse.redirect(loginUrl);
+<span class="lineno"> 7</span>src/utils/url.ts:  export const safeRedirect = (path) => {`;
+
+  const bashBody=`<span class="filehdr">$ pnpm test src/auth</span>
+<span class="com"> PASS </span> src/auth/login.test.tsx
+<span class="com"> PASS </span> src/auth/session.test.tsx
+<span class="com">Tests:       <span style="color:#78c08a">12 passed</span>, 12 total</span>
+<span class="com">Time:        2.41s</span>`;
+
+  return `
+    <div class="gc ${variant} bigchat">
+      <div class="chead">
+        <div class="chead-l">
+          <div class="cbtn" title="close">${ICONS.close}</div>
+          <div class="cbtn" title="history">${ICONS.history}</div>
+        </div>
+        <div class="ctitle">
+          <span class="livedot"></span>squib · claude-sonnet
+          <span class="branch">⎇ feat/oauth2</span>
+        </div>
+        <div class="chead-r">
+          <div class="cbtn" title="new">${ICONS.edit}</div>
+          <div class="cbtn" title="expand">${ICONS.expand}</div>
+        </div>
+      </div>
+      <div class="cbody">
+
+        <div class="cmsg user">
+          <div class="cbubble">can you check why the login is redirecting twice?</div>
+        </div>
+
+        <div class="cmsg assistant">
+          <div class="cbubble">
+            <span class="aglyph">✦</span>Looking into it — I'll scan the auth flow and the session refresh logic.
+          </div>
+          <div class="thinking">thinking · the user reports a double redirect on login. likely a useEffect firing on session change…</div>
+          ${tcall({tool:'Read',arg:'src/auth/',arg2:'LoginShell.tsx',status:'ok',body:readBody,open:true})}
+          ${tcall({tool:'Grep',arg:'pattern',arg2:'"redirect"',status:'ok',body:grepBody})}
+          <div class="cbubble" style="margin-top:6px">
+            Found it. <code>useEffect</code> in <code>LoginShell.tsx</code> fires a second redirect when the session refreshes — there's no guard against re-running after the first navigation. I'll patch it with a ref so it only fires once.
+          </div>
+        </div>
+
+        <div class="cmsg user">
+          <div class="cbubble">yeah, patch it</div>
+        </div>
+
+        <div class="cmsg assistant">
+          ${tcall({tool:'Edit',arg:'src/auth/LoginShell.tsx',arg2:'',status:'ok',body:editBody,open:true})}
+          ${tcall({tool:'Bash',arg:'pnpm test',arg2:'src/auth',status:'ok',body:bashBody})}
+          <div class="cbubble" style="margin-top:6px">
+            <span class="aglyph">✦</span>Patched. Added a <code>redirected</code> ref so the effect only navigates once. All 12 auth tests still pass.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="cfoot">
+        <div class="cinput">
+          <div class="plus">${ICONS.plus}</div>
+          <div class="ph">Reply to squib…</div>
+          <div class="mode">claude-sonnet ${ICONS.chev.replace('width="14"','width="11"').replace('height="14"','height="11"')}</div>
+          <div class="send">${ICONS.stop}</div>
+        </div>
+        <div class="cmeta">
+          <span>● connected · 4 tool calls</span>
+          <span class="ctx-bar">context <span class="b"><i></i></span> 42% · 84k / 200k</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+['crystal','frosted','vapor'].forEach(v=>{
+  document.getElementById(`p-${v}`).innerHTML = permission(v);
+  document.getElementById(`pl-${v}`).innerHTML = plan(v);
+  document.getElementById(`e-${v}`).innerHTML  = elicit(v);
+  document.getElementById(`chat-${v}`).innerHTML = chat(v);
+});
+</script>
+
+</body>
+</html>

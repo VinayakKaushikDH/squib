@@ -18,14 +18,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var trustedSessions: Set<String> = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Global key monitor requires Accessibility permission.
-        // Prompt only if not already granted — macOS silently ignores the global
-        // monitor without this, so we request it upfront.
-        if !AXIsProcessTrusted() {
-            let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
-            AXIsProcessTrustedWithOptions(opts)
-        }
-
         petWindow = PetWindow()
         petWindow?.orderFront(nil)
 
@@ -64,9 +56,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Show a bubble when Claude Code holds a connection open for approval.
         hookServer.onPermissionRequest = { [weak self] request in
-            // Trusted session — approve silently without showing a bubble.
+            // Trusted session — approve silently, but only for yes/no permission requests.
+            // Elicitations present the user with choices and must always show the bubble.
             if let sessionId = request.sessionId,
-               self?.trustedSessions.contains(sessionId) == true {
+               self?.trustedSessions.contains(sessionId) == true,
+               !request.isElicitation {
                 self?.hookServer.resolvePermission(id: request.id, decision: .allow)
                 return
             }

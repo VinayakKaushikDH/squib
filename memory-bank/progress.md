@@ -237,7 +237,19 @@
 - **Dual hook registration**: `writeHooks` helper extracted so hooks are written to both `~/.claude/settings.json` and `~/.claude-personal/settings.json`. If `.claude-personal` directory doesn't exist on the machine, the write is silently skipped.
 - `registerClaudeHooks(port:)` now calls `writeHooks` for both paths; `.claude-personal/settings.json` had a stale port (`56227`) that was updated to match the live session port.
 
+## 2026-04-25 — Session 23: Trusted-session elicitation bug fix
+
+- **Bug**: "Allow all for session" was silently auto-approving elicitation prompts (`isElicitation == true`) — multi-choice questions Claude Code presents to the user — in addition to regular yes/no permission requests.
+- **Fix**: Added `!request.isElicitation` guard to the trusted-session early-return in `AppDelegate.hookServer.onPermissionRequest`. Elicitations now always show the bubble; only regular permission requests are auto-allowed.
+- **Location**: `Sources/squib/AppDelegate.swift` lines 69–71.
+- **Build**: clean (85/82 targets, 35.86s).
+
 ## Current Status
-- **Phase**: Session 22 complete — squib hooks registered in both ~/.claude and ~/.claude-personal
+- **Phase**: Session 23 complete — trusted-session elicitation guard fixed
 - **Next**: smoke test the live app; SVG migration for remaining working-state assets
 - **Skipped**: mini-crabwalk — purely cosmetic, current 100ms snap is acceptable, complexity not worth it
+
+## Backlog / Future Ideas
+- Show full command to be executed in the permission prompt (currently only tool pill + partial detail is shown)
+- Syntax highlight commands in the permission prompt
+- Responsive layout in permission bubble so long commands are visible in full (no truncation)

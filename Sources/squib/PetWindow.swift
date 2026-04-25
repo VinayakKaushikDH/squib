@@ -456,7 +456,7 @@ final class PetWindow: NSPanel {
             let screen        = screenContaining(baseFrame)
             let wa            = screen.visibleFrame
             let bubbleMargin: CGFloat = 16
-            let bubbleLeft    = wa.maxX - BubbleWindow.width - bubbleMargin
+            let bubbleLeft    = wa.maxX - 340 - bubbleMargin
             let bubbleTop     = wa.minY + bubbleMargin + offset
             let overlapsH     = baseFrame.maxX > bubbleLeft
             let overlapsV     = baseFrame.minY < bubbleTop

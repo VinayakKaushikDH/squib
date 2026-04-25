@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>squib · glass reference (frosted)</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   PAGE CHROME — handoff document only.
+   Do NOT port any selectors prefixed with .doc-
+   The portable system starts at the SQUIB GLASS section below.
+   ============================================================ */
+:root{
+  --doc-bg:#0a0a0c;
+  --doc-ink:#f0e3c8;
+  --doc-ink-mute:rgba(240,227,200,0.6);
+  --doc-rule:rgba(240,227,200,0.22);
+  --doc-accent:#d8724e;
+  --ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--doc-bg);color:var(--doc-ink);font-family:var(--ui);font-size:14px;-webkit-font-smoothing:antialiased}
+.doc-page{max-width:1240px;margin:0 auto;padding:40px 28px 140px}
+
+.doc-mast{
+  border-top:2px solid var(--doc-ink);border-bottom:2px solid var(--doc-ink);
+  padding:18px 0;margin-bottom:32px;
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;gap:18px;
+}
+.doc-mast .l,.doc-mast .r{font-family:var(--mono);font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--doc-ink-mute)}
+.doc-mast .t{font-family:var(--mono);font-size:34px;font-weight:700;letter-spacing:-0.02em;text-align:center;margin:0}
+.doc-mast .t .dot{color:var(--doc-accent)}
+.doc-mast .r{text-align:right}
+
+.doc-lede{
+  border:1px dashed var(--doc-rule);
+  padding:18px 24px;font-family:var(--mono);font-size:13px;line-height:1.7;
+  margin-bottom:36px;
+}
+.doc-lede b{color:var(--doc-accent)}
+
+.doc-h{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.22em;text-transform:uppercase;
+  color:var(--doc-ink-mute);display:flex;align-items:center;gap:12px;margin:56px 0 14px;
+}
+.doc-h::after{content:"";flex:1;height:1px;background:var(--doc-rule)}
+.doc-h .n{padding:2px 7px;border:1px solid var(--doc-rule);color:var(--doc-ink);letter-spacing:0}
+
+.doc-h2{font-family:var(--mono);font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em}
+.doc-sub{color:var(--doc-ink-mute);font-size:13px;margin-bottom:22px;max-width:760px;line-height:1.65;font-family:var(--mono)}
+
+.doc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.doc-grid.full{grid-template-columns:1fr}
+@media(max-width:980px){.doc-grid{grid-template-columns:1fr}}
+
+.doc-stage{
+  border-radius:18px;padding:50px 30px;min-height:480px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  border:1px solid rgba(255,255,255,0.06);
+}
+.doc-stage.tall{min-height:700px}
+.doc-stage.wp1{background:radial-gradient(ellipse at 20% 10%,#ff7e5f 0%,transparent 40%),radial-gradient(ellipse at 80% 30%,#feb47b 0%,transparent 40%),radial-gradient(ellipse at 50% 90%,#4a44a8 0%,transparent 50%),linear-gradient(160deg,#1a1a3e 0%,#3a2862 60%,#582844 100%)}
+.doc-stage.wp2{background:radial-gradient(ellipse at 30% 20%,#2a4a8e 0%,transparent 50%),radial-gradient(ellipse at 70% 70%,#1a2a4a 0%,transparent 60%),linear-gradient(180deg,#0a1428 0%,#1a2c48 70%,#2a3a5e 100%)}
+.doc-stage.wp3{background:radial-gradient(ellipse at 50% 30%,#3a8e6a 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,#2a5e8a 0%,transparent 55%),linear-gradient(170deg,#0e1a14 0%,#1a2e22 60%,#1e3242 100%)}
+.doc-stage.wp4{background:radial-gradient(ellipse at 25% 75%,#c75a4a 0%,transparent 50%),radial-gradient(ellipse at 80% 25%,#e8a056 0%,transparent 50%),linear-gradient(155deg,#2a1a14 0%,#48281a 60%,#1e1818 100%)}
+.doc-stage::before{
+  content:"";position:absolute;inset:0;background-image:
+    radial-gradient(circle at 22% 18%,rgba(255,255,255,0.06) 4px,transparent 5px),
+    radial-gradient(circle at 75% 25%,rgba(255,255,255,0.04) 7px,transparent 8px),
+    radial-gradient(circle at 30% 70%,rgba(255,255,255,0.03) 11px,transparent 12px),
+    radial-gradient(circle at 85% 65%,rgba(255,255,255,0.05) 5px,transparent 6px),
+    radial-gradient(circle at 55% 88%,rgba(255,255,255,0.04) 9px,transparent 10px);
+  pointer-events:none;filter:blur(2px);
+}
+.doc-stage .lbl{
+  position:absolute;top:14px;left:16px;font-family:var(--mono);font-size:10px;letter-spacing:0.18em;
+  text-transform:uppercase;color:rgba(255,255,255,0.7);z-index:10;
+}
+.doc-stage .stamp{
+  position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:9px;letter-spacing:0.15em;
+  color:#fff;border:1px solid rgba(255,255,255,0.4);padding:3px 7px;border-radius:3px;z-index:10;
+}
+
+/* Code reference blocks */
+.doc-code{
+  margin:14px 0 8px;
+  border:1px solid var(--doc-rule);
+  border-radius:8px;
+  background:#0e0f12;
+  font-family:var(--mono);font-size:12px;line-height:1.65;
+  color:#d8d4c8;
+  position:relative;
+}
+.doc-code-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 12px;border-bottom:1px solid var(--doc-rule);
+  font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--doc-ink-mute);
+}
+.doc-code-head .tag{color:var(--doc-accent);font-weight:600}
+.doc-code pre{margin:0;padding:14px 16px;overflow-x:auto;white-space:pre}
+.doc-code .k{color:#7ab8e0}
+.doc-code .s{color:#dabd6a}
+.doc-code .c{color:rgba(255,255,255,0.4)}
+.doc-code .v{color:#e09480}
+.doc-code .n{color:#9bc77a}
+.doc-code-copy{
+  position:absolute;top:6px;right:8px;background:rgba(255,255,255,0.06);border:1px solid var(--doc-rule);
+  color:var(--doc-ink);font-family:var(--mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;cursor:pointer;
+}
+.doc-code-copy:hover{background:rgba(255,255,255,0.12)}
+.doc-code-copy.ok{color:#78c08a;border-color:rgba(120,192,138,0.4)}
+
+/* Two-col: preview + code */
+.doc-spec{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;margin-bottom:22px;
+}
+@media(max-width:980px){.doc-spec{grid-template-columns:1fr}}
+
+/* Token table */
+.doc-tokens{
+  border:1px solid var(--doc-rule);border-radius:10px;overflow:hidden;margin:14px 0;
+  font-family:var(--mono);font-size:12px;
+}
+.doc-tokens .row{display:grid;grid-template-columns:1.4fr 1fr 1.6fr;gap:12px;padding:10px 14px;border-bottom:1px solid var(--doc-rule)}
+.doc-tokens .row:last-child{border-bottom:none}
+.doc-tokens .row.head{background:rgba(255,255,255,0.03);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--doc-ink-mute)}
+.doc-tokens .row .swatch{display:inline-block;width:14px;height:14px;border-radius:3px;border:1px solid rgba(255,255,255,0.15);vertical-align:-2px;margin-right:8px}
+.doc-tokens .row code{color:#dabd6a;font-size:11.5px}
+
+/* Notes callouts */
+.doc-callout{
+  border-left:2px solid var(--doc-accent);
+  background:rgba(216,114,78,0.06);
+  padding:12px 16px;margin:14px 0;
+  font-family:var(--mono);font-size:12.5px;line-height:1.65;
+}
+.doc-callout b{color:var(--doc-accent)}
+
+/* ============================================================
+   SQUIB GLASS — PORTABLE SYSTEM (everything below is for Swift)
+   ============================================================ */
+:root{
+  --sq-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+  --sq-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+
+  /* accent */
+  --sq-accent: #d8724e;
+  --sq-accent-strong: #e8845e;
+  --sq-accent-soft: rgba(216,114,78,0.18);
+  --sq-accent-border: rgba(216,114,78,0.5);
+
+  /* glass surfaces */
+  --sq-glass-bg: rgba(20,20,24,0.55);
+  --sq-glass-bg-soft: rgba(0,0,0,0.18);
+  --sq-glass-bg-inner: rgba(0,0,0,0.22);
+  --sq-glass-border: rgba(255,255,255,0.10);
+  --sq-glass-border-strong: rgba(255,255,255,0.16);
+  --sq-glass-rim: rgba(255,255,255,0.30);
+
+  /* text */
+  --sq-text: #ffffff;
+  --sq-text-mute: rgba(255,255,255,0.55);
+  --sq-text-dim: rgba(255,255,255,0.40);
+
+  /* radii */
+  --sq-radius: 22px;
+  --sq-radius-inner: 14px;
+  --sq-radius-tight: 10px;
+
+  --sq-shadow:
+    0 1px 0 rgba(255,255,255,0.12) inset,
+    0 0 0 0.5px rgba(255,255,255,0.06) inset,
+    0 22px 50px rgba(0,0,0,0.5),
+    0 4px 14px rgba(0,0,0,0.3);
+}
+
+/* Card base */
+.sq-card{
+  width:340px;border-radius:var(--sq-radius);color:var(--sq-text);font-family:var(--sq-ui);
+  position:relative;overflow:hidden;
+  background:var(--sq-glass-bg);
+  backdrop-filter:blur(32px) saturate(190%);
+  -webkit-backdrop-filter:blur(32px) saturate(190%);
+  border:1px solid var(--sq-glass-border);
+  box-shadow:var(--sq-shadow);
+}
+.sq-card.wide{width:380px}
+.sq-card::before{
+  content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--sq-glass-rim),transparent);
+  pointer-events:none;
+}
+
+/* Header */
+.sq-head{padding:14px 16px 10px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;position:relative;z-index:2}
+.sq-title{font-size:15px;font-weight:600;letter-spacing:-0.01em;line-height:1.2}
+.sq-meta{font-family:var(--sq-mono);font-size:11px;color:var(--sq-text-mute);margin-top:3px}
+.sq-meta .dot{opacity:0.5;padding:0 4px}
+
+/* Tool pill */
+.sq-pill{
+  font-family:var(--sq-mono);font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  padding:4px 8px;border-radius:6px;color:#fff;background:var(--sq-accent);white-space:nowrap;flex-shrink:0;
+  box-shadow:0 1px 0 rgba(255,255,255,0.2) inset;
+}
+.sq-pill.bash{background:#d8724e}
+.sq-pill.edit{background:#5b7fb8}
+.sq-pill.read{background:#6a9b7c}
+.sq-pill.write{background:#c79556}
+.sq-pill.glob{background:#8e78b6}
+.sq-pill.grep{background:#b87c8e}
+.sq-pill.agent{background:#6aa3b0}
+.sq-pill.plan{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)}
+.sq-pill.ask{background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2)}
+
+/* Body / cmd preview */
+.sq-body{padding:0 16px 12px;position:relative;z-index:2}
+.sq-cmd{
+  font-family:var(--sq-mono);font-size:12px;line-height:1.55;
+  background:var(--sq-glass-bg-inner);
+  border:1px solid var(--sq-glass-border);
+  border-radius:var(--sq-radius-tight);padding:10px 12px;
+  max-height:180px;overflow:auto;white-space:pre-wrap;word-break:break-word;
+}
+.sq-cmd .prompt{color:var(--sq-accent);user-select:none}
+.sq-cmd .ref{color:var(--sq-accent-strong)}
+.sq-cmd::-webkit-scrollbar{width:6px}
+.sq-cmd::-webkit-scrollbar-thumb{background:var(--sq-glass-border-strong);border-radius:3px}
+
+/* Action buttons */
+.sq-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 10px 10px;position:relative;z-index:2}
+.sq-actions.single{grid-template-columns:1fr}
+.sq-btn{
+  font-family:var(--sq-ui);  /* SF Pro / system. NOT mono. */
+  font-size:13px;font-weight:600;letter-spacing:-0.005em;
+  padding:9px 14px;border-radius:var(--sq-radius-inner);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background 0.12s ease,transform 0.06s ease,border-color 0.12s ease;
+  border:1px solid var(--sq-glass-border-strong);
+  background:rgba(255,255,255,0.06);
+  color:var(--sq-text);user-select:none;
+}
+.sq-btn:hover{background:rgba(255,255,255,0.12)}
+.sq-btn:active{transform:translateY(0.5px)}
+.sq-btn.primary{
+  background:var(--sq-accent);color:#fff;border-color:rgba(0,0,0,0.18);
+  box-shadow:0 1px 0 rgba(255,255,255,0.25) inset,0 4px 10px rgba(216,114,78,0.4);
+}
+.sq-btn.primary:hover{background:var(--sq-accent-strong)}
+.sq-btn .kbd{
+  font-family:var(--sq-mono);  /* keybinding stays mono */
+  font-size:10px;font-weight:500;opacity:0.65;letter-spacing:0.02em;padding-left:2px;
+}
+.sq-btn.primary .kbd{opacity:0.85;color:#fff}
+
+/* Suggestions */
+.sq-suggest{padding:0 10px 10px;display:flex;flex-direction:column;gap:6px;position:relative;z-index:2}
+.sq-sug{
+  width:100%;text-align:left;
+  font-family:var(--sq-ui);  /* sans label */
+  font-size:13px;font-weight:500;color:var(--sq-text);
+  background:rgba(255,255,255,0.05);
+  border:1px solid var(--sq-glass-border);
+  border-radius:12px;padding:9px 13px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  transition:background 0.12s ease;
+}
+.sq-sug:hover{background:rgba(255,255,255,0.1)}
+.sq-sug code{font-family:var(--sq-mono);font-size:11.5px;background:rgba(0,0,0,0.25);padding:1px 5px;border-radius:4px;font-weight:500}
+.sq-sug .kbd{font-family:var(--sq-mono);font-size:10px;opacity:0.55;letter-spacing:0.02em}
+
+/* Elicitation form */
+.sq-form{
+  margin:0 14px 12px;background:var(--sq-glass-bg-soft);
+  border:1px solid var(--sq-glass-border);border-radius:var(--sq-radius-inner);padding:14px 14px 12px;
+  position:relative;z-index:2;
+}
+.sq-form .lbl{font-family:var(--sq-mono);font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--sq-text-mute);margin-bottom:8px}
+.sq-form .q{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-0.01em;margin-bottom:4px}
+.sq-form .hint{font-size:12px;color:var(--sq-text-mute);margin-bottom:12px;font-family:var(--sq-mono)}
+.sq-opt{
+  display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border-radius:var(--sq-radius-tight);
+  background:rgba(255,255,255,0.04);border:1px solid var(--sq-glass-border);cursor:pointer;margin-bottom:6px;
+  transition:background 0.12s,border-color 0.12s;
+}
+.sq-opt:hover{background:rgba(255,255,255,0.08)}
+.sq-opt.sel{border-color:var(--sq-accent-border);background:var(--sq-accent-soft)}
+.sq-opt .radio{width:16px;height:16px;border:1.5px solid var(--sq-text-mute);border-radius:50%;flex-shrink:0;margin-top:2px;position:relative}
+.sq-opt.sel .radio{border-color:var(--sq-accent)}
+.sq-opt.sel .radio::after{content:"";position:absolute;inset:3px;background:var(--sq-accent);border-radius:50%}
+.sq-opt .ot{font-size:14px;font-weight:600;line-height:1.25}
+.sq-opt .od{font-size:12.5px;color:var(--sq-text-mute);line-height:1.45;margin-top:3px}
+
+/* ============== CHAT ============== */
+.sq-chat{width:460px;height:600px;display:flex;flex-direction:column}
+.sq-chat .chead{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--sq-glass-border);gap:8px;position:relative;z-index:2}
+.sq-chat .chead-l,.sq-chat .chead-r{display:flex;gap:6px;align-items:center}
+.sq-cbtn{
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,0.06);border:1px solid var(--sq-glass-border);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--sq-text);
+  transition:background 0.12s;
+}
+.sq-cbtn:hover{background:rgba(255,255,255,0.12)}
+.sq-cbtn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sq-chat .ctitle{font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sq-chat .ctitle .live{width:6px;height:6px;border-radius:50%;background:#78c08a;box-shadow:0 0 6px rgba(120,192,138,0.8)}
+.sq-chat .ctitle .branch{font-family:var(--sq-mono);font-size:10px;color:var(--sq-text-mute);font-weight:500;letter-spacing:0.02em;margin-left:6px}
+
+.sq-chat .cbody{flex:1;overflow-y:auto;padding:18px 18px 8px;display:flex;flex-direction:column;gap:14px;position:relative;z-index:2}
+.sq-chat .cbody::-webkit-scrollbar{width:6px}
+.sq-chat .cbody::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.15);border-radius:3px}
+
+.sq-msg{display:flex;flex-direction:column;gap:6px;max-width:88%}
+.sq-msg.user{align-self:flex-end;align-items:flex-end}
+.sq-msg.assistant{align-self:flex-start;width:100%;max-width:100%}
+.sq-msg.user .bubble{
+  padding:9px 14px;border-radius:16px 16px 4px 16px;font-size:13.5px;line-height:1.45;
+  background:rgba(255,255,255,0.10);border:1px solid var(--sq-glass-border);
+}
+.sq-msg.assistant .bubble{font-size:14px;line-height:1.55;background:transparent;border:none;padding:0}
+.sq-msg.assistant .glyph{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:18px;height:18px;border-radius:5px;background:var(--sq-accent);
+  font-size:10px;color:#fff;margin-right:8px;vertical-align:-3px;
+}
+.sq-msg .bubble code{font-family:var(--sq-mono);font-size:12.5px;background:rgba(0,0,0,0.3);padding:1px 5px;border-radius:4px}
+
+/* Tool calls */
+.sq-tool{
+  background:var(--sq-glass-bg-inner);border:1px solid var(--sq-glass-border);
+  border-radius:10px;overflow:hidden;font-family:var(--sq-mono);
+}
+.sq-tool .h{
+  display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:11.5px;
+  border-bottom:1px solid transparent;transition:border-color 0.15s,background 0.12s;
+}
+.sq-tool.open .h{border-bottom-color:var(--sq-glass-border)}
+.sq-tool .h:hover{background:rgba(255,255,255,0.04)}
+.sq-tool .ic{width:18px;height:18px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.sq-tool .ic.bash{background:#d8724e}.sq-tool .ic.edit{background:#5b7fb8}.sq-tool .ic.read{background:#6a9b7c}
+.sq-tool .ic.write{background:#c79556}.sq-tool .ic.grep{background:#b87c8e}.sq-tool .ic.glob{background:#8e78b6}
+.sq-tool .nm{font-weight:600;letter-spacing:0.01em}
+.sq-tool .arg{color:var(--sq-text-mute);font-weight:400;margin-left:4px}
+.sq-tool .arg em{color:rgba(255,255,255,0.95);font-style:normal;font-weight:500}
+.sq-tool .st{margin-left:auto;display:flex;align-items:center;gap:6px;color:var(--sq-text-mute);font-size:10.5px}
+.sq-tool .st .ok{color:#78c08a}.sq-tool .st .err{color:#e85a5a}.sq-tool .st .run{color:var(--sq-accent)}
+.sq-tool .ca{width:14px;height:14px;display:flex;align-items:center;justify-content:center;color:var(--sq-text-mute);transition:transform 0.18s}
+.sq-tool.open .ca{transform:rotate(90deg)}
+.sq-tool .b{font-size:11.5px;line-height:1.55;color:rgba(255,255,255,0.85);padding:10px 12px 12px;background:rgba(0,0,0,0.18);white-space:pre-wrap;word-break:break-word;display:none}
+.sq-tool.open .b{display:block}
+.sq-tool .b .ln{color:rgba(255,255,255,0.3);user-select:none;display:inline-block;width:24px;text-align:right;padding-right:10px}
+.sq-tool .b .add{color:#78c08a;background:rgba(120,192,138,0.10);display:block;padding:0 4px;margin:0 -4px}
+.sq-tool .b .del{color:#e09480;background:rgba(224,148,128,0.10);display:block;padding:0 4px;margin:0 -4px;text-decoration:line-through;text-decoration-color:rgba(224,148,128,0.5)}
+.sq-tool .b .fh{color:var(--sq-text-mute);font-size:10.5px;letter-spacing:0.04em;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--sq-glass-border)}
+.sq-tool .b .key{color:#7ab8e0}.sq-tool .b .str{color:#dabd6a}.sq-tool .b .com{color:rgba(255,255,255,0.4)}
+
+.sq-think{font-family:var(--sq-mono);font-size:11px;color:rgba(255,255,255,0.5);padding:6px 10px;border-left:2px solid rgba(255,255,255,0.18);font-style:italic}
+
+.sq-chat .cfoot{padding:10px 12px 12px;border-top:1px solid var(--sq-glass-border);position:relative;z-index:2}
+.sq-chat .cinput{display:flex;align-items:center;gap:8px;padding:9px 9px 9px 14px;background:var(--sq-glass-bg-inner);border:1px solid var(--sq-glass-border);border-radius:18px}
+.sq-chat .cinput .plus{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;color:var(--sq-text-mute);cursor:pointer;flex-shrink:0}
+.sq-chat .cinput .ph{flex:1;font-size:13.5px;color:rgba(255,255,255,0.5)}
+.sq-chat .cinput .mode{font-family:var(--sq-mono);font-size:11px;color:rgba(255,255,255,0.65);padding:4px 10px;background:rgba(255,255,255,0.06);border:1px solid var(--sq-glass-border);border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.sq-chat .cinput .send{width:28px;height:28px;border-radius:50%;background:var(--sq-accent);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:#fff}
+.sq-chat .cinput .send svg{width:11px;height:11px;fill:currentColor;stroke:none}
+.sq-chat .cmeta{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-family:var(--sq-mono);font-size:10px;color:rgba(255,255,255,0.4);padding:0 4px}
+.sq-chat .cmeta .ctx{display:flex;align-items:center;gap:6px}
+.sq-chat .cmeta .ctx .b{width:36px;height:3px;border-radius:2px;background:rgba(255,255,255,0.1);overflow:hidden}
+.sq-chat .cmeta .ctx .b i{display:block;height:100%;width:42%;background:var(--sq-accent)}
+
+/* Slide-in entrance */
+.sq-card.enter{animation:sqin 0.5s cubic-bezier(.2,.9,.2,1.05)}
+@keyframes sqin{0%{transform:translateX(30px) scale(0.96);opacity:0}70%{transform:translateX(-3px) scale(1.005);opacity:1}100%{transform:translateX(0) scale(1);opacity:1}}
+</style>
+</head>
+<body>
+
+<main class="doc-page">
+
+  <header class="doc-mast">
+    <div class="l">UI · ISS. 004 · FROZEN</div>
+    <h1 class="t">squib<span class="dot">.</span>glass</h1>
+    <div class="r">swift handoff · frosted</div>
+  </header>
+
+  <div class="doc-lede">
+    <b>Frozen reference for the Swift port.</b> One glass treatment — <b>Frosted</b>. Every surface (permission · plan · elicitation · chat) lives in this file as ready-to-paste HTML, with the full portable CSS in a single block at the top. Class names use the <code>.sq-*</code> prefix so they won't collide with whatever wrapper you bring in. JS is optional — only the chat tool-call rows need a click handler.
+  </div>
+
+  <!-- ============================================================
+       0 · TOKENS
+       ============================================================ -->
+  <div class="doc-h"><span class="n">00</span> Design tokens</div>
+  <h2 class="doc-h2">Tokens.</h2>
+  <p class="doc-sub">All values live as CSS custom properties on <code>:root</code>. Mirror these in Swift if you want a hot-swap option (e.g. <code>--sq-accent</code> → <code>NSColor.accent</code>).</p>
+
+  <div class="doc-tokens">
+    <div class="row head"><div>Token</div><div>Value</div><div>Used by</div></div>
+    <div class="row"><div><code>--sq-glass-bg</code></div><div><span class="swatch" style="background:rgba(20,20,24,0.55)"></span><code>rgba(20,20,24,0.55)</code></div><div>card fill</div></div>
+    <div class="row"><div><code>--sq-glass-bg-inner</code></div><div><span class="swatch" style="background:rgba(0,0,0,0.22)"></span><code>rgba(0,0,0,0.22)</code></div><div>cmd preview, tool body</div></div>
+    <div class="row"><div><code>--sq-glass-bg-soft</code></div><div><span class="swatch" style="background:rgba(0,0,0,0.18)"></span><code>rgba(0,0,0,0.18)</code></div><div>elicit form panel</div></div>
+    <div class="row"><div><code>--sq-glass-border</code></div><div><code>rgba(255,255,255,0.10)</code></div><div>card edge, sub-elements</div></div>
+    <div class="row"><div><code>--sq-glass-border-strong</code></div><div><code>rgba(255,255,255,0.16)</code></div><div>buttons</div></div>
+    <div class="row"><div><code>--sq-glass-rim</code></div><div><code>rgba(255,255,255,0.30)</code></div><div>top edge highlight</div></div>
+    <div class="row"><div><code>--sq-accent</code></div><div><span class="swatch" style="background:#d8724e"></span><code>#d8724e</code></div><div>primary, prompt, brand</div></div>
+    <div class="row"><div><code>--sq-accent-strong</code></div><div><span class="swatch" style="background:#e8845e"></span><code>#e8845e</code></div><div>hover, in-text refs</div></div>
+    <div class="row"><div><code>--sq-radius</code> / <code>-inner</code> / <code>-tight</code></div><div><code>22 / 14 / 10 px</code></div><div>card / button / inner</div></div>
+    <div class="row"><div>backdrop</div><div><code>blur(32px) saturate(190%)</code></div><div>card</div></div>
+    <div class="row"><div>shadow</div><div><code>0 22px 50px rgba(0,0,0,.5)</code></div><div>card lift</div></div>
+  </div>
+
+  <div class="doc-callout">
+    <b>Swift note.</b> The card uses <code>backdrop-filter</code> for the blur; in the WKWebView preview that's plenty. In production, place the WebView over an <code>NSVisualEffectView</code> with <code>.hudWindow</code> material so the blur reads correctly when the wallpaper is animated or videoed. Set the WebView's <code>drawsBackground = false</code> so the glass actually composites over the effect view.
+  </div>
+
+  <!-- ============================================================
+       1 · PERMISSION CARDS
+       ============================================================ -->
+  <div class="doc-h"><span class="n">01</span> Permission card</div>
+  <h2 class="doc-h2">Permission · Bash, Edit, Read.</h2>
+  <p class="doc-sub">Three pill flavors. Buttons (Allow / Deny / Allow Session / Always allow) are SF Pro; only keybindings stay mono. Compact = drop the <code>.sq-body</code> block entirely.</p>
+
+  <div class="doc-spec">
+    <div>
+      <div class="doc-stage wp1">
+        <div class="lbl">A · permission · bash</div>
+        <div class="stamp">DEFAULT</div>
+        <div class="sq-card enter">
+          <div class="sq-head">
+            <div>
+              <div class="sq-title">Permission Request</div>
+              <div class="sq-meta">self-service-frontend<span class="dot">·</span>#969</div>
+            </div>
+            <span class="sq-pill bash">Bash</span>
+          </div>
+          <div class="sq-body"><div class="sq-cmd"><span class="prompt">$ </span>brew update &amp;&amp; brew upgrade</div></div>
+          <div class="sq-actions">
+            <button class="sq-btn">Deny <span class="kbd">[⌘⇧N]</span></button>
+            <button class="sq-btn primary">Allow <span class="kbd">[⌘⇧Y]</span></button>
+          </div>
+          <div class="sq-suggest">
+            <button class="sq-sug"><span>Allow Session</span><span class="kbd">[⌘⇧S]</span></button>
+            <button class="sq-sug"><span>Always allow <code>brew update:*</code></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="doc-code">
+        <div class="doc-code-head"><span>permission · bash</span><span class="tag">.sq-card</span></div>
+        <button class="doc-code-copy" data-copy="snip-perm-bash">copy</button>
+<pre id="snip-perm-bash">&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-card"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-head"</span>&gt;
+    &lt;<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-title"</span>&gt;Permission Request&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-meta"</span>&gt;{folder}·#{shortId}&lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"sq-pill bash"</span>&gt;Bash&lt;/<span class="k">span</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-body"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cmd"</span>&gt;
+      &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"prompt"</span>&gt;$ &lt;/<span class="k">span</span>&gt;{command}
+    &lt;/<span class="k">div</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-actions"</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn"</span>         data-action=<span class="s">"deny"</span>&gt;Deny  &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧N]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn primary"</span> data-action=<span class="s">"allow"</span>&gt;Allow &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧Y]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-suggest"</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-sug"</span> data-action=<span class="s">"allow-session"</span>&gt;
+      &lt;<span class="k">span</span>&gt;Allow Session&lt;/<span class="k">span</span>&gt;&lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧S]&lt;/<span class="k">span</span>&gt;
+    &lt;/<span class="k">button</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-sug"</span> data-action=<span class="s">"allow-always"</span>&gt;
+      &lt;<span class="k">span</span>&gt;Always allow &lt;<span class="k">code</span>&gt;{rule}&lt;/<span class="k">code</span>&gt;&lt;/<span class="k">span</span>&gt;
+    &lt;/<span class="k">button</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-spec">
+    <div>
+      <div class="doc-stage wp4">
+        <div class="lbl">B · permission · edit</div>
+        <div class="sq-card enter">
+          <div class="sq-head">
+            <div>
+              <div class="sq-title">Permission Request</div>
+              <div class="sq-meta">self-service-frontend<span class="dot">·</span>#969</div>
+            </div>
+            <span class="sq-pill edit">Edit</span>
+          </div>
+          <div class="sq-body"><div class="sq-cmd"><span class="prompt">› </span>edit src/components/Pet.tsx
++ add state transition timer
+- remove legacy SVG eye tracker</div></div>
+          <div class="sq-actions">
+            <button class="sq-btn">Deny <span class="kbd">[⌘⇧N]</span></button>
+            <button class="sq-btn primary">Allow <span class="kbd">[⌘⇧Y]</span></button>
+          </div>
+          <div class="sq-suggest">
+            <button class="sq-sug"><span>Allow Edit in <code>src/</code></span><span class="kbd">[⌘⇧S]</span></button>
+            <button class="sq-sug"><span>Auto-accept edits</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="doc-stage wp2">
+        <div class="lbl">C · compact · no body</div>
+        <div class="stamp">TIGHT</div>
+        <div class="sq-card enter">
+          <div class="sq-head">
+            <div>
+              <div class="sq-title">Permission Request</div>
+              <div class="sq-meta">self-service-frontend<span class="dot">·</span>#969</div>
+            </div>
+            <span class="sq-pill bash">Bash</span>
+          </div>
+          <div class="sq-actions">
+            <button class="sq-btn">Deny <span class="kbd">[⌘⇧N]</span></button>
+            <button class="sq-btn primary">Allow <span class="kbd">[⌘⇧Y]</span></button>
+          </div>
+          <div class="sq-suggest">
+            <button class="sq-sug"><span>Allow Session</span><span class="kbd">[⌘⇧S]</span></button>
+            <button class="sq-sug"><span>Always allow <code>brew update:*</code></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-callout">
+    <b>Pill colors.</b> <code>.sq-pill.bash</code> #d8724e · <code>.edit</code> #5b7fb8 · <code>.read</code> #6a9b7c · <code>.write</code> #c79556 · <code>.glob</code> #8e78b6 · <code>.grep</code> #b87c8e · <code>.agent</code> #6aa3b0 · <code>.plan</code> / <code>.ask</code> neutral white-12% with border. Add a <code>data-tool</code> attribute on the host so Swift can map it to the matching CSS class.
+  </div>
+
+  <!-- ============================================================
+       2 · PLAN REVIEW
+       ============================================================ -->
+  <div class="doc-h"><span class="n">02</span> Plan review</div>
+  <h2 class="doc-h2">Plan review.</h2>
+  <p class="doc-sub">Two actions only — Edit Plan / Approve. No "Go to Terminal".</p>
+
+  <div class="doc-spec">
+    <div>
+      <div class="doc-stage wp2">
+        <div class="lbl">plan review</div>
+        <div class="sq-card enter">
+          <div class="sq-head">
+            <div>
+              <div class="sq-title">Plan Review</div>
+              <div class="sq-meta">self-service-frontend<span class="dot">·</span>#969</div>
+            </div>
+            <span class="sq-pill plan">Plan</span>
+          </div>
+          <div class="sq-body"><div class="sq-cmd"><span class="prompt">› </span>Migrate auth to OAuth2
+1. Add <span class="ref">oauth2-proxy</span> service
+2. Update <span class="ref">auth.ts</span> client
+3. Add callback routes in <span class="ref">server/api.ts</span>
+4. Migrate existing JWT tokens
+5. Remove legacy <span class="ref">sessionStore.ts</span></div></div>
+          <div class="sq-actions">
+            <button class="sq-btn">Edit Plan <span class="kbd">[⌘⇧E]</span></button>
+            <button class="sq-btn primary">Approve <span class="kbd">[⌘⇧Y]</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="doc-code">
+        <div class="doc-code-head"><span>plan review</span><span class="tag">.sq-card</span></div>
+        <button class="doc-code-copy" data-copy="snip-plan">copy</button>
+<pre id="snip-plan">&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-card"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-head"</span>&gt;
+    &lt;<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-title"</span>&gt;Plan Review&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-meta"</span>&gt;{folder}·#{shortId}&lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"sq-pill plan"</span>&gt;Plan&lt;/<span class="k">span</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-body"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cmd"</span>&gt;
+      &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"prompt"</span>&gt;› &lt;/<span class="k">span</span>&gt;{planTitle}
+{planSteps}
+    &lt;/<span class="k">div</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-actions"</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn"</span>         data-action=<span class="s">"edit"</span>&gt;Edit Plan &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧E]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn primary"</span> data-action=<span class="s">"approve"</span>&gt;Approve &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧Y]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       3 · ELICITATION
+       ============================================================ -->
+  <div class="doc-h"><span class="n">03</span> Elicitation</div>
+  <h2 class="doc-h2">Elicitation · needs input.</h2>
+  <p class="doc-sub">Wider card (<code>.sq-card.wide</code>, 380px). Selected option uses <code>.sq-opt.sel</code>. Submit Answer is SF Pro.</p>
+
+  <div class="doc-spec">
+    <div>
+      <div class="doc-stage wp3 tall">
+        <div class="lbl">elicitation · needs input</div>
+        <div class="stamp">FORM</div>
+        <div class="sq-card wide enter">
+          <div class="sq-head">
+            <div>
+              <div class="sq-title">Needs Input</div>
+              <div class="sq-meta">self-service-frontend<span class="dot">·</span>#969</div>
+            </div>
+            <span class="sq-pill ask">Ask</span>
+          </div>
+          <div class="sq-form">
+            <div class="lbl">Session goal</div>
+            <div class="q">What would you like to focus on in this session?</div>
+            <div class="hint">Choose one option</div>
+            <div class="sq-opt"><div class="radio"></div><div><div class="ot">Code review</div><div class="od">Review recent changes and provide feedback on the implementation.</div></div></div>
+            <div class="sq-opt sel"><div class="radio"></div><div><div class="ot">Bug fixing</div><div class="od">Investigate and fix a specific bug or unexpected behavior.</div></div></div>
+            <div class="sq-opt"><div class="radio"></div><div><div class="ot">New feature</div><div class="od">Plan and implement a new feature or enhancement.</div></div></div>
+          </div>
+          <div class="sq-actions">
+            <button class="sq-btn">Skip <span class="kbd">[⌘⇧N]</span></button>
+            <button class="sq-btn primary">Submit Answer <span class="kbd">[⌘⇧Y]</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="doc-code">
+        <div class="doc-code-head"><span>elicitation</span><span class="tag">.sq-card.wide</span></div>
+        <button class="doc-code-copy" data-copy="snip-elicit">copy</button>
+<pre id="snip-elicit">&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-card wide"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-head"</span>&gt;
+    &lt;<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-title"</span>&gt;Needs Input&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-meta"</span>&gt;{folder}·#{shortId}&lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"sq-pill ask"</span>&gt;Ask&lt;/<span class="k">span</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-form"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"lbl"</span>&gt;{section}&lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"q"</span>&gt;{question}&lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"hint"</span>&gt;{hint}&lt;/<span class="k">div</span>&gt;
+
+    &lt;!-- repeat per option --&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-opt"</span> data-id=<span class="s">"{id}"</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"radio"</span>&gt;&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span>&gt;
+        &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"ot"</span>&gt;{title}&lt;/<span class="k">div</span>&gt;
+        &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"od"</span>&gt;{desc}&lt;/<span class="k">div</span>&gt;
+      &lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    <span class="c">// add class "sel" to the chosen option</span>
+  &lt;/<span class="k">div</span>&gt;
+
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-actions"</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn"</span>         data-action=<span class="s">"skip"</span>&gt;Skip          &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧N]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+    &lt;<span class="k">button</span> <span class="v">class</span>=<span class="s">"sq-btn primary"</span> data-action=<span class="s">"submit"</span>&gt;Submit Answer &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"kbd"</span>&gt;[⌘⇧Y]&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">button</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       4 · CHAT
+       ============================================================ -->
+  <div class="doc-h"><span class="n">04</span> Chat window</div>
+  <h2 class="doc-h2">Chat — full claude-code surface.</h2>
+  <p class="doc-sub">460 × 600. Header (close · history · title+branch · new · expand). Body has user bubbles, assistant prose, thinking preamble, and expandable tool-call cards (Read · Edit · Grep · Bash · Write · Glob). Footer: pill input, model picker, token-context bar.</p>
+
+  <div class="doc-grid full">
+    <div class="doc-stage wp2 tall" style="justify-content:center">
+      <div class="lbl">chat · feat/oauth2</div>
+      <div class="stamp">FUTURE SHIP</div>
+      <div class="sq-card sq-chat enter">
+        <div class="chead">
+          <div class="chead-l">
+            <div class="sq-cbtn" data-action="close" title="close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></div>
+            <div class="sq-cbtn" data-action="history" title="history"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 2"/></svg></div>
+          </div>
+          <div class="ctitle">
+            <span class="live"></span>squib · claude-sonnet
+            <span class="branch">⎇ feat/oauth2</span>
+          </div>
+          <div class="chead-r">
+            <div class="sq-cbtn" data-action="new" title="new"><svg viewBox="0 0 24 24"><path d="M4 20h4L18 10l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg></div>
+            <div class="sq-cbtn" data-action="expand" title="expand"><svg viewBox="0 0 24 24"><path d="M4 14v6h6M20 10V4h-6M4 20l7-7M20 4l-7 7"/></svg></div>
+          </div>
+        </div>
+
+        <div class="cbody">
+          <div class="sq-msg user"><div class="bubble">can you check why the login is redirecting twice?</div></div>
+
+          <div class="sq-msg assistant">
+            <div class="bubble"><span class="glyph">✦</span>Looking into it — I'll scan the auth flow and the session refresh logic.</div>
+            <div class="sq-think">thinking · the user reports a double redirect on login. likely a useEffect firing on session change…</div>
+
+            <div class="sq-tool open">
+              <div class="h">
+                <div class="ic read">R</div>
+                <span class="nm">Read</span>
+                <span class="arg">src/auth/ <em>LoginShell.tsx</em></span>
+                <div class="st"><span class="ok">✓ done</span></div>
+                <div class="ca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+              </div>
+              <div class="b"><div class="fh">src/auth/LoginShell.tsx · 12 lines</div><span class="ln">42</span><span class="key">export function</span> <span class="key">LoginShell</span>() {
+<span class="ln">43</span>  <span class="key">const</span> session = useSession();
+<span class="ln">44</span>  <span class="key">const</span> router = useRouter();
+<span class="ln">45</span>
+<span class="ln">46</span>  useEffect(() =&gt; {
+<span class="ln">47</span>    <span class="com">// fires twice when session refreshes</span>
+<span class="ln">48</span>    <span class="key">if</span> (session?.user) router.push(<span class="str">"/app"</span>);
+<span class="ln">49</span>  }, [session]);</div>
+            </div>
+
+            <div class="sq-tool">
+              <div class="h">
+                <div class="ic grep">G</div>
+                <span class="nm">Grep</span>
+                <span class="arg">pattern <em>"redirect"</em></span>
+                <div class="st"><span class="ok">✓ 4 hits</span></div>
+                <div class="ca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+              </div>
+              <div class="b"><div class="fh">pattern: redirect · 4 hits</div><span class="ln">12</span>src/auth/LoginShell.tsx:  router.push("/app");
+<span class="ln">28</span>src/auth/AuthProvider.tsx:  if (redirect) navigate(redirect);
+<span class="ln">14</span>src/middleware.ts:  return NextResponse.redirect(loginUrl);
+<span class="ln"> 7</span>src/utils/url.ts:  export const safeRedirect = (path) =&gt; {</div>
+            </div>
+
+            <div class="bubble" style="margin-top:6px">Found it. <code>useEffect</code> in <code>LoginShell.tsx</code> fires a second redirect when the session refreshes — there's no guard against re-running after the first navigation. I'll patch it with a ref so it only fires once.</div>
+          </div>
+
+          <div class="sq-msg user"><div class="bubble">yeah, patch it</div></div>
+
+          <div class="sq-msg assistant">
+            <div class="sq-tool open">
+              <div class="h">
+                <div class="ic edit">E</div>
+                <span class="nm">Edit</span>
+                <span class="arg">src/auth/<em>LoginShell.tsx</em></span>
+                <div class="st"><span class="ok">✓ +3 −2</span></div>
+                <div class="ca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+              </div>
+              <div class="b"><div class="fh">src/auth/LoginShell.tsx · +3 −2</div><span class="ln">46</span>  useEffect(() =&gt; {
+<span class="ln">47</span><span class="del">    if (session?.user) router.push("/app");</span>
+<span class="ln">47</span><span class="add">    if (session?.user &amp;&amp; !redirected.current) {</span>
+<span class="ln">48</span><span class="add">      redirected.current = true;</span>
+<span class="ln">49</span><span class="add">      router.push("/app");</span>
+<span class="ln">50</span><span class="add">    }</span>
+<span class="ln">51</span>  }, [session]);</div>
+            </div>
+
+            <div class="sq-tool">
+              <div class="h">
+                <div class="ic bash">B</div>
+                <span class="nm">Bash</span>
+                <span class="arg">pnpm test <em>src/auth</em></span>
+                <div class="st"><span class="ok">✓ 12 passed</span></div>
+                <div class="ca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></div>
+              </div>
+              <div class="b"><span class="fh">$ pnpm test src/auth</span>
+<span class="com"> PASS </span> src/auth/login.test.tsx
+<span class="com"> PASS </span> src/auth/session.test.tsx
+<span class="com">Tests:       <span style="color:#78c08a">12 passed</span>, 12 total</span>
+<span class="com">Time:        2.41s</span></div>
+            </div>
+
+            <div class="bubble" style="margin-top:6px"><span class="glyph">✦</span>Patched. Added a <code>redirected</code> ref so the effect only navigates once. All 12 auth tests still pass.</div>
+          </div>
+        </div>
+
+        <div class="cfoot">
+          <div class="cinput">
+            <div class="plus"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+            <div class="ph">Reply to squib…</div>
+            <div class="mode">claude-sonnet <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></div>
+            <div class="send"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg></div>
+          </div>
+          <div class="cmeta">
+            <span>● connected · 4 tool calls</span>
+            <span class="ctx">context <span class="b"><i></i></span> 42% · 84k / 200k</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-spec">
+    <div>
+      <div class="doc-code">
+        <div class="doc-code-head"><span>chat shell</span><span class="tag">.sq-card.sq-chat</span></div>
+        <button class="doc-code-copy" data-copy="snip-chat">copy</button>
+<pre id="snip-chat">&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-card sq-chat"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"chead"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"chead-l"</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cbtn"</span> data-action=<span class="s">"close"</span>&gt;{closeIcon}&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cbtn"</span> data-action=<span class="s">"history"</span>&gt;{historyIcon}&lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"ctitle"</span>&gt;
+      &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"live"</span>&gt;&lt;/<span class="k">span</span>&gt;squib · {model}
+      &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"branch"</span>&gt;⎇ {branch}&lt;/<span class="k">span</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"chead-r"</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cbtn"</span> data-action=<span class="s">"new"</span>&gt;{newIcon}&lt;/<span class="k">div</span>&gt;
+      &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-cbtn"</span> data-action=<span class="s">"expand"</span>&gt;{expandIcon}&lt;/<span class="k">div</span>&gt;
+    &lt;/<span class="k">div</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"cbody"</span>&gt;
+    &lt;!-- messages --&gt;
+  &lt;/<span class="k">div</span>&gt;
+
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"cfoot"</span>&gt;...&lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;</pre>
+      </div>
+    </div>
+    <div>
+      <div class="doc-code">
+        <div class="doc-code-head"><span>messages · user / assistant / tool</span><span class="tag">.sq-msg, .sq-tool</span></div>
+        <button class="doc-code-copy" data-copy="snip-msgs">copy</button>
+<pre id="snip-msgs"><span class="c">// user</span>
+&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-msg user"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"bubble"</span>&gt;{text}&lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;
+
+<span class="c">// assistant prose</span>
+&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-msg assistant"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"bubble"</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"glyph"</span>&gt;✦&lt;/<span class="k">span</span>&gt;{markdown}
+  &lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;
+
+<span class="c">// thinking preamble (optional)</span>
+&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-think"</span>&gt;thinking · {gist}&lt;/<span class="k">div</span>&gt;
+
+<span class="c">// tool call (start collapsed; toggle 'open' on click)</span>
+&lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"sq-tool"</span> data-tool=<span class="s">"edit"</span> data-status=<span class="s">"ok"</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"h"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"ic edit"</span>&gt;E&lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"nm"</span>&gt;Edit&lt;/<span class="k">span</span>&gt;
+    &lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"arg"</span>&gt;{path}&lt;<span class="k">em</span>&gt;{file}&lt;/<span class="k">em</span>&gt;&lt;/<span class="k">span</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"st"</span>&gt;&lt;<span class="k">span</span> <span class="v">class</span>=<span class="s">"ok"</span>&gt;✓ +3 −2&lt;/<span class="k">span</span>&gt;&lt;/<span class="k">div</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"ca"</span>&gt;{caretIcon}&lt;/<span class="k">div</span>&gt;
+  &lt;/<span class="k">div</span>&gt;
+  &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"b"</span>&gt;
+    &lt;<span class="k">div</span> <span class="v">class</span>=<span class="s">"fh"</span>&gt;{filehead}&lt;/<span class="k">div</span>&gt;
+    {diffLines}
+  &lt;/<span class="k">div</span>&gt;
+&lt;/<span class="k">div</span>&gt;</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-callout">
+    <b>Diff lines.</b> Inside <code>.sq-tool .b</code>: each line is <code>&lt;span class="ln"&gt;{n}&lt;/span&gt;</code> followed by <code>&lt;span class="add"&gt;…&lt;/span&gt;</code>, <code>&lt;span class="del"&gt;…&lt;/span&gt;</code>, or plain text. Use <code>&lt;span class="key"&gt;</code> for keywords, <code>.str</code> for strings, <code>.com</code> for comments. Server can pre-render the syntax spans, or do it client-side with a <code>highlight.js</code> sidecar — they only need to match a handful of CSS hooks.
+  </div>
+
+  <!-- ============================================================
+       5 · JS BRIDGE
+       ============================================================ -->
+  <div class="doc-h"><span class="n">05</span> JS bridge</div>
+  <h2 class="doc-h2">Wiring it to Swift.</h2>
+  <p class="doc-sub">Minimum viable bridge — Swift posts payloads in, the page returns user actions out. Same shape as your existing <code>BubbleWindow.swift</code>.</p>
+
+  <div class="doc-code">
+    <div class="doc-code-head"><span>bridge contract</span><span class="tag">window.squib</span></div>
+    <button class="doc-code-copy" data-copy="snip-bridge">copy</button>
+<pre id="snip-bridge"><span class="c">// ===== inbound (Swift → JS): mount or update a card =====</span>
+<span class="k">window</span>.squib.<span class="n">load</span>({
+  <span class="v">kind</span>: <span class="s">"permission"</span>,    <span class="c">// "permission" | "plan" | "elicitation" | "default"</span>
+  <span class="v">tool</span>: <span class="s">"bash"</span>,          <span class="c">// "bash" | "edit" | "read" | "write" | "glob" | "grep" | "agent" | "plan" | "ask"</span>
+  <span class="v">title</span>: <span class="s">"Permission Request"</span>,
+  <span class="v">folder</span>: <span class="s">"self-service-frontend"</span>,
+  <span class="v">shortId</span>: <span class="s">"969"</span>,
+  <span class="v">command</span>: <span class="s">"brew update &amp;&amp; brew upgrade"</span>,    <span class="c">// permission/plan body</span>
+  <span class="v">compact</span>: <span class="k">false</span>,                              <span class="c">// drop the .sq-body block</span>
+  <span class="v">suggestions</span>: [
+    { <span class="v">label</span>: <span class="s">"Allow Session"</span>, <span class="v">kbd</span>: <span class="s">"⌘⇧S"</span>, <span class="v">id</span>: <span class="s">"allow-session"</span> },
+    { <span class="v">label</span>: <span class="s">"Always allow `brew update:*`"</span>,  <span class="v">id</span>: <span class="s">"allow-always"</span> }
+  ],
+  <span class="v">elicit</span>: {                              <span class="c">// only when kind === "elicitation"</span>
+    <span class="v">section</span>: <span class="s">"Session goal"</span>,
+    <span class="v">question</span>: <span class="s">"What would you like…"</span>,
+    <span class="v">hint</span>: <span class="s">"Choose one option"</span>,
+    <span class="v">options</span>: [{ <span class="v">id</span>, <span class="v">title</span>, <span class="v">desc</span>, <span class="v">selected</span> }]
+  }
+});
+
+<span class="c">// ===== inbound (Swift → JS): chat append =====</span>
+<span class="k">window</span>.squib.chat.<span class="n">append</span>({
+  <span class="v">role</span>: <span class="s">"assistant"</span>,                <span class="c">// "user" | "assistant"</span>
+  <span class="v">text</span>: <span class="s">"Found it. ..."</span>,
+  <span class="v">thinking</span>: <span class="s">"the user reports..."</span>,    <span class="c">// optional preamble</span>
+  <span class="v">tools</span>: [{                            <span class="c">// optional tool calls</span>
+    <span class="v">tool</span>: <span class="s">"edit"</span>, <span class="v">arg</span>: <span class="s">"src/auth/"</span>, <span class="v">file</span>: <span class="s">"LoginShell.tsx"</span>,
+    <span class="v">status</span>: <span class="s">"ok"</span>,                    <span class="c">// "ok" | "err" | "running"</span>
+    <span class="v">summary</span>: <span class="s">"+3 −2"</span>,
+    <span class="v">body</span>: <span class="s">"&lt;diff html&gt;"</span>             <span class="c">// pre-rendered span markup</span>
+  }]
+});
+
+<span class="c">// ===== outbound (JS → Swift) =====</span>
+<span class="c">// click on .sq-btn[data-action] / .sq-sug[data-action] / .sq-cbtn[data-action]</span>
+<span class="c">// posts:</span>
+{ <span class="v">type</span>: <span class="s">"action"</span>, <span class="v">action</span>: <span class="s">"allow"</span> }
+{ <span class="v">type</span>: <span class="s">"action"</span>, <span class="v">action</span>: <span class="s">"allow-session"</span> }
+{ <span class="v">type</span>: <span class="s">"submit"</span>, <span class="v">optionId</span>: <span class="s">"bug-fixing"</span> }       <span class="c">// elicitation</span>
+{ <span class="v">type</span>: <span class="s">"chat:send"</span>, <span class="v">text</span>: <span class="s">"yeah, patch it"</span> }
+{ <span class="v">type</span>: <span class="s">"chat:stop"</span> }
+
+<span class="c">// transport: webkit.messageHandlers.squib.postMessage(...)</span></pre>
+  </div>
+
+  <div class="doc-callout">
+    <b>Card sizing.</b> Card width is <code>340px</code> default, <code>380px</code> for elicitation (<code>.sq-card.wide</code>). Chat is <code>460×600</code> (<code>.sq-card.sq-chat</code>). Window size in Swift should track the card — don't add NSWindow padding around it; the glass card IS the window content.
+  </div>
+
+  <!-- ============================================================
+       6 · KEYBINDINGS
+       ============================================================ -->
+  <div class="doc-h"><span class="n">06</span> Keybindings</div>
+  <div class="doc-tokens">
+    <div class="row head"><div>Combo</div><div>Action</div><div>Surface</div></div>
+    <div class="row"><div><code>⌘⇧Y</code></div><div>primary (Allow / Approve / Submit)</div><div>all</div></div>
+    <div class="row"><div><code>⌘⇧N</code></div><div>secondary (Deny / Skip)</div><div>permission, elicitation</div></div>
+    <div class="row"><div><code>⌘⇧S</code></div><div>Allow Session</div><div>permission</div></div>
+    <div class="row"><div><code>⌘⇧E</code></div><div>Edit Plan</div><div>plan review</div></div>
+    <div class="row"><div><code>↑ ↓</code></div><div>navigate options</div><div>elicitation</div></div>
+    <div class="row"><div><code>esc</code></div><div>dismiss / close</div><div>chat, all cards</div></div>
+  </div>
+
+  <!-- ============================================================
+       7 · CHECKLIST
+       ============================================================ -->
+  <div class="doc-h"><span class="n">07</span> Port checklist</div>
+  <div class="doc-callout">
+    <b>1.</b> Lift the entire <code>:root { --sq-* }</code> block + everything from <code>.sq-card</code> down to <code>@keyframes sqin</code> into <code>bubbleHTML</code>.<br>
+    <b>2.</b> Window: <code>NSWindow.styleMask = [.borderless]</code>, <code>backgroundColor = .clear</code>, <code>isOpaque = false</code>; <code>NSVisualEffectView.material = .hudWindow</code> at the back; WKWebView with <code>setValue(false, forKey: "drawsBackground")</code> in front.<br>
+    <b>3.</b> Body should set <code>background: transparent</code>; the card provides its own.<br>
+    <b>4.</b> Wire <code>data-action</code> click delegation → <code>webkit.messageHandlers.squib.postMessage</code>.<br>
+    <b>5.</b> Chat tool toggle: <code>document.addEventListener('click', e =&gt; { const t = e.target.closest('.sq-tool .h'); if (t) t.parentElement.classList.toggle('open'); })</code>.<br>
+    <b>6.</b> Mount <code>window.squib.load({...})</code> + <code>window.squib.chat.append({...})</code> as the only Swift→JS entry points; everything else is style-only.
+  </div>
+
+</main>
+
+<script>
+/* Optional client behavior — duplicate this in Swift's bubbleHTML if you want it. */
+document.addEventListener('click', e => {
+  // Tool-call expand
+  const head = e.target.closest('.sq-tool .h');
+  if (head) head.parentElement.classList.toggle('open');
+
+  // Option select
+  const opt = e.target.closest('.sq-opt');
+  if (opt) {
+    opt.parentElement.querySelectorAll('.sq-opt').forEach(x => x.classList.remove('sel'));
+    opt.classList.add('sel');
+  }
+
+  // Copy buttons (doc only)
+  const cp = e.target.closest('.doc-code-copy');
+  if (cp) {
+    const id = cp.dataset.copy;
+    const pre = document.getElementById(id);
+    if (!pre) return;
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      cp.classList.add('ok');
+      const orig = cp.textContent;
+      cp.textContent = 'copied';
+      setTimeout(() => { cp.classList.remove('ok'); cp.textContent = orig; }, 1400);
+    });
+  }
+});
+</script>
+
+</body>
+</html>

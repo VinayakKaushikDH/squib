@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+  </defs>
+
+  
+  <rect class="shadow-anim" x="3" y="15" width="9" height="1" fill="#000" opacity="0.5"></rect>
+
+  
+  <g>
+    
+    <g class="packet p1">
+      <circle cx="0" cy="0" r="1.2" fill="#FF5252"></circle>
+      <circle cx="-0.35" cy="-0.35" r="0.45" fill="#FF8A80" opacity="0.7"></circle>
+      <circle cx="0.3" cy="0.4" r="0.6" fill="#D32F2F" opacity="0.3"></circle>
+    </g>
+    
+    <g class="packet p2">
+      <circle cx="0" cy="0" r="1.2" fill="#FFC107"></circle>
+      <circle cx="-0.35" cy="-0.35" r="0.45" fill="#FFE082" opacity="0.7"></circle>
+      <circle cx="0.3" cy="0.4" r="0.6" fill="#FFA000" opacity="0.3"></circle>
+    </g>
+    
+    <g class="packet p3">
+      <circle cx="0" cy="0" r="1.2" fill="#4CAF50"></circle>
+      <circle cx="-0.35" cy="-0.35" r="0.45" fill="#81C784" opacity="0.7"></circle>
+      <circle cx="0.3" cy="0.4" r="0.6" fill="#388E3C" opacity="0.3"></circle>
+    </g>
+  </g>
+
+  
+  <g fill="#DE886D">
+    <rect x="3" y="13" width="1" height="2"></rect>
+    <rect x="5" y="13" width="1" height="2"></rect>
+    <rect x="9" y="13" width="1" height="2"></rect>
+    <rect x="11" y="13" width="1" height="2"></rect>
+  </g>
+
+  
+  <g class="body-rock">
+    <g class="breathe">
+      
+      <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+
+      
+      <g class="arm-juggle-l">
+        <rect x="0" y="9" width="2" height="2" fill="#DE886D"></rect>
+      </g>
+
+      
+      <g class="arm-juggle-r">
+        <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+      </g>
+
+      
+      <g class="eye-track" fill="#000">
+        <g class="blink">
+          <rect x="4" y="8" width="1" height="2"></rect>
+          <rect x="10" y="8" width="1" height="2"></rect>
+        </g>
+      </g>
+
+    </g>
+  </g>
+</svg>

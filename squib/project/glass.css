@@ -1,0 +1,523 @@
+/* Liquid-glass UI layer — layered on top of the zine base styles.
+ * Used by the bubble, elicitation, chat, and pet's speech surfaces.
+ * Dark-first; paper/light mode falls back to lighter translucent.
+ */
+
+:root {
+  --glass-bg: rgba(20, 20, 22, 0.72);
+  --glass-bg-soft: rgba(32, 32, 36, 0.55);
+  --glass-bg-inner: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.09);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+  --glass-text: #f0ece3;
+  --glass-text-mute: rgba(240, 236, 227, 0.55);
+  --glass-text-dim: rgba(240, 236, 227, 0.38);
+  --glass-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --glass-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif;
+
+  --glass-accent: #d8724e;            /* warm orange-rust, matches screenshot */
+  --glass-accent-soft: rgba(216, 114, 78, 0.18);
+  --glass-accent-border: rgba(216, 114, 78, 0.5);
+
+  --glass-radius: 22px;
+  --glass-radius-inner: 14px;
+  --glass-radius-tight: 10px;
+
+  --glass-shadow:
+    0 1px 0 rgba(255,255,255,0.06) inset,
+    0 0 0 0.5px rgba(255,255,255,0.08) inset,
+    0 20px 40px rgba(0,0,0,0.45),
+    0 4px 12px rgba(0,0,0,0.35);
+}
+
+/* Light glass variant (paper/day mode) */
+[data-theme="light"] .glass-scope {
+  --glass-bg: rgba(250, 248, 243, 0.82);
+  --glass-bg-soft: rgba(255, 255, 255, 0.55);
+  --glass-bg-inner: rgba(0, 0, 0, 0.035);
+  --glass-border: rgba(30, 25, 18, 0.12);
+  --glass-border-strong: rgba(30, 25, 18, 0.22);
+  --glass-text: #1f1a10;
+  --glass-text-mute: rgba(31, 26, 16, 0.55);
+  --glass-text-dim: rgba(31, 26, 16, 0.38);
+  --glass-accent-soft: rgba(216, 114, 78, 0.22);
+  --glass-shadow:
+    0 1px 0 rgba(255,255,255,0.6) inset,
+    0 0 0 0.5px rgba(0,0,0,0.06) inset,
+    0 18px 36px rgba(0,0,0,0.18),
+    0 4px 10px rgba(0,0,0,0.10);
+}
+
+/* --- Core card ---------------------------------------------------- */
+.gcard {
+  width: 340px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  color: var(--glass-text);
+  font-family: var(--glass-ui);
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  overflow: hidden;
+}
+.gcard.wide { width: 380px; }
+
+.gcard::before {
+  /* subtle top-edge highlight, Apple-glass staple */
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  pointer-events: none;
+}
+
+.ghead {
+  padding: 14px 16px 10px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.ghead .htitle {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--glass-text);
+}
+.ghead .hmeta {
+  font-family: var(--glass-mono);
+  font-size: 11px;
+  color: var(--glass-text-mute);
+  margin-top: 3px;
+  letter-spacing: 0.01em;
+}
+.ghead .hmeta .dot { opacity: 0.5; padding: 0 4px; }
+.ghead .hmeta .sid { color: var(--glass-text-mute); }
+
+/* Tool pill (top-right) */
+.gpill {
+  font-family: var(--glass-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  background: var(--glass-accent);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.gpill.bash  { background: #d8724e; }
+.gpill.edit  { background: #5b7fb8; }
+.gpill.read  { background: #6a9b7c; }
+.gpill.write { background: #c79556; }
+.gpill.glob  { background: #8e78b6; }
+.gpill.grep  { background: #b87c8e; }
+.gpill.agent { background: #6aa3b0; }
+.gpill.plan  { background: rgba(255,255,255,0.08); color: var(--glass-text); border: 1px solid var(--glass-border-strong); }
+.gpill.ask   { background: rgba(255,255,255,0.08); color: var(--glass-text); border: 1px solid var(--glass-border-strong); }
+
+/* Body content (cmd preview) */
+.gbody { padding: 0 16px 12px; }
+.gcmd {
+  font-family: var(--glass-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  background: var(--glass-bg-inner);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius-tight);
+  padding: 10px 12px;
+  color: var(--glass-text);
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.gcmd .prompt { color: var(--glass-accent); user-select: none; }
+.gcmd::-webkit-scrollbar { width: 6px; }
+.gcmd::-webkit-scrollbar-thumb { background: var(--glass-border-strong); border-radius: 3px; }
+
+/* Primary action row */
+.gactions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 0 10px 10px;
+}
+.gactions.single { grid-template-columns: 1fr; }
+
+.gbtn {
+  font-family: var(--glass-ui);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  padding: 9px 14px;
+  border-radius: var(--glass-radius-inner);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.12s ease, transform 0.06s ease, border-color 0.12s ease;
+  border: 1px solid var(--glass-border-strong);
+  background: var(--glass-bg-inner);
+  color: var(--glass-text);
+  user-select: none;
+}
+.gbtn:hover { background: rgba(255,255,255,0.07); }
+.gbtn:active { transform: translateY(0.5px); }
+.gbtn.primary {
+  background: var(--glass-accent);
+  color: #fff;
+  border-color: rgba(0,0,0,0.15);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.2) inset, 0 4px 10px rgba(216,114,78,0.35);
+}
+.gbtn.primary:hover { background: #e08261; }
+
+.kbd {
+  font-family: var(--glass-mono);
+  font-size: 10px;
+  font-weight: 500;
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+  padding-left: 2px;
+}
+.gbtn.primary .kbd { opacity: 0.8; color: #fff; }
+
+/* Suggestion pills (full-width stacked rows) */
+.gsuggest {
+  padding: 0 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gsug {
+  width: 100%;
+  text-align: left;
+  font-family: var(--glass-mono);
+  font-size: 12px;
+  color: var(--glass-text);
+  background: var(--glass-bg-inner);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius-inner);
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.12s ease;
+}
+.gsug:hover { background: rgba(255,255,255,0.07); }
+.gsug .kbd { opacity: 0.45; }
+
+/* Elicitation form group */
+.gform {
+  margin: 0 14px 12px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius-inner);
+  padding: 14px 14px 12px;
+}
+.gform .section-lbl {
+  font-family: var(--glass-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--glass-text-mute);
+  margin-bottom: 8px;
+}
+.gform .q {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--glass-text);
+  margin-bottom: 4px;
+}
+.gform .hint {
+  font-size: 12px;
+  color: var(--glass-text-mute);
+  margin-bottom: 12px;
+}
+
+.gopt {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-radius: var(--glass-radius-tight);
+  background: var(--glass-bg-inner);
+  border: 1px solid var(--glass-border);
+  cursor: pointer;
+  margin-bottom: 6px;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.gopt:hover { background: rgba(255,255,255,0.05); }
+.gopt.sel { border-color: var(--glass-accent-border); background: var(--glass-accent-soft); }
+.gopt .radio {
+  width: 16px; height: 16px;
+  border: 1.5px solid var(--glass-text-mute);
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  transition: border-color 0.12s ease;
+}
+.gopt.sel .radio { border-color: var(--glass-accent); }
+.gopt.sel .radio::after {
+  content: "";
+  position: absolute; inset: 3px;
+  background: var(--glass-accent);
+  border-radius: 50%;
+}
+.gopt .otext .ot { font-size: 14px; font-weight: 600; color: var(--glass-text); line-height: 1.25; }
+.gopt .otext .od { font-size: 12.5px; color: var(--glass-text-mute); line-height: 1.4; margin-top: 3px; }
+
+/* --- Slide-in animation ------------------------------------------- */
+.gcard.enter {
+  animation: gin 0.5s cubic-bezier(.2,.9,.2,1.05);
+}
+@keyframes gin {
+  0% { transform: translateX(30px) scale(0.96); opacity: 0; }
+  70% { transform: translateX(-3px) scale(1.005); opacity: 1; }
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+/* --- Chat bubble (future) ----------------------------------------- */
+.gchat {
+  width: 420px;
+  height: 520px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.gchat .chead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--glass-border);
+  gap: 8px;
+}
+.gchat .chead-left, .gchat .chead-right { display: flex; gap: 6px; align-items: center; }
+.gchat .cbtn-icon {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: var(--glass-bg-inner);
+  border: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  color: var(--glass-text);
+  transition: background 0.12s ease;
+}
+.gchat .cbtn-icon:hover { background: rgba(255,255,255,0.07); }
+.gchat .cbtn-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.gchat .chead .ctitle {
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--glass-text);
+}
+.gchat .chead .ctitle .livedot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #78c08a;
+  box-shadow: 0 0 6px rgba(120,192,138,0.8);
+}
+.gchat .cbody {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 16px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.gchat .cbody::-webkit-scrollbar { width: 6px; }
+.gchat .cbody::-webkit-scrollbar-thumb { background: var(--glass-border-strong); border-radius: 3px; }
+
+.cmsg {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 78%;
+}
+.cmsg.user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+.cmsg.assistant {
+  align-self: flex-start;
+}
+.cmsg .cbubble {
+  padding: 8px 14px;
+  border-radius: 16px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--glass-border);
+  color: var(--glass-text);
+}
+.cmsg.user .cbubble {
+  background: rgba(255,255,255,0.08);
+  border-radius: 16px 16px 4px 16px;
+}
+.cmsg.assistant .cbubble {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+}
+.cmsg.assistant .aglyph {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--glass-accent);
+}
+.cmsg .ctool {
+  font-family: var(--glass-mono);
+  font-size: 11px;
+  color: var(--glass-text-mute);
+  padding: 4px 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: var(--glass-bg-inner);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.cmsg .ctool .done { color: #78c08a; }
+
+.gchat .cfoot {
+  padding: 10px 10px 12px;
+  border-top: 1px solid var(--glass-border);
+}
+.gchat .cinput {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  background: var(--glass-bg-inner);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+}
+.gchat .cinput .plus {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--glass-text-mute);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.gchat .cinput .ph {
+  flex: 1;
+  font-size: 13.5px;
+  color: var(--glass-text-dim);
+}
+.gchat .cinput .mode {
+  font-size: 12px;
+  color: var(--glass-text-mute);
+  padding: 0 6px;
+}
+.gchat .cinput .send {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--glass-accent);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  color: #fff;
+}
+.gchat .cinput .send svg { width: 10px; height: 10px; fill: currentColor; }
+
+/* Desktop stage — where cards sit so you can feel the glass against wallpaper */
+.desktop-stage {
+  background:
+    radial-gradient(ellipse at 30% 20%, #2a4a7e 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 90%, #1a2a4a 0%, transparent 50%),
+    linear-gradient(180deg, #0f1828 0%, #1a2c48 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 40px 30px;
+  min-height: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.desktop-stage.mountain {
+  background:
+    linear-gradient(180deg, #1a3a6e 0%, #2a5a8e 45%, #6a8aae 65%, #8a9ab0 100%);
+}
+.desktop-stage.mountain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 50% 60%, rgba(255,255,255,0.05) 1px, transparent 1.5px);
+  background-size: 3px 3px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.desktop-stage .stage-label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-family: var(--glass-mono);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  z-index: 10;
+}
+.desktop-stage .stage-stamp {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  font-family: var(--glass-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--glass-accent);
+  border: 1px solid var(--glass-accent);
+  padding: 2px 6px;
+  border-radius: 3px;
+  z-index: 10;
+}
+
+/* Chat stage with crab attached on the side */
+.chat-stage-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  position: relative;
+}
+.chat-stage-row .crab-holder {
+  align-self: center;
+  transform: translateX(-12px);
+  z-index: 5;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,0.4));
+}
+
+/* Grid container for bubble showcases */
+.glass-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.glass-grid.full { grid-template-columns: 1fr; }
+
+@media (max-width: 900px) {
+  .glass-grid { grid-template-columns: 1fr; }
+  .gchat { width: 100%; max-width: 400px; }
+}

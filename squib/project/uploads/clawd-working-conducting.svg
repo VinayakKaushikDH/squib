@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+  </defs>
+
+  
+  <rect class="shadow-pulse" x="3" y="15" width="9" height="1" fill="#000000"></rect>
+
+  
+
+  <g class="dim-23"><g class="f1"><g class="cs1">
+    <rect x="0" y="0" width="2" height="2" fill="#FF5252"></rect>
+  </g></g></g>
+
+  <g class="dim-all"><g class="f2">
+    <rect x="0" y="0" width="2" height="2" fill="#FFC107"></rect>
+  </g></g>
+
+  <g class="dim-13"><g class="f3"><g class="cs3">
+    <rect x="0" y="0" width="2" height="2" fill="#0082FC"></rect>
+  </g></g></g>
+
+  <g class="dim-12"><g class="f4"><g class="cs4">
+    <rect x="0" y="0" width="2" height="2" fill="#4CAF50"></rect>
+  </g></g></g>
+
+  <g class="dim-all"><g class="f5">
+    <rect x="0" y="0" width="2" height="2" fill="#9C27B0"></rect>
+  </g></g>
+
+  
+  <rect class="spark-l" x="-1.5" y="-0.5" width="1" height="1" fill="#FFF" opacity="0"></rect>
+  <rect class="spark-p" x="9.5" y="-5" width="1" height="1" fill="#FFF" opacity="0"></rect>
+  <rect class="spark-r" x="17" y="-0.5" width="1" height="1" fill="#FFF" opacity="0"></rect>
+
+  
+  <g class="breathe">
+    <g fill="#DE886D">
+      <rect x="3" y="13" width="1" height="2"></rect>
+      <rect x="5" y="13" width="1" height="2"></rect>
+      <rect x="9" y="13" width="1" height="2"></rect>
+      <rect x="11" y="13" width="1" height="2"></rect>
+    </g>
+    <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+    <g class="eyes-dispatch">
+      <g class="eyes-blink">
+        <rect x="4" y="8" width="1" height="2" fill="#000000"></rect>
+        <rect x="10" y="8" width="1" height="2" fill="#000000"></rect>
+      </g>
+    </g>
+    <g class="arm-l-dispatch">
+      <rect x="0" y="9" width="2" height="2" fill="#DE886D"></rect>
+    </g>
+    <g class="arm-r-dispatch">
+      <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+    </g>
+  </g>
+</svg>

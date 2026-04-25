@@ -156,6 +156,9 @@ Moving types from the `squib` target to `SquibCore` requires `public` on every c
 ## 2026-04-23 — Bubble shortcut layout: ⌘⇧A on first suggestion, ⌘⇧S on Allow Session
 `⌘⇧A` triggers the first "Always allow..." suggestion button in `BubbleCardView` (the button that previously had no shortcut). `⌘⇧S` remains on the "Allow Session" button. These are distinct: suggestion buttons create permanent Claude Code rules; Allow Session creates session-scoped trust in squib only. User explicitly corrected an attempt to put `⌘⇧A` on Allow Session.
 
+## 2026-04-25 — Trusted session: elicitations must never be auto-approved (Session 23)
+`AppDelegate.hookServer.onPermissionRequest` skips the bubble and calls `resolvePermission(.allow)` immediately when a session is trusted. This guard must check `!request.isElicitation` — elicitation requests present the user with multi-choice questions that require an explicit answer; silently allowing them sends an empty/wrong answer back to Claude Code. Regular yes/no permission requests are the only kind that should be auto-approved for trusted sessions. Plan-review (`ExitPlanMode`) requests are also binary (Approve / Go to Terminal) and are intentionally left in the auto-approve path.
+
 ## 2026-04-23 — Dual Claude config hook registration (Session 22)
 `registerClaudeHooks(port:)` writes hooks to both `~/.claude/settings.json` and `~/.claude-personal/settings.json` via a `writeHooks` helper. The helper checks that the target directory exists before writing — if `.claude-personal` is not installed on a machine it silently skips rather than creating a dangling file. This means any user with a personal Claude config gets squib hooks automatically without requiring the `.claude-personal` directory to exist everywhere.
 

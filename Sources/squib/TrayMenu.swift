@@ -123,6 +123,18 @@ final class TrayMenu: NSObject {
 
         menu.addItem(.separator())
 
+        // Keyboard shortcuts need Accessibility — show a prompt item if not granted.
+        if !AXIsProcessTrusted() {
+            let axItem = NSMenuItem(
+                title: "Enable Keyboard Shortcuts…",
+                action: #selector(requestAccessibility),
+                keyEquivalent: ""
+            )
+            axItem.target = self
+            menu.addItem(axItem)
+            menu.addItem(.separator())
+        }
+
         let quit = NSMenuItem(title: "Quit Squib",
                               action: #selector(NSApplication.terminate(_:)),
                               keyEquivalent: "q")
@@ -133,6 +145,11 @@ final class TrayMenu: NSObject {
     @objc private func toggleLaunchAtLogin() {
         LoginItemManager.toggle()
         rebuild()
+    }
+
+    @objc private func requestAccessibility() {
+        let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary
+        AXIsProcessTrustedWithOptions(opts)
     }
 
     private func truncated(_ id: String) -> String {

@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>squib — knight &amp; mage</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  :root {
+    --bg: #15110d;
+    --bg-2: #1c1612;
+    --panel: #221a14;
+    --border: rgba(255,210,160,0.10);
+    --border-strong: rgba(255,210,160,0.22);
+    --text: #f0e3c8;
+    --text-mute: rgba(240,227,200,0.55);
+    --text-dim: rgba(240,227,200,0.32);
+    --steel: #8a8478;
+    --steel-d: #4a4640;
+    --steel-l: #c0bba8;
+    --cloak: #2a2218;
+    --cloak-l: #4a3a2a;
+    --leather: #5a3a22;
+    --rust: #a85030;
+    --ember: #ff7a2a;
+    --ember-l: #ffd070;
+    --ember-w: #fff5cc;
+    --eye: #ff5a1a;
+    --eye-blue: #6abfff;
+    --bonfire: #ff8a3a;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --ui: "IBM Plex Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--ui); font-size: 14px; -webkit-font-smoothing: antialiased; }
+  body {
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255,150,60,0.08), transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(120,40,20,0.10), transparent 50%),
+      var(--bg);
+  }
+  .page { max-width: 1340px; margin: 0 auto; padding: 40px 28px 140px; }
+
+  .masthead {
+    border-top: 2px solid var(--text);
+    border-bottom: 2px solid var(--text);
+    padding: 16px 0;
+    margin-bottom: 32px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 18px;
+  }
+  .masthead .l, .masthead .r { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mute); }
+  .masthead .t { font-family: var(--mono); font-size: 36px; font-weight: 700; letter-spacing: -0.02em; text-align: center; margin: 0; }
+  .masthead .t .dot { color: var(--ember); }
+  .masthead .r { text-align: right; }
+
+  .lede {
+    border: 1px dashed var(--border-strong);
+    padding: 18px 24px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 36px;
+  }
+  .lede b { color: var(--ember); }
+  .lede .sw { color: var(--steel-l); }
+  .lede .fr { color: var(--ember-l); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0 14px;
+  }
+  .section-label::after { content:""; flex:1; height:1px; background: var(--border-strong); }
+  .section-label .n { padding: 2px 7px; border: 1px solid var(--border-strong); color: var(--text); letter-spacing: 0; }
+  h2.heading { font-family: var(--mono); font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.01em; }
+  .subhead { color: var(--text-mute); font-size: 13px; margin-bottom: 22px; max-width: 720px; line-height: 1.6; }
+
+  /* HERO STAGE */
+  .hero {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 28px;
+    margin-bottom: 18px;
+  }
+  @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } }
+  .hero-stage {
+    background:
+      radial-gradient(ellipse at 50% 80%, rgba(255,140,50,0.18), transparent 60%),
+      linear-gradient(180deg, #14100c 0%, #1f1812 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    aspect-ratio: 4/3;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 14%;
+  }
+  /* paper-stone scanlines */
+  .hero-stage::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 3px, rgba(0,0,0,0.10) 3px 4px);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .hero-stage .floor {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 22%;
+    background:
+      linear-gradient(180deg, rgba(80,55,35,0.0) 0%, rgba(40,25,15,0.85) 100%);
+  }
+  .hero-stage .pillar {
+    position: absolute;
+    bottom: 18%;
+    width: 36px; height: 70%;
+    background: linear-gradient(180deg, #1a1310 0%, #2a1f15 100%);
+    border-left: 1px solid rgba(0,0,0,0.4);
+    border-right: 1px solid rgba(255,210,160,0.04);
+  }
+  .hero-stage .pillar.l { left: 10%; }
+  .hero-stage .pillar.r { right: 10%; }
+  .hero-stage .torch {
+    position: absolute;
+    width: 8px; height: 8px;
+    background: var(--ember-l);
+    box-shadow: 0 0 16px 6px var(--ember), 0 0 32px 10px rgba(255,140,50,0.4);
+    border-radius: 1px;
+    animation: flicker 1.4s ease-in-out infinite;
+  }
+  .hero-stage .torch.l { left: 12.5%; bottom: 60%; }
+  .hero-stage .torch.r { right: 12.5%; bottom: 60%; }
+  @keyframes flicker {
+    0%,100% { opacity: 0.9; transform: scale(1); }
+    50%     { opacity: 1; transform: scale(1.15); }
+    25%     { opacity: 0.7; }
+  }
+
+  .hero-portrait {
+    position: relative;
+    z-index: 2;
+    transform: scale(8); /* large pixel-sprite scale */
+    image-rendering: pixelated;
+    transform-origin: bottom center;
+  }
+
+  /* Hero info column */
+  .hero-info { display: flex; flex-direction: column; gap: 16px; }
+  .hero-name {
+    font-family: var(--mono);
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0;
+    line-height: 1.1;
+  }
+  .hero-name .small { display: block; font-size: 11px; letter-spacing: 0.24em; color: var(--ember); margin-top: 4px; }
+  .hero-tagline { font-size: 13px; line-height: 1.65; color: var(--text-mute); }
+  .hero-stat {
+    display: flex; gap: 14px;
+    font-family: var(--mono); font-size: 11px;
+    color: var(--text-mute);
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .hero-stat b { color: var(--text); font-weight: 500; }
+
+  .swap-bar {
+    display: flex; gap: 10px; margin-top: 4px;
+  }
+  .swap-bar button {
+    flex: 1;
+    background: var(--panel);
+    border: 1px solid var(--border-strong);
+    color: var(--text-mute);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 12px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .swap-bar button:hover { color: var(--text); border-color: var(--text-mute); }
+  .swap-bar button.on { color: var(--ember); border-color: var(--ember); background: rgba(255,122,42,0.08); }
+  .swap-bar button .k {
+    display: block; font-size: 9px; color: var(--text-dim);
+    margin-top: 4px; letter-spacing: 0.12em;
+  }
+  .swap-bar button.on .k { color: var(--ember-l); }
+
+  /* STATE GRID */
+  .state-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 1100px) { .state-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px)  { .state-grid { grid-template-columns: repeat(2, 1fr); } }
+  .state-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .state-card .stage {
+    aspect-ratio: 1/1;
+    display: flex; align-items: flex-end; justify-content: center;
+    padding-bottom: 18%;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse at 50% 90%, rgba(255,150,60,0.10), transparent 65%),
+      #14100c;
+  }
+  .state-card .stage::before {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: 0; height: 28%;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.6));
+  }
+  .state-card .stage::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0 3px, rgba(0,0,0,0.08) 3px 4px);
+    pointer-events: none;
+    mix-blend-mode: multiply;
+  }
+  .state-card .sprite {
+    transform: scale(4);
+    image-rendering: pixelated;
+    transform-origin: bottom center;
+    position: relative;
+    z-index: 2;
+  }
+  .state-card .meta {
+    padding: 10px 14px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+  .state-card .meta .nm { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+  .state-card .meta .wp {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 3px;
+    border: 1px solid var(--border-strong);
+  }
+  .state-card .meta .wp.sword { color: var(--steel-l); border-color: var(--steel-d); }
+  .state-card .meta .wp.fire  { color: var(--ember-l); border-color: var(--ember); }
+  .state-card .meta .wp.none  { color: var(--text-mute); }
+  .state-card .num {
+    position: absolute; top: 8px; left: 10px;
+    font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: 0.18em;
+  }
+  .state-card .desc {
+    position: absolute; top: 8px; right: 10px;
+    font-family: var(--mono); font-size: 9px; color: var(--text-dim); letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* PIXEL SPRITE — built with box-shadow on a single pixel */
+  /* Each sprite is a wrapper with absolute children using the .pixel class.
+     Cleaner than 32x32 of divs and easier to tweak per-pose. */
+
+  .sprite-wrap {
+    position: relative;
+    width: 32px; height: 36px;
+  }
+  .px { position: absolute; width: 1px; height: 1px; image-rendering: pixelated; }
+
+  /* === reusable pixel art sprites via mixins === */
+  /* We build each sprite as inline-styled <div>s in JS to keep the HTML compact. */
+
+  /* breathing & idle animations */
+  @keyframes breathe { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-0.5px); } }
+  @keyframes breathe-hero { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-0.4px); } }
+  @keyframes cloak-sway { 0%,100% { transform: skewX(0deg); } 50% { transform: skewX(-3deg); } }
+  @keyframes ember-rise {
+    0%   { transform: translate(0,0) scale(1); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translate(var(--dx,0px), -22px) scale(0.5); opacity: 0; }
+  }
+  @keyframes ember-pulse {
+    0%,100% { transform: scale(1); filter: brightness(1.0); }
+    50%     { transform: scale(1.18); filter: brightness(1.4); }
+  }
+  @keyframes sword-bob { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(-2deg); } }
+  @keyframes attack-swing {
+    0%   { transform: rotate(-110deg); opacity: 0; }
+    20%  { opacity: 1; }
+    50%  { transform: rotate(60deg); opacity: 1; }
+    100% { transform: rotate(60deg); opacity: 0; }
+  }
+  @keyframes cast-charge {
+    0%,100% { transform: scale(1); box-shadow: 0 0 6px 2px rgba(255,122,42,0.6); }
+    50%     { transform: scale(1.4); box-shadow: 0 0 14px 5px rgba(255,180,80,0.95); }
+  }
+  @keyframes float-slow { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+  @keyframes blink-eye { 0%,90%,100% { opacity: 1; } 95% { opacity: 0; } }
+  @keyframes spark-flick { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes zzz-rise {
+    0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translate(8px, -16px) scale(1.2); opacity: 0; }
+  }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-1px); } 75% { transform: translateX(1px); } }
+  @keyframes alert-bounce { 0%,100% { transform: translateY(0); } 30% { transform: translateY(-3px); } 60% { transform: translateY(0); } }
+
+  /* State-specific animation classes */
+  .anim-breathe   { animation: breathe 3.2s ease-in-out infinite; }
+  .anim-breathe-hero { animation: breathe-hero 3.2s ease-in-out infinite; }
+  .anim-shake     { animation: shake 0.18s linear infinite; }
+  .anim-bounce    { animation: alert-bounce 1.2s ease-in-out infinite; }
+
+  .cloak-swayer   { animation: cloak-sway 4s ease-in-out infinite; transform-origin: top center; }
+  .sword-bobber   { animation: sword-bob 3.6s ease-in-out infinite; transform-origin: bottom right; }
+
+  /* Floating status FX */
+  .fx-zzz       { position: absolute; animation: zzz-rise 3s ease-out infinite; }
+  .fx-zzz.b     { animation-delay: 1s; }
+  .fx-zzz.c     { animation-delay: 2s; }
+  .ember-particle { position: absolute; animation: ember-rise 2s ease-out infinite; }
+  .ember-orb    { animation: ember-pulse 1.4s ease-in-out infinite; transform-origin: center; }
+  .swing-arc    { position: absolute; animation: attack-swing 0.9s ease-out infinite; transform-origin: bottom left; }
+  .charge-ring  { animation: cast-charge 1.2s ease-in-out infinite; }
+  .float        { animation: float-slow 2.4s ease-in-out infinite; }
+  .blink        { animation: blink-eye 4s ease-in-out infinite; }
+
+  /* FX pip — small icon above helm */
+  .fx-pip {
+    position: absolute;
+    top: -4px; left: 50%;
+    transform: translateX(-50%) scale(1);
+    image-rendering: pixelated;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  /* — Bonfire — */
+  .bonfire-flame {
+    animation: ember-pulse 0.6s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  /* shelf callouts */
+  .shelf {
+    margin-top: 56px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 900px) { .shelf { grid-template-columns: 1fr; } }
+  .panel-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .panel-card h3 {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ember);
+    margin: 0 0 10px;
+  }
+  .panel-card .k { color: var(--ember-l); }
+  .panel-card ul { padding-left: 18px; margin: 6px 0; }
+  .panel-card li { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="masthead">
+    <div class="l">BAKEOFF · ISS. 005</div>
+    <h1 class="t">ashen<span class="dot">.</span>squib</h1>
+    <div class="r">one knight · two weapons</div>
+  </header>
+
+  <div class="lede">
+    <b>concept.</b> a single dark-souls knight pet. <span class="sw">sword</span> in passive states (idle, working, sleeping) — grounded, watchful, weight on back foot.
+    <span class="fr">fire spell</span> in active states (thinking, attention, error) — forward-leaning, palm raised, embers drifting, eye-glow flares.
+    same body, same cloak, same character. the <em>weapon changes the mood</em>.
+  </div>
+
+  <!-- ============ HERO ============ -->
+  <div class="section-label"><span class="n">01</span> The character</div>
+  <h2 class="heading">Ashen Squib.</h2>
+  <p class="subhead">Hooded knight, soot-grey plate, deep wine cloak. Eye-slit glows ember-orange. Two weapons hang on the same belt — pick one, the whole posture changes.</p>
+
+  <div class="hero">
+    <div class="hero-stage">
+      <div class="pillar l"></div>
+      <div class="pillar r"></div>
+      <div class="torch l"></div>
+      <div class="torch r"></div>
+      <div class="floor"></div>
+      <div id="hero-mount"></div>
+    </div>
+    <div class="hero-info">
+      <div>
+        <h3 class="hero-name">Ashen Squib<span class="small">UNDEAD · WANDERER · COMPANION</span></h3>
+        <p class="hero-tagline">A small hollowed knight that watches your terminal. Sword drawn when calm. Pyromancy when something wants your attention.</p>
+      </div>
+      <div class="hero-stat">
+        <span><b>VIT</b> 12</span>
+        <span><b>STR</b> 14</span>
+        <span><b>INT</b> 10</span>
+        <span><b>FTH</b> 16</span>
+      </div>
+      <div>
+        <div style="font-family: var(--mono); font-size: 10px; letter-spacing: 0.22em; color: var(--text-mute); text-transform: uppercase; margin-bottom: 8px;">Weapon swap</div>
+        <div class="swap-bar">
+          <button id="btn-sword" class="on" data-weapon="sword">Longsword<span class="k">passive</span></button>
+          <button id="btn-fire"  data-weapon="fire">Pyromancy<span class="k">active</span></button>
+          <button id="btn-none"  data-weapon="none">Bonfire<span class="k">resting</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ STATE GRID — SWORD ============ -->
+  <div class="section-label"><span class="n">02</span> Sword stance · passive states</div>
+  <h2 class="heading">When all is well.</h2>
+  <p class="subhead">Sword drawn, weight on back foot, hood low. Cloak hangs heavy. Eye-glow steady. The <span style="color: var(--steel-l);">stoic</span> mode.</p>
+  <div class="state-grid" id="grid-sword"></div>
+
+  <!-- ============ STATE GRID — FIRE ============ -->
+  <div class="section-label"><span class="n">03</span> Pyromancy stance · active states</div>
+  <h2 class="heading">When something burns.</h2>
+  <p class="subhead">Sword sheathed. Free palm out, ember orb hovering. Forward-lean, cloak lifted by heat shimmer. Eye-glow flares — drifting embers rise from the body. The <span style="color: var(--ember-l);">incantatory</span> mode.</p>
+  <div class="state-grid" id="grid-fire"></div>
+
+  <!-- ============ STATE GRID — BONFIRE ============ -->
+  <div class="section-label"><span class="n">04</span> Bonfire · resting state</div>
+  <h2 class="heading">When the session ends.</h2>
+  <p class="subhead">Kneeling at a bonfire, sword stabbed in earth beside. Plate dimmed. Soft Z's drift. The agent is offline — squib is resting at the bonfire too.</p>
+  <div class="state-grid" id="grid-rest" style="grid-template-columns: repeat(2, 1fr);"></div>
+
+  <!-- ============ THE TAKE ============ -->
+  <div class="shelf">
+    <div class="panel-card">
+      <h3>The weapon-swap rule</h3>
+      <ul>
+        <li><span class="k">idle / working</span> — Longsword. grounded. cloak heavy.</li>
+        <li><span class="k">thinking / attention</span> — Pyromancy. lean forward. embers rise.</li>
+        <li><span class="k">error</span> — Pyromancy fizzles. spell sputters out.</li>
+        <li><span class="k">sleeping / session-end</span> — Bonfire kneel. weapon stabbed in earth.</li>
+      </ul>
+      <p style="margin-top: 10px;">Same character. Same silhouette. The weapon tells the user what mood the agent is in without a single word of UI copy.</p>
+    </div>
+    <div class="panel-card">
+      <h3>Animation hooks (per pose)</h3>
+      <ul>
+        <li>cloak <span class="k">sway</span> — base ambient on every state</li>
+        <li>chest <span class="k">breathe</span> — vertical bob, ~3s loop</li>
+        <li>eye-glow <span class="k">pulse</span> — ember red, faster on active</li>
+        <li>weapon-specific FX — slash arc, ember orb, drifting particles, bonfire flicker</li>
+        <li>helmet <span class="k">tilt</span> — head turns toward cursor on hover (handoff trick)</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<div id="tweaks-root"></div>
+
+<script>
+/* ============================================================
+   SQUIB KNIGHT SPRITE BUILDER
+   Each sprite is a 32x36 pixel grid. We build it by emitting
+   absolute-positioned 1×1 divs (scaled up via CSS transform).
+   Pose presets compose limb modules (helm, body, cloak, arms).
+   ============================================================ */
+
+const PALETTE = {
+  steel: '#7e7468',
+  steelD: '#3e3a32',
+  steelL: '#b8b09c',
+  cloak: '#3a1c1c',         // dark wine
+  cloakL: '#5a2828',
+  cloakS: '#1c0c0c',         // shadow
+  leather: '#3a2412',
+  leatherL: '#5a3820',
+  trim: '#806030',
+  rust: '#a85030',
+  ember: '#ff7a2a',
+  emberL: '#ffd070',
+  emberW: '#fff5cc',
+  emberD: '#c64a1a',
+  eye: '#ff5a1a',
+  eyeBright: '#ffaa44',
+  black: '#0a0808',
+  shadow: '#1a0a08',
+  bone: '#d8c4a4',
+  bone2: '#a08868',
+  bonfire: '#ff8a3a',
+  bonfireC: '#fff0a0',
+  bonfireD: '#a02810',
+};
+
+/* helper: emit a pixel div */
+function px(x, y, color, w = 1, h = 1, cls = '') {
+  return `<div class="px ${cls}" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${color}"></div>`;
+}
+
+/* ============== KNIGHT BASE — used by all poses ============== */
+/* Coordinates: 32×36 grid. Knight is centered around x=12-19, y=4-32.
+   Origin: bottom-center of sprite = ground.
+
+   Layout:
+     y  4-9   helmet (hood + slit)
+     y 10-12  pauldrons / shoulders
+     y 12-22  torso + cloak
+     y 22-30  legs + boots
+     y 30-32  ground shadow
+*/
+
+function knightBody(opts = {}) {
+  const {
+    cloakSway = true,
+    eyeGlow = PALETTE.eye,
+    leanForward = false,    // true for fire stance
+    legPose = 'stand',      // 'stand' | 'wide' | 'kneel'
+    eyeBlink = true,
+    armorTone = 'steel',    // 'steel' | 'dim'
+  } = opts;
+
+  const S  = armorTone === 'dim' ? '#605a52' : PALETTE.steel;
+  const SD = armorTone === 'dim' ? '#2a2620' : PALETTE.steelD;
+  const SL = armorTone === 'dim' ? '#8a8474' : PALETTE.steelL;
+
+  let out = '';
+
+  // Ground shadow
+  out += px(11, 32, 'rgba(0,0,0,0.4)', 10, 1);
+  out += px(13, 33, 'rgba(0,0,0,0.25)', 6, 1);
+
+  // === Cloak (back layer) ===
+  // The cloak sways behind the body. Built as a darker silhouette.
+  const cloakOffset = leanForward ? 1 : 0;
+  out += `<div class="${cloakSway ? 'cloak-swayer' : ''}" style="position:absolute;left:0;top:0;width:32px;height:36px;">`;
+  // hood back
+  out += px(13 - cloakOffset, 4, PALETTE.cloakS, 7, 2);
+  // shoulder cape
+  out += px(11 - cloakOffset, 11, PALETTE.cloakS, 11, 2);
+  out += px(10 - cloakOffset, 12, PALETTE.cloak, 13, 2);
+  // hanging cloth
+  out += px(10 - cloakOffset, 14, PALETTE.cloak, 13, 8);
+  out += px(11 - cloakOffset, 22, PALETTE.cloak, 11, 3);
+  out += px(12 - cloakOffset, 25, PALETTE.cloakS, 9, 2);
+  // tattered hem
+  out += px(11 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  out += px(13 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  out += px(15 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  out += px(17 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  out += px(19 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  out += px(21 - cloakOffset, 27, PALETTE.cloakS, 1, 1);
+  // light-side highlight (cloak edge catching torchlight)
+  out += px(22 - cloakOffset, 14, PALETTE.cloakL, 1, 6);
+  out += px(22 - cloakOffset, 20, PALETTE.cloakL, 1, 4);
+  out += `</div>`;
+
+  // === Helm ===
+  // hood overlay
+  out += px(13, 4, PALETTE.cloakS, 7, 1);
+  out += px(12, 5, PALETTE.cloakS, 1, 4);
+  out += px(20, 5, PALETTE.cloakS, 1, 4);
+  // helm metal
+  out += px(13, 5, SD, 7, 1);
+  out += px(13, 6, S, 7, 1);
+  out += px(13, 7, S, 7, 1);
+  out += px(13, 8, SD, 7, 1);
+  // helm highlight
+  out += px(14, 6, SL, 1, 1);
+  // eye slit
+  out += px(14, 7, PALETTE.black, 5, 1);
+  // glowing eye
+  const eyeAnim = eyeBlink ? 'blink' : '';
+  out += `<div class="${eyeAnim}" style="position:absolute;left:0;top:0;width:32px;height:36px;">`;
+  out += px(15, 7, eyeGlow, 1, 1);
+  out += px(17, 7, eyeGlow, 1, 1);
+  // glow halo
+  out += px(15, 7, PALETTE.emberW, 1, 1);
+  out += `</div>`;
+  // chin / jaw shadow
+  out += px(14, 9, PALETTE.cloakS, 5, 1);
+  out += px(15, 9, PALETTE.shadow, 3, 1);
+
+  // === Torso (chestplate) ===
+  // shoulders / pauldrons
+  out += px(12, 10, SD, 9, 1);
+  out += px(12, 11, S, 9, 1);
+  out += px(11, 11, SD, 1, 1);
+  out += px(21, 11, SD, 1, 1);
+  // pauldron studs
+  out += px(12, 11, SL, 1, 1);
+  out += px(20, 11, SL, 1, 1);
+
+  // chest (covered partly by cloak — only center shows)
+  out += px(14, 12, S, 5, 1);
+  out += px(13, 13, SD, 7, 5);
+  out += px(14, 13, S, 5, 4);
+  out += px(15, 13, SL, 1, 1); // highlight
+  // belt
+  out += px(13, 18, PALETTE.leather, 7, 1);
+  out += px(16, 18, PALETTE.trim, 1, 1); // buckle
+  // tabard / sash hint under cloak
+  out += px(15, 19, PALETTE.cloakL, 3, 3);
+
+  // === Legs ===
+  if (legPose === 'stand') {
+    // greaves
+    out += px(13, 22, SD, 3, 6);
+    out += px(17, 22, SD, 3, 6);
+    out += px(14, 22, S, 1, 5);
+    out += px(18, 22, S, 1, 5);
+    // boots
+    out += px(13, 28, PALETTE.leather, 4, 2);
+    out += px(17, 28, PALETTE.leather, 4, 2);
+    out += px(13, 29, PALETTE.shadow, 4, 1);
+    out += px(17, 29, PALETTE.shadow, 4, 1);
+  } else if (legPose === 'wide') {
+    // wider stance for casting
+    out += px(12, 22, SD, 3, 6);
+    out += px(18, 22, SD, 3, 6);
+    out += px(13, 22, S, 1, 5);
+    out += px(19, 22, S, 1, 5);
+    out += px(11, 28, PALETTE.leather, 5, 2);
+    out += px(17, 28, PALETTE.leather, 5, 2);
+    out += px(11, 29, PALETTE.shadow, 5, 1);
+    out += px(17, 29, PALETTE.shadow, 5, 1);
+  } else if (legPose === 'kneel') {
+    // one knee down
+    out += px(12, 22, SD, 4, 4);   // forward shin (kneeling)
+    out += px(13, 22, S, 1, 3);
+    out += px(11, 26, PALETTE.leather, 5, 2);
+    out += px(11, 27, PALETTE.shadow, 5, 1);
+    // back leg folded
+    out += px(17, 24, SD, 4, 5);
+    out += px(18, 24, S, 1, 4);
+    out += px(17, 28, PALETTE.leather, 4, 1);
+    out += px(17, 29, PALETTE.shadow, 4, 1);
+  }
+
+  return out;
+}
+
+/* === Sword arm (right side, holding longsword down) === */
+function armWithSword(opts = {}) {
+  const { raised = false, swing = false, shoulder = false } = opts;
+  let out = '';
+  const S = PALETTE.steel, SD = PALETTE.steelD, SL = PALETTE.steelL;
+
+  if (shoulder) {
+    // Sword resting on shoulder — thinking pose
+    // arm bent, hand near collar
+    out += px(20, 11, SD, 1, 1);
+    out += px(21, 12, S, 2, 3);
+    out += px(22, 14, S, 1, 1);
+    // handle (vertical, blade up over shoulder)
+    out += px(22, 6, PALETTE.leatherL, 1, 7); // grip
+    out += px(22, 13, PALETTE.trim, 1, 1); // crossguard
+    out += px(21, 13, PALETTE.trim, 3, 1);
+    // pommel
+    out += px(22, 5, PALETTE.trim, 1, 1);
+    // blade
+    out += px(23, 0, SD, 1, 6);
+    out += px(24, 1, SL, 1, 5);
+    out += px(25, 4, S, 1, 2);
+    return out;
+  }
+
+  if (raised) {
+    // Sword raised above head — attention pose
+    // bent arm
+    out += px(20, 10, SD, 1, 2);
+    out += px(21, 8, S, 1, 3);
+    out += px(22, 6, S, 1, 3);
+    // grip
+    out += px(22, 3, PALETTE.leatherL, 1, 4);
+    // crossguard
+    out += px(20, 3, PALETTE.trim, 5, 1);
+    out += px(22, 2, PALETTE.trim, 1, 1);
+    // blade going up
+    out += px(22, -8, SD, 1, 10);
+    out += px(23, -8, SL, 1, 10);
+    out += px(22, -8, PALETTE.emberW, 1, 1); // tip glow
+    return out;
+  }
+
+  // Default — sword held at side, point down
+  // shoulder + upper arm
+  out += px(20, 11, SD, 1, 1);
+  out += px(21, 11, SD, 2, 1);
+  out += px(21, 12, S, 2, 4);
+  out += px(22, 16, S, 1, 2);
+  // gauntlet
+  out += px(22, 18, SD, 2, 2);
+  out += px(22, 18, SL, 1, 1);
+
+  // Sword (blade down beside body)
+  // pommel + grip + crossguard above gauntlet
+  out += px(22, 14, PALETTE.trim, 1, 1);
+  out += px(22, 15, PALETTE.leatherL, 1, 3);
+  out += px(20, 17, PALETTE.trim, 4, 1); // crossguard
+  // blade going down
+  out += `<div class="sword-bobber" style="position:absolute;left:0;top:0;width:32px;height:36px;">`;
+  out += px(22, 18, SD, 1, 12);
+  out += px(23, 18, SL, 1, 12);
+  out += px(22, 30, S, 1, 1); // tip
+  out += `</div>`;
+
+  if (swing) {
+    // Swing arc — drawn over everything
+    out += `<div class="swing-arc" style="left:18px;top:6px;">`;
+    out += px(0, 0, PALETTE.emberW, 1, 1);
+    out += px(1, 0, PALETTE.emberL, 1, 1);
+    out += px(2, 1, PALETTE.emberL, 1, 1);
+    out += px(3, 2, PALETTE.ember, 1, 1);
+    out += px(4, 3, PALETTE.ember, 1, 1);
+    out += px(4, 5, PALETTE.emberD, 1, 1);
+    out += px(3, 6, PALETTE.emberD, 1, 1);
+    out += `</div>`;
+  }
+
+  return out;
+}
+
+/* === Free arm (no weapon — hangs at side or holds spell) === */
+function armFree(opts = {}) {
+  const { side = 'left', spell = null } = opts;
+  // side='left' = the character's left hand which is on the right of the sprite
+  // for this design, sword is on right (x=20-23), spell/free is on left (x=10-13)
+  const x0 = side === 'left' ? 10 : 21;  // shoulder x
+  const dir = side === 'left' ? -1 : 1;
+  let out = '';
+  const S = PALETTE.steel, SD = PALETTE.steelD, SL = PALETTE.steelL;
+
+  if (spell === 'cast') {
+    // Arm extended forward, palm out, ember orb in front
+    // upper arm (out to side)
+    out += px(x0, 11, SD, 1, 1);
+    out += px(x0 + dir, 11, S, 2, 2);
+    // forearm extending forward+down
+    out += px(x0 + 2*dir, 12, S, 1, 2);
+    out += px(x0 + 3*dir, 13, S, 1, 1);
+    // gauntlet/palm
+    out += px(x0 + 3*dir, 14, SD, 1, 1);
+    out += px(x0 + 4*dir, 14, SD, 1, 1);
+
+    // Ember orb in palm
+    const ox = x0 + 5*dir, oy = 13;
+    out += `<div class="ember-orb" style="position:absolute;left:${ox - 1}px;top:${oy - 1}px;width:4px;height:4px;">`;
+    out += px(1, 0, PALETTE.ember, 1, 1);
+    out += px(0, 1, PALETTE.ember, 1, 1);
+    out += px(1, 1, PALETTE.emberW, 1, 1);
+    out += px(2, 1, PALETTE.ember, 1, 1);
+    out += px(1, 2, PALETTE.emberD, 1, 1);
+    out += `</div>`;
+    // Glow halo
+    out += `<div style="position:absolute;left:${ox - 4}px;top:${oy - 3}px;width:10px;height:10px;background:radial-gradient(circle, rgba(255,140,40,0.8), transparent 60%);pointer-events:none;"></div>`;
+
+    // Drifting embers
+    for (let i = 0; i < 3; i++) {
+      const dx = (i - 1) * 1.5;
+      const delay = i * 0.6;
+      out += `<div class="ember-particle" style="left:${ox}px;top:${oy}px;width:1px;height:1px;background:${i === 1 ? PALETTE.emberW : PALETTE.ember};animation-delay:${delay}s;--dx:${dx}px;"></div>`;
+    }
+
+    return out;
+  }
+
+  if (spell === 'fizzle') {
+    // arm forward but spell sputters
+    out += px(x0, 11, SD, 1, 1);
+    out += px(x0 + dir, 11, S, 2, 2);
+    out += px(x0 + 2*dir, 12, S, 1, 2);
+    out += px(x0 + 3*dir, 13, S, 1, 1);
+    out += px(x0 + 4*dir, 14, SD, 1, 1);
+
+    // Sputtering smoke instead of ember
+    const ox = x0 + 5*dir;
+    out += `<div style="position:absolute;left:${ox - 1}px;top:11px;animation:spark-flick 0.18s linear infinite;">`;
+    out += px(0, 0, '#5a4a3a', 1, 1);
+    out += px(1, 1, '#3a2a1a', 1, 1);
+    out += px(0, 2, '#5a4a3a', 1, 1);
+    out += `</div>`;
+    return out;
+  }
+
+  if (spell === 'point') {
+    // Pointing finger — attention pose with spell
+    out += px(x0, 11, SD, 1, 1);
+    out += px(x0 + dir, 11, S, 1, 2);
+    out += px(x0 + 2*dir, 11, S, 1, 1);
+    out += px(x0 + 3*dir, 10, S, 1, 1);
+    out += px(x0 + 4*dir, 9, SD, 1, 1);
+
+    // Tiny ember at fingertip
+    const ox = x0 + 4*dir;
+    out += `<div class="ember-orb" style="position:absolute;left:${ox - 1}px;top:7px;width:3px;height:3px;">`;
+    out += px(1, 0, PALETTE.emberW, 1, 1);
+    out += px(0, 1, PALETTE.ember, 1, 1);
+    out += px(1, 1, PALETTE.emberL, 1, 1);
+    out += px(2, 1, PALETTE.ember, 1, 1);
+    out += px(1, 2, PALETTE.emberD, 1, 1);
+    out += `</div>`;
+    return out;
+  }
+
+  // Default — arm at side
+  out += px(x0, 11, SD, 1, 1);
+  out += px(x0 + dir, 11, S, 1, 1);
+  out += px(x0 + dir, 12, S, 1, 5);
+  out += px(x0 + dir, 17, SD, 1, 2);
+  out += px(x0 + dir, 17, SL, 1, 1);
+  return out;
+}
+
+/* === Charge ring (under feet during cast) === */
+function chargeRing() {
+  return `<div class="charge-ring" style="position:absolute;left:7px;top:30px;width:18px;height:3px;background:radial-gradient(ellipse, rgba(255,140,40,0.6), transparent 70%);border-radius:50%;"></div>`;
+}
+
+/* === FX pip — small icon over helm === */
+function fxPip(kind) {
+  if (!kind) return '';
+  const offsets = { left: -2, top: -8 };
+  let inner = '';
+  if (kind === 'zzz') {
+    return `<div class="fx-pip" style="left:50%;top:-8px;width:6px;height:6px;">
+      <div class="fx-zzz" style="left:0;top:0;width:6px;height:6px;color:${PALETTE.steelL};font-family:monospace;font-size:6px;font-weight:bold;line-height:1;">z</div>
+      <div class="fx-zzz b" style="left:1px;top:0;width:6px;height:6px;color:${PALETTE.steelL};font-family:monospace;font-size:6px;font-weight:bold;line-height:1;">z</div>
+      <div class="fx-zzz c" style="left:2px;top:0;width:6px;height:6px;color:${PALETTE.bone};font-family:monospace;font-size:6px;font-weight:bold;line-height:1;">Z</div>
+    </div>`;
+  }
+  if (kind === 'q') {
+    return `<div class="fx-pip float" style="left:50%;top:-7px;transform:translateX(-50%);">
+      <div style="font-family:monospace;font-size:6px;font-weight:900;color:${PALETTE.emberL};line-height:1;text-shadow:0 0 2px ${PALETTE.ember};">?</div>
+    </div>`;
+  }
+  if (kind === 'bang') {
+    return `<div class="fx-pip anim-bounce" style="left:50%;top:-8px;transform:translateX(-50%);">
+      <div style="font-family:monospace;font-size:7px;font-weight:900;color:${PALETTE.ember};line-height:1;text-shadow:0 0 3px ${PALETTE.ember};">!</div>
+    </div>`;
+  }
+  if (kind === 'x') {
+    return `<div class="fx-pip" style="left:50%;top:-7px;transform:translateX(-50%);animation:shake 0.18s linear infinite;">
+      <div style="font-family:monospace;font-size:7px;font-weight:900;color:${PALETTE.rust};line-height:1;">×</div>
+    </div>`;
+  }
+  if (kind === 'gear') {
+    return `<div class="fx-pip" style="left:50%;top:-7px;transform:translateX(-50%);animation:cast-charge 1.2s ease-in-out infinite;">
+      <div style="font-family:monospace;font-size:6px;color:${PALETTE.emberL};line-height:1;">✦</div>
+    </div>`;
+  }
+  return '';
+}
+
+/* === Bonfire prop === */
+function bonfire() {
+  let out = '';
+  // sword stabbed in earth (vertical, behind kneeling figure)
+  out += px(8, 14, PALETTE.trim, 3, 1); // crossguard
+  out += px(9, 9, PALETTE.leatherL, 1, 5); // grip
+  out += px(9, 8, PALETTE.trim, 1, 1); // pommel
+  out += px(9, 15, PALETTE.steelD, 1, 12); // blade in dirt
+  out += px(10, 15, PALETTE.steelL, 1, 12);
+
+  // bonfire (right side)
+  // logs
+  out += px(22, 28, '#3a1c0c', 6, 1);
+  out += px(23, 27, '#5a2c14', 5, 1);
+  out += px(22, 29, '#2a1408', 6, 2);
+  // dark base
+  out += px(21, 30, PALETTE.shadow, 8, 1);
+
+  // flame
+  out += `<div class="bonfire-flame" style="position:absolute;left:0;top:0;width:32px;height:36px;">`;
+  out += px(24, 25, PALETTE.bonfireD, 2, 1);
+  out += px(23, 24, PALETTE.bonfire, 4, 1);
+  out += px(24, 23, PALETTE.bonfire, 2, 1);
+  out += px(24, 22, PALETTE.emberL, 2, 1);
+  out += px(25, 21, PALETTE.bonfireC, 1, 1);
+  out += px(25, 26, PALETTE.emberW, 1, 1);
+  out += `</div>`;
+
+  // glow halo
+  out += `<div style="position:absolute;left:18px;top:18px;width:14px;height:14px;background:radial-gradient(circle, rgba(255,140,40,0.5), transparent 60%);pointer-events:none;animation:flicker 0.9s ease-in-out infinite;"></div>`;
+
+  // floating ash
+  for (let i = 0; i < 2; i++) {
+    out += `<div class="ember-particle" style="left:${24 + i}px;top:24px;width:1px;height:1px;background:${PALETTE.ember};animation-delay:${i * 1.2}s;--dx:${i === 0 ? -2 : 2}px;"></div>`;
+  }
+
+  return out;
+}
+
+/* ==================== POSE PRESETS ==================== */
+/* Each pose returns a full sprite HTML string. Wrap in .sprite div for animation. */
+
+function pose(kind, opts = {}) {
+  let body = '';
+  const armorTone = (kind === 'sleep' || kind === 'rest') ? 'dim' : 'steel';
+
+  if (kind === 'sword-idle') {
+    body += knightBody({ legPose: 'stand', armorTone });
+    body += armFree({ side: 'left' });
+    body += armWithSword();
+    return wrap(body, 'anim-breathe');
+  }
+  if (kind === 'sword-working') {
+    body += knightBody({ legPose: 'stand', eyeGlow: PALETTE.eyeBright });
+    body += armFree({ side: 'left' });
+    body += armWithSword({ swing: true });
+    return wrap(body, 'anim-breathe');
+  }
+  if (kind === 'sword-thinking') {
+    body += knightBody({ legPose: 'stand' });
+    body += armFree({ side: 'left' });
+    body += armWithSword({ shoulder: true });
+    body += fxPip('q');
+    return wrap(body, 'anim-breathe');
+  }
+
+  if (kind === 'fire-idle') {
+    body += knightBody({ legPose: 'wide', leanForward: true, eyeGlow: PALETTE.eyeBright });
+    body += armWithSword(); // sword still on right hip
+    body += armFree({ side: 'left', spell: 'cast' });
+    return wrap(body, 'anim-breathe');
+  }
+  if (kind === 'fire-thinking') {
+    body += knightBody({ legPose: 'wide', leanForward: true, eyeGlow: PALETTE.eyeBright });
+    body += armWithSword({ shoulder: false });
+    body += armFree({ side: 'left', spell: 'cast' });
+    body += chargeRing();
+    body += fxPip('q');
+    return wrap(body, 'anim-breathe');
+  }
+  if (kind === 'fire-attention') {
+    body += knightBody({ legPose: 'wide', leanForward: true, eyeGlow: PALETTE.eyeBright });
+    body += armWithSword({ shoulder: false });
+    body += armFree({ side: 'left', spell: 'point' });
+    body += fxPip('bang');
+    return wrap(body, 'anim-bounce');
+  }
+  if (kind === 'fire-error') {
+    body += knightBody({ legPose: 'stand' });
+    body += armWithSword({ shoulder: false });
+    body += armFree({ side: 'left', spell: 'fizzle' });
+    body += fxPip('x');
+    return wrap(body, 'anim-shake');
+  }
+  if (kind === 'fire-working') {
+    body += knightBody({ legPose: 'wide', leanForward: true, eyeGlow: PALETTE.eyeBright });
+    body += armWithSword({ shoulder: false });
+    body += armFree({ side: 'left', spell: 'cast' });
+    body += chargeRing();
+    body += fxPip('gear');
+    return wrap(body, 'anim-breathe');
+  }
+
+  if (kind === 'rest-bonfire') {
+    body += bonfire();
+    body += knightBody({ legPose: 'kneel', armorTone: 'dim', eyeGlow: '#9a4a1a', cloakSway: false });
+    body += fxPip('zzz');
+    return wrap(body, '');
+  }
+  if (kind === 'rest-sleep') {
+    body += knightBody({ legPose: 'kneel', armorTone: 'dim', eyeGlow: '#5a2810', cloakSway: false, eyeBlink: false });
+    body += fxPip('zzz');
+    return wrap(body, '');
+  }
+
+  // hero default — sword idle but bigger
+  body += knightBody({ legPose: 'stand' });
+  body += armFree({ side: 'left' });
+  body += armWithSword();
+  return wrap(body, 'anim-breathe-hero');
+}
+
+function wrap(inner, animClass) {
+  return `<div class="sprite-wrap ${animClass}" style="position:relative;">${inner}</div>`;
+}
+
+/* ==================== HERO RENDERING ==================== */
+
+let currentWeapon = 'sword';
+function renderHero() {
+  const mount = document.getElementById('hero-mount');
+  let html;
+  if (currentWeapon === 'sword') html = pose('sword-idle');
+  else if (currentWeapon === 'fire') html = pose('fire-idle');
+  else html = pose('rest-bonfire');
+  // wrap in hero-portrait scaler
+  mount.innerHTML = `<div class="hero-portrait anim-breathe-hero">${html.replace('class="sprite-wrap anim-breathe"','class="sprite-wrap"').replace('class="sprite-wrap anim-bounce"','class="sprite-wrap"').replace('class="sprite-wrap anim-shake"','class="sprite-wrap"').replace('class="sprite-wrap "','class="sprite-wrap"')}</div>`;
+}
+renderHero();
+
+document.querySelectorAll('.swap-bar button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.swap-bar button').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+    currentWeapon = btn.dataset.weapon;
+    renderHero();
+  });
+});
+
+/* ==================== STATE GRID RENDERING ==================== */
+
+function card(num, name, desc, weapon, poseKind) {
+  const wpClass = weapon === 'sword' ? 'sword' : weapon === 'fire' ? 'fire' : 'none';
+  const wpLabel = weapon === 'sword' ? 'longsword' : weapon === 'fire' ? 'pyromancy' : 'none';
+  return `
+    <div class="state-card">
+      <div class="num">${num}</div>
+      <div class="desc">${desc}</div>
+      <div class="stage">
+        <div class="sprite">${pose(poseKind)}</div>
+      </div>
+      <div class="meta">
+        <div class="nm">${name}</div>
+        <div class="wp ${wpClass}">${wpLabel}</div>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('grid-sword').innerHTML = [
+  card('01', 'Idle', 'agent quiet', 'sword', 'sword-idle'),
+  card('02', 'Working', 'tools running', 'sword', 'sword-working'),
+  card('03', 'Thinking', 'formulating', 'sword', 'sword-thinking'),
+].join('');
+
+document.getElementById('grid-fire').innerHTML = [
+  card('04', 'Channeling', 'agent active', 'fire', 'fire-idle'),
+  card('05', 'Thinking', 'spell building', 'fire', 'fire-thinking'),
+  card('06', 'Attention', 'needs input', 'fire', 'fire-attention'),
+  card('07', 'Error', 'spell fizzles', 'fire', 'fire-error'),
+].join('');
+
+document.getElementById('grid-rest').innerHTML = [
+  card('08', 'Bonfire', 'session ended', 'none', 'rest-bonfire'),
+  card('09', 'Hollowed', 'long sleep', 'none', 'rest-sleep'),
+].join('');
+</script>
+
+<script type="text/babel" data-presets="env,react">
+const { useEffect } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "weapon": "rest",
+  "palette": "ember",
+  "speed": "calm"
+}/*EDITMODE-END*/;
+
+const WEAPON = [
+  { id: "auto",  label: "Auto" },
+  { id: "sword", label: "Sword" },
+  { id: "fire",  label: "Fire" },
+  { id: "rest",  label: "Rest" },
+];
+const PALETTE_OPTS = [
+  { id: "ember", label: "Ember" },
+  { id: "frost", label: "Frost" },
+  { id: "void",  label: "Void" },
+];
+const SPEED = [
+  { id: "drowsy", label: "Drowsy", speed: 1.8 },
+  { id: "calm",   label: "Calm",   speed: 1.0 },
+  { id: "tense",  label: "Tense",  speed: 0.5 },
+];
+
+function App() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+  useEffect(() => {
+    const r = document.documentElement;
+    // palette swap
+    if (tweaks.palette === "frost") {
+      r.style.setProperty('--ember',   '#6abfff');
+      r.style.setProperty('--ember-l', '#bfe5ff');
+      r.style.setProperty('--ember-w', '#eaf6ff');
+      r.style.setProperty('--eye',     '#6abfff');
+      r.style.setProperty('--bonfire', '#5aa8ff');
+    } else if (tweaks.palette === "void") {
+      r.style.setProperty('--ember',   '#a85ad8');
+      r.style.setProperty('--ember-l', '#d0a0ff');
+      r.style.setProperty('--ember-w', '#f0d0ff');
+      r.style.setProperty('--eye',     '#a85ad8');
+      r.style.setProperty('--bonfire', '#7a3aa8');
+    } else {
+      r.style.setProperty('--ember',   '#ff7a2a');
+      r.style.setProperty('--ember-l', '#ffd070');
+      r.style.setProperty('--ember-w', '#fff5cc');
+      r.style.setProperty('--eye',     '#ff5a1a');
+      r.style.setProperty('--bonfire', '#ff8a3a');
+    }
+  }, [tweaks.palette]);
+
+  useEffect(() => {
+    const s = SPEED.find(x => x.id === tweaks.speed) || SPEED[1];
+    const sheet = document.styleSheets[0];
+    // Just multiply via CSS var on root → we'll rewrite all anim durations
+    document.documentElement.style.setProperty('--anim-mult', s.speed);
+    // For simplicity: set all .sprite-wrap children's animation-duration via class
+    document.querySelectorAll('.sprite-wrap, .cloak-swayer, .sword-bobber, .ember-orb, .ember-particle, .swing-arc, .charge-ring, .float, .blink, .bonfire-flame, .torch, .fx-zzz').forEach(el => {
+      el.style.animationDuration = '';
+    });
+    if (s.speed !== 1) {
+      document.querySelectorAll('.sprite-wrap, .cloak-swayer, .sword-bobber, .ember-orb, .ember-particle, .swing-arc, .charge-ring, .float, .blink, .bonfire-flame, .fx-zzz').forEach(el => {
+        const cs = getComputedStyle(el).animationDuration;
+        if (cs && cs !== '0s') {
+          const ms = parseFloat(cs) * 1000 * s.speed;
+          el.style.animationDuration = `${ms}ms`;
+        }
+      });
+    }
+  }, [tweaks.speed]);
+
+  useEffect(() => {
+    if (tweaks.weapon === "auto") return;
+    // Force hero to a particular weapon
+    const map = { sword: 'btn-sword', fire: 'btn-fire', rest: 'btn-none' };
+    const btn = document.getElementById(map[tweaks.weapon]);
+    if (btn) btn.click();
+  }, [tweaks.weapon]);
+
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Weapon · hero pose">
+        <TweakRadio
+          label=""
+          value={tweaks.weapon}
+          onChange={v => setTweak("weapon", v)}
+          options={WEAPON.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+      <TweakSection label="Palette · ember tone">
+        <TweakRadio
+          label=""
+          value={tweaks.palette}
+          onChange={v => setTweak("palette", v)}
+          options={PALETTE_OPTS.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+      <TweakSection label="Speed · animation tempo">
+        <TweakRadio
+          label=""
+          value={tweaks.speed}
+          onChange={v => setTweak("speed", v)}
+          options={SPEED.map(o => ({ value: o.id, label: o.label }))}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("tweaks-root"));
+root.render(<App />);
+</script>
+
+</body>
+</html>

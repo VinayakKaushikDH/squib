@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+  </defs>
+
+  
+  <g transform="translate(15, 0) scale(-1, 1)">
+
+    
+    <rect class="shadow-anim" x="3" y="15" width="9" height="1" fill="#000" opacity="0.5"></rect>
+
+    
+    <rect class="dust dust-1" x="0" y="0" width="1.5" height="1.5" fill="#9E9E9E"></rect>
+    <rect class="dust dust-2" x="0" y="0" width="1" height="1" fill="#B0BEC5"></rect>
+    <rect class="dust dust-3" x="0" y="0" width="1.2" height="1.2" fill="#9E9E9E"></rect>
+
+    
+    <g fill="#DE886D">
+      <rect x="3" y="13" width="1" height="2"></rect>
+      <rect x="5" y="13" width="1" height="2"></rect>
+      <rect x="9" y="13" width="1" height="2"></rect>
+      <rect x="11" y="13" width="1" height="2"></rect>
+    </g>
+
+    
+    <g class="body-lean">
+
+      
+      <g transform="translate(1, 5)">
+        <g class="sweat sweat-1" fill="#40C4FF">
+          <rect x="0" y="1" width="1.5" height="1.5"></rect>
+          <rect x="0.25" y="0" width="1" height="1"></rect>
+        </g>
+      </g>
+      <g transform="translate(-0.5, 7)">
+        <g class="sweat sweat-2" fill="#40C4FF">
+          <rect x="0" y="0.5" width="1" height="1"></rect>
+          <rect x="0.15" y="0" width="0.7" height="0.7"></rect>
+        </g>
+      </g>
+
+      
+      <g class="breathe">
+
+        
+        <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+
+        
+        <g class="arm-l">
+          <rect x="0" y="9" width="2" height="2" fill="#DE886D"></rect>
+        </g>
+
+        
+        <g class="arm-r">
+          <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+          
+          <rect x="13.5" y="11" width="1" height="3.5" fill="#795548"></rect>
+          
+          <rect x="12" y="14.5" width="4" height="1.5" fill="#FFC107"></rect>
+          
+          <rect x="12.5" y="14.85" width="0.35" height="0.8" fill="#C99700" opacity="0.3"></rect>
+          <rect x="13.2" y="14.8" width="0.3" height="0.9" fill="#C99700" opacity="0.35"></rect>
+          <rect x="13.8" y="14.85" width="0.35" height="0.8" fill="#C99700" opacity="0.3"></rect>
+          <rect x="14.5" y="14.8" width="0.3" height="0.85" fill="#C99700" opacity="0.35"></rect>
+        </g>
+
+        
+        <g class="eyes-dir" fill="#000">
+          <g class="blink">
+            <rect x="4" y="8" width="1" height="2"></rect>
+            <rect x="10" y="8" width="1" height="2"></rect>
+          </g>
+        </g>
+
+      </g>
+    </g>
+
+  </g>
+</svg>

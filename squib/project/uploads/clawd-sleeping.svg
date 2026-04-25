@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+
+    
+    <g id="pixel-z">
+      <rect x="0" y="0" width="4" height="1"></rect>
+      <rect x="2" y="1" width="1" height="1"></rect>
+      <rect x="1" y="2" width="1" height="1"></rect>
+      <rect x="0" y="3" width="4" height="1"></rect>
+    </g>
+    
+    <g id="pixel-z-small">
+      <rect x="0" y="0" width="3" height="1"></rect>
+      <rect x="1" y="1" width="1" height="1"></rect>
+      <rect x="0" y="2" width="3" height="1"></rect>
+    </g>
+  </defs>
+
+  
+  <rect id="ground-shadow" class="shadow-breathe" x="-1" y="15" width="17" height="1" fill="#000000"></rect>
+
+  
+  <g class="zzz-particles">
+    <use href="#pixel-z" class="z-particle z1" fill="#90A4AE"></use>
+    <use href="#pixel-z-small" class="z-particle z2" fill="#B0BEC5"></use>
+    <use href="#pixel-z" class="z-particle z3" fill="#CFD8DC"></use>
+  </g>
+
+  
+  <g class="breathe">
+    
+    <g fill="#DE886D">
+      <rect id="outer-left-leg-up" x="3" y="9" width="1" height="1"></rect>
+      <rect id="inner-left-leg-up" x="5" y="9" width="1" height="1"></rect>
+      <rect id="inner-right-leg-up" x="9" y="9" width="1" height="1"></rect>
+      <rect id="outer-right-leg-up" x="11" y="9" width="1" height="1"></rect>
+    </g>
+
+    
+    <g fill="#DE886D">
+      
+      <rect id="torso-sploot" x="1" y="10" width="13" height="5"></rect>
+      
+      
+      <rect id="left-arm-sploot" x="-1" y="13" width="2" height="2"></rect>
+      <rect id="right-arm-sploot" x="14" y="13" width="2" height="2"></rect>
+    </g>
+    
+    
+    <g fill="#000000">
+      <rect id="left-eye-shut" x="3.5" y="12.5" width="2" height="0.4"></rect>
+      <rect id="right-eye-shut" x="9.5" y="12.5" width="2" height="0.4"></rect>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>squib — pet bakeoff</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1014;
+    --bg-2: #14161c;
+    --panel: #1a1d25;
+    --panel-2: #22262f;
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.14);
+    --text: #ebe7db;
+    --text-mute: rgba(235,231,219,0.55);
+    --text-dim: rgba(235,231,219,0.35);
+    --accent: #d8724e;
+    --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --ui: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    font-family: var(--ui);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1280px; margin: 0 auto; padding: 48px 32px 120px; }
+  .masthead {
+    border-top: 2px solid var(--text);
+    border-bottom: 2px solid var(--text);
+    padding: 16px 0 14px;
+    margin-bottom: 36px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .masthead .l { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mute); }
+  .masthead .t {
+    font-family: var(--mono); font-size: 34px; font-weight: 700;
+    letter-spacing: -0.02em; text-align: center; margin: 0;
+  }
+  .masthead .t .dot { color: var(--accent); }
+  .masthead .r { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-mute); text-align: right; }
+
+  .lede {
+    border: 1px dashed var(--border-strong);
+    padding: 18px 22px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 40px;
+    background: var(--bg-2);
+  }
+  .lede b { color: var(--accent); }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 50px 0 18px;
+  }
+  .section-label::after { content: ""; flex: 1; height: 1px; background: var(--border-strong); }
+  .section-label .n { display: inline-block; padding: 2px 7px; border: 1px solid var(--border-strong); color: var(--text); letter-spacing: 0; }
+
+  h2.heading {
+    font-family: var(--mono); font-size: 22px; font-weight: 700;
+    margin: 0 0 4px; letter-spacing: -0.01em;
+  }
+  .subhead { color: var(--text-mute); font-size: 13px; margin-bottom: 24px; max-width: 640px; line-height: 1.5; }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 1100px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 800px)  { .grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .card:hover { border-color: var(--border-strong); transform: translateY(-2px); }
+  .card .num {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+  }
+  .card .tag {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 2px 6px;
+    border-radius: 3px;
+    opacity: 0.9;
+  }
+  .card .tag.muted { color: var(--text-mute); border-color: var(--border-strong); }
+  .card .stage {
+    background: var(--bg-2);
+    border-bottom: 1px solid var(--border);
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+  .card .stage.checker {
+    background:
+      linear-gradient(45deg, #14161c 25%, transparent 25%) 0 0/16px 16px,
+      linear-gradient(-45deg, #14161c 25%, transparent 25%) 0 8px/16px 16px,
+      linear-gradient(45deg, transparent 75%, #14161c 75%) 8px -8px/16px 16px,
+      linear-gradient(-45deg, transparent 75%, #14161c 75%) -8px 0/16px 16px,
+      #1a1d25;
+  }
+  .card .meta {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .card .name {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.005em;
+  }
+  .card .name .sp {
+    color: var(--text-mute);
+    font-weight: 400;
+    font-size: 11px;
+    margin-left: 6px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .card .why {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-mute);
+  }
+  .card .chips {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .card .chips span {
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 6px;
+    border: 1px solid var(--border-strong);
+    border-radius: 3px;
+    color: var(--text-mute);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  svg.pet { display: block; }
+
+  /* Animations */
+  @keyframes bob { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-2px);} }
+  @keyframes blink { 0%,90%,100% { transform: scaleY(1);} 94%,97% { transform: scaleY(0.1);} }
+  @keyframes sway { 0%,100% { transform: rotate(-1.5deg);} 50% { transform: rotate(1.5deg);} }
+  @keyframes drift { 0%,100% { transform: translateY(0);} 50% { transform: translateY(-3px);} }
+  @keyframes jitter { 0%,100% { transform: translateX(0);} 25% { transform: translateX(-0.5px);} 75% { transform: translateX(0.5px);} }
+  .a-bob { animation: bob 3s ease-in-out infinite; transform-origin: center; }
+  .a-sway { animation: sway 3.5s ease-in-out infinite; transform-origin: center bottom; }
+  .a-drift { animation: drift 4s ease-in-out infinite; transform-origin: center; }
+  .a-jitter { animation: jitter 0.8s ease-in-out infinite; }
+  .a-blink { animation: blink 5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 26px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .panel .k { color: var(--accent); }
+  .panel ul { padding-left: 18px; margin: 10px 0; }
+  .panel li { margin-bottom: 6px; }
+
+  .axes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .axis {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    background: var(--panel);
+  }
+  .axis h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin: 0 0 8px;
+  }
+  .axis p { font-size: 12.5px; color: var(--text); margin: 0; line-height: 1.55; }
+
+  @media (max-width: 800px) { .axes { grid-template-columns: 1fr; } }
+
+  /* vote block */
+  .vote {
+    margin-top: 40px;
+    padding: 20px 26px;
+    border: 1px solid var(--accent);
+    border-radius: 14px;
+    background: rgba(216,114,78,0.08);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .vote b { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<main class="page">
+
+  <header class="masthead">
+    <div class="l">BAKEOFF · ISS. 003</div>
+    <h1 class="t">pet<span class="dot">.</span>pick</h1>
+    <div class="r">18 candidates · pick one species</div>
+  </header>
+
+  <div class="lede">
+    <b>goal.</b> settle the <i>species + art vocabulary</i> before building variants.
+    a coding helper pet needs to: read well at 64–120 px, emote across 6+ states, survive on any wallpaper, and not annoy you after 8 hours of staring at it.
+    below are 18 candidates organized by <b>art style</b> first, not species. once you pick a row you like, next pass explodes it into 4-5 finished variants.
+  </div>
+
+  <div class="section-label"><span class="n">A</span> what makes a good coding-helper pet</div>
+  <div class="axes">
+    <div class="axis">
+      <h4>Read at a glance</h4>
+      <p>Silhouette must carry meaning at 64px. Round, blocky, or strongly asymmetric silhouettes win; skinny stick-figures vanish.</p>
+    </div>
+    <div class="axis">
+      <h4>Expressive face</h4>
+      <p>Two dots for eyes + one mouth shape can do 80% of the work. Big head-to-body ratio reads cuter and emotes clearer.</p>
+    </div>
+    <div class="axis">
+      <h4>Fits the work</h4>
+      <p>Nocturnal / patient / tinkering creatures feel right for debugging at 2am. Not hyper-active. Loyal-companion energy.</p>
+    </div>
+  </div>
+
+  <!-- ========== PIXEL ROW ========== -->
+  <div class="section-label"><span class="n">01</span> Pixel · blocky · retro</div>
+  <h2 class="heading">Pixel sprites.</h2>
+  <div class="subhead">The reference art style. Fast to animate, reads at tiny sizes, deeply associated with "computer companion." Downside: slight early-2000s nostalgia skew.</div>
+
+  <div class="grid">
+
+    <!-- 1. Pixel crab -->
+    <div class="card"><span class="num">01</span><span class="tag">ref style</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="4" y="4" width="8" height="6" fill="#de886d"/>
+            <rect x="2" y="6" width="2" height="2" fill="#de886d"/>
+            <rect x="12" y="6" width="2" height="2" fill="#de886d"/>
+            <rect x="1" y="5" width="1" height="3" fill="#de886d"/>
+            <rect x="14" y="5" width="1" height="3" fill="#de886d"/>
+            <rect x="5" y="10" width="1" height="2" fill="#de886d"/>
+            <rect x="7" y="10" width="1" height="2" fill="#de886d"/>
+            <rect x="8" y="10" width="1" height="2" fill="#de886d"/>
+            <rect x="10" y="10" width="1" height="2" fill="#de886d"/>
+            <rect x="5" y="6" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="6" y="8" width="4" height="1" fill="#a55a3f"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Pincer <span class="sp">crab</span></div>
+        <div class="why">Safe default. Matches the reference vocabulary perfectly. Pixel crab reads "desktop companion" instantly.</div>
+        <div class="chips"><span>pixel</span><span>crustacean</span><span>safe</span></div>
+      </div>
+    </div>
+
+    <!-- 2. Pixel ghost -->
+    <div class="card"><span class="num">02</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-drift">
+            <rect x="4" y="3" width="8" height="1" fill="#e8e4d8"/>
+            <rect x="3" y="4" width="10" height="1" fill="#e8e4d8"/>
+            <rect x="3" y="5" width="10" height="7" fill="#e8e4d8"/>
+            <rect x="3" y="12" width="2" height="1" fill="#e8e4d8"/>
+            <rect x="6" y="12" width="2" height="1" fill="#e8e4d8"/>
+            <rect x="9" y="12" width="2" height="1" fill="#e8e4d8"/>
+            <rect x="12" y="12" width="1" height="1" fill="#e8e4d8"/>
+            <rect x="5" y="7" width="1" height="2" fill="#1f1a10" class="a-blink"/>
+            <rect x="10" y="7" width="1" height="2" fill="#1f1a10" class="a-blink"/>
+            <rect x="6" y="10" width="4" height="1" fill="#1f1a10"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Boo <span class="sp">ghost</span></div>
+        <div class="why">A friendly spectre — always on top of your windows, naturally floats, 0 legs to animate. Haunts your bugs.</div>
+        <div class="chips"><span>pixel</span><span>floats</span><span>minimal</span></div>
+      </div>
+    </div>
+
+    <!-- 3. Pixel cat loaf -->
+    <div class="card"><span class="num">03</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="3" y="3" width="1" height="2" fill="#4a3a2a"/>
+            <rect x="4" y="2" width="1" height="2" fill="#4a3a2a"/>
+            <rect x="11" y="2" width="1" height="2" fill="#4a3a2a"/>
+            <rect x="12" y="3" width="1" height="2" fill="#4a3a2a"/>
+            <rect x="4" y="4" width="9" height="7" fill="#4a3a2a"/>
+            <rect x="3" y="5" width="1" height="5" fill="#4a3a2a"/>
+            <rect x="13" y="5" width="1" height="5" fill="#4a3a2a"/>
+            <rect x="4" y="11" width="9" height="1" fill="#4a3a2a"/>
+            <rect x="6" y="6" width="1" height="2" fill="#ffd166" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="2" fill="#ffd166" class="a-blink"/>
+            <rect x="7" y="8" width="2" height="1" fill="#de886d"/>
+            <rect x="6" y="9" width="1" height="1" fill="#1f1a10"/>
+            <rect x="9" y="9" width="1" height="1" fill="#1f1a10"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Loaf <span class="sp">cat (seated)</span></div>
+        <div class="why">Cat in loaf-mode. Universal coder's companion. Reads adorable even at 32px.</div>
+        <div class="chips"><span>pixel</span><span>cute</span><span>cozy</span></div>
+      </div>
+    </div>
+
+    <!-- 4. Pixel octopus -->
+    <div class="card"><span class="num">04</span><span class="tag">name fit</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="4" y="3" width="8" height="1" fill="#9370b0"/>
+            <rect x="3" y="4" width="10" height="6" fill="#9370b0"/>
+            <rect x="2" y="10" width="2" height="3" fill="#9370b0"/>
+            <rect x="5" y="10" width="1" height="3" fill="#9370b0"/>
+            <rect x="7" y="10" width="1" height="3" fill="#9370b0"/>
+            <rect x="9" y="10" width="1" height="3" fill="#9370b0"/>
+            <rect x="11" y="10" width="1" height="3" fill="#9370b0"/>
+            <rect x="12" y="10" width="2" height="3" fill="#9370b0"/>
+            <rect x="2" y="13" width="1" height="1" fill="#9370b0"/>
+            <rect x="13" y="13" width="1" height="1" fill="#9370b0"/>
+            <rect x="5" y="6" width="1" height="2" fill="#fff" class="a-blink"/>
+            <rect x="10" y="6" width="1" height="2" fill="#fff" class="a-blink"/>
+            <rect x="6" y="8" width="4" height="1" fill="#6a507a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Squib <span class="sp">octopus</span></div>
+        <div class="why">Literally the app's name. 8 arms = 8 tools running in parallel. Smart, inky, nocturnal.</div>
+        <div class="chips"><span>pixel</span><span>on-brand</span><span>many-limbs</span></div>
+      </div>
+    </div>
+
+    <!-- 5. Pixel moth -->
+    <div class="card"><span class="num">05</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="7" y="4" width="2" height="8" fill="#8a7a6a"/>
+            <rect x="6" y="5" width="1" height="6" fill="#8a7a6a"/>
+            <rect x="9" y="5" width="1" height="6" fill="#8a7a6a"/>
+            <rect x="2" y="5" width="4" height="5" fill="#c9b89a"/>
+            <rect x="1" y="6" width="1" height="3" fill="#c9b89a"/>
+            <rect x="3" y="6" width="2" height="1" fill="#8a7a6a"/>
+            <rect x="10" y="5" width="4" height="5" fill="#c9b89a"/>
+            <rect x="14" y="6" width="1" height="3" fill="#c9b89a"/>
+            <rect x="11" y="6" width="2" height="1" fill="#8a7a6a"/>
+            <rect x="7" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="8" y="6" width="1" height="1" fill="#000" class="a-blink"/>
+            <rect x="6" y="3" width="1" height="2" fill="#8a7a6a"/>
+            <rect x="9" y="3" width="1" height="2" fill="#8a7a6a"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Dusty <span class="sp">moth</span></div>
+        <div class="why">Drawn to the glow of your screen at 3am. Fuzzy, muted, deeply debugger-coded. "Debugger" pun built-in.</div>
+        <div class="chips"><span>pixel</span><span>nocturnal</span><span>niche</span></div>
+      </div>
+    </div>
+
+    <!-- 6. Pixel slime -->
+    <div class="card"><span class="num">06</span>
+      <div class="stage checker">
+        <svg class="pet" width="140" height="140" viewBox="0 0 16 16" shape-rendering="crispEdges">
+          <g class="a-bob">
+            <rect x="4" y="5" width="8" height="1" fill="#7dc88a"/>
+            <rect x="3" y="6" width="10" height="1" fill="#7dc88a"/>
+            <rect x="2" y="7" width="12" height="5" fill="#7dc88a"/>
+            <rect x="3" y="12" width="2" height="1" fill="#7dc88a"/>
+            <rect x="7" y="12" width="2" height="1" fill="#7dc88a"/>
+            <rect x="11" y="12" width="2" height="1" fill="#7dc88a"/>
+            <rect x="4" y="7" width="2" height="1" fill="#a5e0a8" opacity="0.7"/>
+            <rect x="5" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="10" y="8" width="1" height="2" fill="#000" class="a-blink"/>
+            <rect x="6" y="10" width="4" height="1" fill="#000"/>
+            <rect x="6" y="11" width="4" height="1" fill="#000"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Goo <span class="sp">slime</span></div>
+        <div class="why">Simplest possible silhouette. Squishes for every state. RPG-coded — feels like a familiar from a roguelike.</div>
+        <div class="chips"><span>pixel</span><span>simple</span><span>squishy</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== SOFT VECTOR ROW ========== -->
+  <div class="section-label"><span class="n">02</span> Soft vector · rounded · modern</div>
+  <h2 class="heading">Rounded vector.</h2>
+  <div class="subhead">No pixels, just friendly curves. Scales perfectly from menubar icon (16px) to full hero (256px). Closer to Apple / Airbnb illustration family. Cute without being juvenile.</div>
+
+  <div class="grid">
+
+    <!-- 7. Axolotl -->
+    <div class="card"><span class="num">07</span><span class="tag">crowd fave</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <ellipse cx="60" cy="72" rx="40" ry="32" fill="#f5b7c5"/>
+            <!-- external gills -->
+            <g fill="#ff8fa8">
+              <path d="M 25 48 Q 15 35 10 42 Q 18 50 20 58 Z"/>
+              <path d="M 22 58 Q 8 55 6 68 Q 16 68 25 66 Z"/>
+              <path d="M 95 48 Q 105 35 110 42 Q 102 50 100 58 Z"/>
+              <path d="M 98 58 Q 112 55 114 68 Q 104 68 95 66 Z"/>
+            </g>
+            <!-- face -->
+            <g>
+              <circle cx="45" cy="65" r="4" fill="#1f1a10" class="a-blink"/>
+              <circle cx="75" cy="65" r="4" fill="#1f1a10" class="a-blink"/>
+              <circle cx="46" cy="64" r="1.2" fill="#fff"/>
+              <circle cx="76" cy="64" r="1.2" fill="#fff"/>
+              <path d="M 52 80 Q 60 85 68 80" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+              <!-- cheek blush -->
+              <ellipse cx="35" cy="78" rx="5" ry="3" fill="#ff8fa8" opacity="0.6"/>
+              <ellipse cx="85" cy="78" rx="5" ry="3" fill="#ff8fa8" opacity="0.6"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Axo <span class="sp">axolotl</span></div>
+        <div class="why">Perpetually smiling, feathery gills = 6 built-in animation points. Internet-adored. Distinctly un-generic.</div>
+        <div class="chips"><span>vector</span><span>cute</span><span>unique</span></div>
+      </div>
+    </div>
+
+    <!-- 8. Owl -->
+    <div class="card"><span class="num">08</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <ellipse cx="60" cy="68" rx="34" ry="40" fill="#8a7558"/>
+            <!-- ear tufts -->
+            <path d="M 32 38 L 28 24 L 40 34 Z" fill="#8a7558"/>
+            <path d="M 88 38 L 92 24 L 80 34 Z" fill="#8a7558"/>
+            <!-- belly -->
+            <ellipse cx="60" cy="80" rx="22" ry="22" fill="#d9c9a8"/>
+            <!-- eye discs -->
+            <circle cx="48" cy="58" r="14" fill="#f5ecd5"/>
+            <circle cx="72" cy="58" r="14" fill="#f5ecd5"/>
+            <circle cx="48" cy="58" r="6" fill="#1f1a10" class="a-blink"/>
+            <circle cx="72" cy="58" r="6" fill="#1f1a10" class="a-blink"/>
+            <circle cx="49.5" cy="56.5" r="1.6" fill="#fff"/>
+            <circle cx="73.5" cy="56.5" r="1.6" fill="#fff"/>
+            <!-- beak -->
+            <path d="M 56 68 L 64 68 L 60 76 Z" fill="#d87f2e"/>
+            <!-- wing hints -->
+            <path d="M 30 70 Q 26 82 32 96" stroke="#604829" stroke-width="2" fill="none"/>
+            <path d="M 90 70 Q 94 82 88 96" stroke="#604829" stroke-width="2" fill="none"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Who <span class="sp">owl</span></div>
+        <div class="why">Wise, nocturnal, watches you code. Big-eye-disc silhouette reads "paying attention" from across the screen.</div>
+        <div class="chips"><span>vector</span><span>nocturnal</span><span>wise</span></div>
+      </div>
+    </div>
+
+    <!-- 9. Frog -->
+    <div class="card"><span class="num">09</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body -->
+            <ellipse cx="60" cy="78" rx="38" ry="26" fill="#6ca868"/>
+            <!-- back legs -->
+            <ellipse cx="26" cy="88" rx="10" ry="6" fill="#6ca868"/>
+            <ellipse cx="94" cy="88" rx="10" ry="6" fill="#6ca868"/>
+            <!-- belly -->
+            <ellipse cx="60" cy="86" rx="22" ry="10" fill="#c9d998"/>
+            <!-- eye domes -->
+            <circle cx="42" cy="52" r="12" fill="#6ca868"/>
+            <circle cx="78" cy="52" r="12" fill="#6ca868"/>
+            <circle cx="42" cy="52" r="8" fill="#fff"/>
+            <circle cx="78" cy="52" r="8" fill="#fff"/>
+            <circle cx="42" cy="54" r="4" fill="#1f1a10" class="a-blink"/>
+            <circle cx="78" cy="54" r="4" fill="#1f1a10" class="a-blink"/>
+            <!-- smile -->
+            <path d="M 40 74 Q 60 82 80 74" stroke="#1f1a10" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <!-- cheek dot -->
+            <circle cx="32" cy="78" r="2.5" fill="#d87f4e"/>
+            <circle cx="88" cy="78" r="2.5" fill="#d87f4e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Hop <span class="sp">frog</span></div>
+        <div class="why">Wide-eyed, patient sitter. Mascot energy. Bonus: fits "leap" metaphors for shipping.</div>
+        <div class="chips"><span>vector</span><span>amphibian</span><span>patient</span></div>
+      </div>
+    </div>
+
+    <!-- 10. Capybara -->
+    <div class="card"><span class="num">10</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body -->
+            <ellipse cx="66" cy="78" rx="36" ry="22" fill="#9a7958"/>
+            <!-- legs -->
+            <rect x="42" y="92" width="7" height="10" rx="2" fill="#7a5d3e"/>
+            <rect x="58" y="92" width="7" height="10" rx="2" fill="#7a5d3e"/>
+            <rect x="76" y="92" width="7" height="10" rx="2" fill="#7a5d3e"/>
+            <rect x="92" y="92" width="7" height="10" rx="2" fill="#7a5d3e"/>
+            <!-- head -->
+            <ellipse cx="32" cy="62" rx="22" ry="20" fill="#9a7958"/>
+            <!-- ears -->
+            <ellipse cx="22" cy="46" rx="5" ry="4" fill="#7a5d3e"/>
+            <ellipse cx="38" cy="44" rx="5" ry="4" fill="#7a5d3e"/>
+            <!-- snout -->
+            <ellipse cx="18" cy="68" rx="10" ry="7" fill="#b89478"/>
+            <circle cx="14" cy="64" r="1.4" fill="#1f1a10"/>
+            <circle cx="14" cy="70" r="1.4" fill="#1f1a10"/>
+            <!-- eye -->
+            <circle cx="30" cy="58" r="2.5" fill="#1f1a10" class="a-blink"/>
+            <!-- zen expression -->
+            <path d="M 14 72 Q 18 74 22 72" stroke="#1f1a10" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Cap <span class="sp">capybara</span></div>
+        <div class="why">Zen, unbothered, the internet's favorite animal. Perfect metaphor: nothing rattles it, even a broken build.</div>
+        <div class="chips"><span>vector</span><span>zen</span><span>meme-proven</span></div>
+      </div>
+    </div>
+
+    <!-- 11. Hedgehog -->
+    <div class="card"><span class="num">11</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body -->
+            <path d="M 20 78 Q 60 32 100 78 Q 100 94 20 94 Z" fill="#6a5338"/>
+            <!-- spike detail -->
+            <g stroke="#3a2818" stroke-width="1.3" fill="none" stroke-linecap="round">
+              <path d="M 32 66 L 30 58"/>
+              <path d="M 44 54 L 42 44"/>
+              <path d="M 58 46 L 58 36"/>
+              <path d="M 72 48 L 74 38"/>
+              <path d="M 86 58 L 90 50"/>
+            </g>
+            <!-- face -->
+            <ellipse cx="40" cy="78" rx="22" ry="18" fill="#d9c0a0"/>
+            <!-- snout -->
+            <ellipse cx="24" cy="78" rx="6" ry="5" fill="#b89478"/>
+            <circle cx="22" cy="78" r="2.2" fill="#1f1a10"/>
+            <!-- eye -->
+            <circle cx="40" cy="72" r="2.8" fill="#1f1a10" class="a-blink"/>
+            <circle cx="41" cy="71" r="0.9" fill="#fff"/>
+            <!-- feet -->
+            <ellipse cx="36" cy="96" rx="5" ry="3" fill="#3a2818"/>
+            <ellipse cx="82" cy="96" rx="5" ry="3" fill="#3a2818"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Quill <span class="sp">hedgehog</span></div>
+        <div class="why">Shy, prickly when rushed, warms up to you. Small, round, unmistakable silhouette.</div>
+        <div class="chips"><span>vector</span><span>shy</span><span>prickly</span></div>
+      </div>
+    </div>
+
+    <!-- 12. Mushroom sprite -->
+    <div class="card"><span class="num">12</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-sway">
+            <!-- cap -->
+            <path d="M 20 58 Q 60 12 100 58 Q 100 68 60 68 Q 20 68 20 58 Z" fill="#c44733"/>
+            <!-- spots -->
+            <circle cx="40" cy="44" r="5" fill="#f5ecd5"/>
+            <circle cx="68" cy="34" r="7" fill="#f5ecd5"/>
+            <circle cx="84" cy="48" r="4" fill="#f5ecd5"/>
+            <!-- stem -->
+            <path d="M 38 68 Q 40 102 58 102 L 62 102 Q 80 102 82 68 Z" fill="#f5e8cd"/>
+            <!-- face on stem -->
+            <circle cx="50" cy="84" r="3" fill="#1f1a10" class="a-blink"/>
+            <circle cx="70" cy="84" r="3" fill="#1f1a10" class="a-blink"/>
+            <path d="M 54 92 Q 60 95 66 92" stroke="#1f1a10" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <circle cx="44" cy="90" r="2" fill="#ffa080" opacity="0.7"/>
+            <circle cx="76" cy="90" r="2" fill="#ffa080" opacity="0.7"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Cap <span class="sp">mushroom sprite</span></div>
+        <div class="why">Grows on your desktop like a forest grows on a log. Shy and ambient. Cap color = theme accent.</div>
+        <div class="chips"><span>vector</span><span>sprite</span><span>colorable</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== LINE / ZINE ROW ========== -->
+  <div class="section-label"><span class="n">03</span> Line · ink · hand-drawn</div>
+  <h2 class="heading">Line-art.</h2>
+  <div class="subhead">The original zine direction. Feels like something pulled from your own notebook. Sits lighter visually — great on busy wallpapers.</div>
+
+  <div class="grid">
+
+    <!-- 13. Hermit crab (the current) -->
+    <div class="card"><span class="num">13</span><span class="tag muted">v1</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body inspired by current -->
+            <rect x="32" y="48" width="56" height="32" fill="#e39b7b" stroke="#1f1a10" stroke-width="2.2"/>
+            <line x1="36" y1="54" x2="84" y2="54" stroke="#1f1a10" stroke-width="1.2" stroke-linecap="round"/>
+            <!-- claws -->
+            <path d="M 32 66 L 18 66 L 14 60" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 10 54 L 18 54 L 20 60 L 12 60 Z" fill="#e39b7b" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M 10 62 L 18 62 L 20 66 L 12 66 Z" fill="#e39b7b" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M 88 66 L 102 66 L 106 60" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 110 54 L 102 54 L 100 60 L 108 60 Z" fill="#e39b7b" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M 110 62 L 102 62 L 100 66 L 108 66 Z" fill="#e39b7b" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- legs -->
+            <path d="M 46 80 L 46 92 L 42 96" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 58 80 L 58 94 L 54 98" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 66 80 L 66 94 L 70 98" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 78 80 L 78 92 L 82 96" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <!-- eyes -->
+            <rect x="45" y="58" width="4" height="7" fill="#1f1a10" class="a-blink"/>
+            <rect x="71" y="58" width="4" height="7" fill="#1f1a10" class="a-blink"/>
+            <path d="M 52 74 Q 60 76 68 74" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Squib-v1 <span class="sp">zine crab</span></div>
+        <div class="why">The current direction. Grumpy, hand-drawn, sits lightly on any background. Baseline for comparison.</div>
+        <div class="chips"><span>line</span><span>current</span><span>zine</span></div>
+      </div>
+    </div>
+
+    <!-- 14. Line cat -->
+    <div class="card"><span class="num">14</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body -->
+            <path d="M 30 90 Q 30 58 50 54 L 70 54 Q 90 58 90 90 Z" fill="#f5ecd5" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- ears -->
+            <path d="M 36 58 L 32 38 L 50 52" fill="#f5ecd5" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <path d="M 84 58 L 88 38 L 70 52" fill="#f5ecd5" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- inner ear -->
+            <path d="M 38 54 L 38 44 L 46 52 Z" fill="#e39b7b"/>
+            <path d="M 82 54 L 82 44 L 74 52 Z" fill="#e39b7b"/>
+            <!-- tail curl -->
+            <path d="M 88 88 Q 100 88 100 76 Q 100 68 92 68" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <!-- eyes closed (cozy) -->
+            <path d="M 48 72 Q 52 76 56 72" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <path d="M 64 72 Q 68 76 72 72" stroke="#1f1a10" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+            <!-- nose+smile -->
+            <path d="M 58 78 L 62 78 L 60 80 Z" fill="#1f1a10"/>
+            <path d="M 56 82 Q 60 84 64 82" stroke="#1f1a10" stroke-width="1.5" fill="none"/>
+            <!-- whiskers -->
+            <line x1="44" y1="80" x2="32" y2="78" stroke="#1f1a10" stroke-width="1"/>
+            <line x1="44" y1="82" x2="32" y2="84" stroke="#1f1a10" stroke-width="1"/>
+            <line x1="76" y1="80" x2="88" y2="78" stroke="#1f1a10" stroke-width="1"/>
+            <line x1="76" y1="82" x2="88" y2="84" stroke="#1f1a10" stroke-width="1"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Sketch <span class="sp">ink cat</span></div>
+        <div class="why">Hand-drawn curled cat, eyes closed in contentment. Reads from further away than pixel cat.</div>
+        <div class="chips"><span>line</span><span>cute</span><span>cozy</span></div>
+      </div>
+    </div>
+
+    <!-- 15. Line bee -->
+    <div class="card"><span class="num">15</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-drift">
+            <!-- wings -->
+            <ellipse cx="44" cy="46" rx="14" ry="10" fill="#e8f4ff" stroke="#1f1a10" stroke-width="1.8" opacity="0.85"/>
+            <ellipse cx="78" cy="46" rx="14" ry="10" fill="#e8f4ff" stroke="#1f1a10" stroke-width="1.8" opacity="0.85"/>
+            <!-- body oval -->
+            <ellipse cx="60" cy="68" rx="28" ry="22" fill="#f5ca3a" stroke="#1f1a10" stroke-width="2.4"/>
+            <!-- stripes -->
+            <path d="M 38 62 Q 46 54 60 52 Q 74 54 82 62" stroke="#1f1a10" stroke-width="3.2" fill="none"/>
+            <path d="M 40 78 Q 48 84 60 84 Q 72 84 80 78" stroke="#1f1a10" stroke-width="3.2" fill="none"/>
+            <!-- face -->
+            <circle cx="52" cy="64" r="2.4" fill="#1f1a10" class="a-blink"/>
+            <circle cx="68" cy="64" r="2.4" fill="#1f1a10" class="a-blink"/>
+            <path d="M 54 72 Q 60 74 66 72" stroke="#1f1a10" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <!-- antennae -->
+            <path d="M 52 50 Q 48 38 44 36" stroke="#1f1a10" stroke-width="1.6" fill="none"/>
+            <path d="M 68 50 Q 72 38 76 36" stroke="#1f1a10" stroke-width="1.6" fill="none"/>
+            <circle cx="44" cy="34" r="1.8" fill="#1f1a10"/>
+            <circle cx="76" cy="34" r="1.8" fill="#1f1a10"/>
+            <!-- stinger -->
+            <path d="M 88 68 L 96 72 L 88 74 Z" fill="#1f1a10"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Busy <span class="sp">honeybee</span></div>
+        <div class="why">Literal "worker bee." Wings flutter = natural working animation. Warm color, friendly, productivity-coded.</div>
+        <div class="chips"><span>line</span><span>busy</span><span>warm</span></div>
+      </div>
+    </div>
+
+    <!-- 16. Line shrimp -->
+    <div class="card"><span class="num">16</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body curve -->
+            <path d="M 20 68 Q 30 40 60 40 Q 90 40 96 60 L 96 70 Q 90 78 84 72 Q 78 82 70 76 Q 62 84 56 76 Q 48 84 42 76 Q 34 84 28 76 Q 22 80 20 68 Z"
+              fill="#f5a8a0" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- segments -->
+            <line x1="48" y1="56" x2="52" y2="76" stroke="#1f1a10" stroke-width="1.4"/>
+            <line x1="62" y1="52" x2="64" y2="76" stroke="#1f1a10" stroke-width="1.4"/>
+            <line x1="76" y1="54" x2="78" y2="74" stroke="#1f1a10" stroke-width="1.4"/>
+            <!-- tail fan -->
+            <path d="M 20 68 L 8 58 L 12 72 L 6 78 L 16 76 L 14 86 L 20 78 Z" fill="#f5a8a0" stroke="#1f1a10" stroke-width="2.2" stroke-linejoin="round"/>
+            <!-- eye -->
+            <circle cx="88" cy="52" r="3" fill="#1f1a10" class="a-blink"/>
+            <circle cx="89" cy="51" r="1" fill="#fff"/>
+            <!-- antenna -->
+            <path d="M 94 44 Q 106 30 108 22" stroke="#1f1a10" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+            <path d="M 100 42 Q 110 36 114 34" stroke="#1f1a10" stroke-width="1.4" fill="none" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Pink <span class="sp">shrimp</span></div>
+        <div class="why">Underdog pick. Still crustacean-family (matches original brief) but clearly its own thing.</div>
+        <div class="chips"><span>line</span><span>crustacean</span><span>different</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== CHARACTER / MASCOT ROW ========== -->
+  <div class="section-label"><span class="n">04</span> Mascot · personality · character</div>
+  <h2 class="heading">Invented characters.</h2>
+  <div class="subhead">Not a real animal — something specific to squib. More room to own the identity, more risk of feeling corporate.</div>
+
+  <div class="grid">
+
+    <!-- 17. Mono glyph blob -->
+    <div class="card"><span class="num">17</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- a dangling cursor-like creature with personality -->
+            <path d="M 60 20 L 60 90" stroke="#1f1a10" stroke-width="3"/>
+            <!-- head blob on top of cursor pipe -->
+            <ellipse cx="60" cy="64" rx="26" ry="24" fill="#1f1a10"/>
+            <!-- eyes -->
+            <circle cx="52" cy="60" r="4" fill="#d8724e" class="a-blink"/>
+            <circle cx="68" cy="60" r="4" fill="#d8724e" class="a-blink"/>
+            <!-- slight smirk -->
+            <path d="M 50 72 Q 60 78 70 72" stroke="#d8724e" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+            <!-- little legs -->
+            <path d="M 48 84 L 44 92" stroke="#1f1a10" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 72 84 L 76 92" stroke="#1f1a10" stroke-width="3" stroke-linecap="round"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Caret <span class="sp">cursor creature</span></div>
+        <div class="why">A living text-cursor. Deeply on-theme for a coding app. Invented, ownable, unlike any other mascot.</div>
+        <div class="chips"><span>invented</span><span>on-theme</span><span>novel</span></div>
+      </div>
+    </div>
+
+    <!-- 18. Bracket bug -->
+    <div class="card"><span class="num">18</span>
+      <div class="stage checker">
+        <svg class="pet" width="150" height="150" viewBox="0 0 120 120">
+          <g class="a-bob">
+            <!-- body made of a { -->
+            <path d="M 52 40 Q 40 40 40 50 Q 40 58 32 60 Q 40 62 40 70 Q 40 80 52 80" fill="none" stroke="#1f1a10" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M 68 40 Q 80 40 80 50 Q 80 58 88 60 Q 80 62 80 70 Q 80 80 68 80" fill="none" stroke="#1f1a10" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- center body -->
+            <rect x="50" y="48" width="20" height="24" rx="4" fill="#d8724e"/>
+            <!-- face -->
+            <circle cx="56" cy="58" r="2.5" fill="#1f1a10" class="a-blink"/>
+            <circle cx="64" cy="58" r="2.5" fill="#1f1a10" class="a-blink"/>
+            <path d="M 55 66 Q 60 70 65 66" stroke="#1f1a10" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+            <!-- legs -->
+            <path d="M 54 72 L 50 86" stroke="#1f1a10" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 60 72 L 60 86" stroke="#1f1a10" stroke-width="2" stroke-linecap="round"/>
+            <path d="M 66 72 L 70 86" stroke="#1f1a10" stroke-width="2" stroke-linecap="round"/>
+            <!-- antennae -->
+            <path d="M 54 48 L 50 40" stroke="#1f1a10" stroke-width="1.6"/>
+            <path d="M 66 48 L 70 40" stroke="#1f1a10" stroke-width="1.6"/>
+            <circle cx="50" cy="40" r="1.8" fill="#d8724e"/>
+            <circle cx="70" cy="40" r="1.8" fill="#d8724e"/>
+          </g>
+        </svg>
+      </div>
+      <div class="meta">
+        <div class="name">Brac <span class="sp">bracket bug</span></div>
+        <div class="why">A little beetle cradled between two curly braces. On-theme to the extreme. Smushes a pun into the silhouette.</div>
+        <div class="chips"><span>invented</span><span>typographic</span><span>clever</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========== SHORTLIST + ASK ========== -->
+  <div class="section-label"><span class="n">05</span> My take</div>
+
+  <div class="panel">
+    <p style="margin:0 0 12px;"><b style="color:var(--accent)">If I'm picking</b> — I'd pare down to these four and do another round on one:</p>
+    <ul>
+      <li><span class="k">04 Squib octopus (pixel)</span> — the name is right there, 8 arms animate gorgeously, matches the reference vocabulary. Safest creative win.</li>
+      <li><span class="k">07 Axo axolotl (vector)</span> — softest, most "cute" without being juvenile. Built-in animation points (gills).</li>
+      <li><span class="k">17 Caret cursor-creature</span> — most ownable, most on-theme for a coding app. Could become a real identity.</li>
+      <li><span class="k">05 Dusty moth (pixel)</span> — wildcard. Nocturnal, drawn to screen glow, "debugger" joke lands. Very squib-energy.</li>
+    </ul>
+    <p style="margin:12px 0 0;">Crab stays on the table but it's treading on the reference's species directly. If we go crab, we should commit to a radically different <i>art style</i> (e.g. 13 line/zine crab vs 01 pixel crab) rather than just re-colored pixels.</p>
+  </div>
+
+  <div class="vote">
+    <b>Your call →</b> tell me one (or two) numbers and I'll spin up 4–5 finished variants with full animation loops, or tell me a different direction entirely. You can also mix: "pixel style of 01 but creature from 07" works.
+  </div>
+
+</main>
+</body>
+</html>

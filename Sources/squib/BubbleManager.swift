@@ -74,11 +74,13 @@ final class BubbleManager {
         guard let top = stack.last else { return }
         let mods = event.modifierFlags.intersection([.command, .shift, .control, .option])
         guard mods == [.command, .shift] else { return }
+        let isPlanMode = top.request.toolName == "ExitPlanMode"
         switch event.charactersIgnoringModifiers?.lowercased() ?? "" {
         case "y": top.window.allowViaKey()
-        case "n": top.window.denyViaKey()
+        case "n": if !isPlanMode { top.window.denyViaKey() }
         case "s": top.window.allowSessionViaKey()
         case "a": top.window.firstSuggestionViaKey()
+        case "e": if isPlanMode { top.window.editPlanViaKey() }
         default:  break
         }
     }
@@ -87,14 +89,13 @@ final class BubbleManager {
 
     private func reposition() {
         let wa     = NSScreen.main?.visibleFrame ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
-        let bw     = BubbleWindow.width
         let margin = Self.margin
         let gap    = Self.gap
 
-        let x = wa.maxX - bw - margin
         var y = wa.minY + margin
 
         for entry in stack {
+            let x = wa.maxX - entry.window.width - margin
             entry.window.show(at: NSPoint(x: x, y: y))
             y += entry.window.measuredHeight + gap
         }

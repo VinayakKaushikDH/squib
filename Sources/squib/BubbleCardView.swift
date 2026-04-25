@@ -19,13 +19,14 @@ private extension Color {
 
 private func pillColor(for name: String) -> Color {
     switch name {
-    case "Bash":         return Color(hex: "#d97757")
-    case "Edit":         return Color(hex: "#5b8dd9")
-    case "Write":        return Color(hex: "#8b7ec7")
-    case "Read":         return Color(hex: "#5a9e6f")
-    case "Glob", "Grep": return Color(hex: "#5a9eab")
-    case "Agent":        return Color(hex: "#c47a9a")
-    default:             return Color(hex: "#52525b")
+    case "Bash":  return Color(hex: "#d8724e")
+    case "Edit":  return Color(hex: "#5b7fb8")
+    case "Read":  return Color(hex: "#6a9b7c")
+    case "Write": return Color(hex: "#c79556")
+    case "Glob":  return Color(hex: "#8e78b6")
+    case "Grep":  return Color(hex: "#b87c8e")
+    case "Agent": return Color(hex: "#6aa3b0")
+    default:      return Color(hex: "#52525b")
     }
 }
 
@@ -154,15 +155,17 @@ struct BubbleCardView: View {
         VStack(alignment: .leading, spacing: 8) {
             modeContent
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
         .onGeometryChange(for: CGFloat.self, of: { $0.size.height }) { h in
             model.onHeightMeasured?(h)
         }
         .opacity(appeared ? 1 : 0)
-        .offset(x: appeared ? 0 : 40)
-        .animation(.easeOut(duration: 0.28), value: appeared)
+        .offset(x: appeared ? 0 : 30)
+        .scaleEffect(appeared ? 1 : 0.96)
+        .animation(.spring(response: 0.5, dampingFraction: 0.7), value: appeared)
         .onAppear { appeared = true }
         .onChange(of: model.pendingKeyAction) { _, action in
             guard let action, !model.isDecided else {
@@ -173,6 +176,7 @@ struct BubbleCardView: View {
             case .deny:            handleDeny()
             case .allowSession:    handleAllowSession()
             case .firstSuggestion: handleFirstSuggestion()
+            case .editPlan:        handleDeny()
             }
             model.pendingKeyAction = nil
         }
@@ -195,31 +199,32 @@ struct BubbleCardView: View {
 
     @ViewBuilder
     private var regularContent: some View {
-        HStack(spacing: 0) {
-            Text("Permission Request")
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(.secondary)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Permission Request")
+                    .font(.system(size: 15, weight: .semibold))
+                if let tag = sessionTag {
+                    SessionTagLabel(text: tag)
+                }
+            }
             Spacer()
             ToolPill(name: request.toolName)
         }
 
-        if let tag = sessionTag {
-            SessionTagLabel(text: tag)
-        }
-
         let detail = extractDetail(toolName: request.toolName, input: parsedInput)
         if !detail.isEmpty {
-            CommandBlock(text: detail)
+            CommandBlock(text: detail, isBash: request.toolName == "Bash")
         }
 
         HStack(spacing: 8) {
             BubbleActionButton("Deny",  hint: "⌘⇧N", role: .deny)  { handleDeny() }
             BubbleActionButton("Allow", hint: "⌘⇧Y", role: .allow) { handleAllow() }
         }
+        .padding(.horizontal, -6)
         .disabled(model.isDecided)
 
         if !dedupedSuggestions.isEmpty {
-            VStack(spacing: 5) {
+            VStack(spacing: 6) {
                 BubbleSuggestionButton(label: "Allow Session", hint: "⌘⇧S") {
                     handleAllowSession()
                 }
@@ -236,6 +241,7 @@ struct BubbleCardView: View {
                     }
                 }
             }
+            .padding(.horizontal, -6)
             .disabled(model.isDecided)
         }
     }
@@ -244,12 +250,16 @@ struct BubbleCardView: View {
 
     @ViewBuilder
     private var planReviewContent: some View {
-        Text("Plan Review")
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(.secondary)
-
-        if let tag = sessionTag {
-            SessionTagLabel(text: tag)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Plan Review")
+                    .font(.system(size: 15, weight: .semibold))
+                if let tag = sessionTag {
+                    SessionTagLabel(text: tag)
+                }
+            }
+            Spacer()
+            ToolPill(name: request.toolName)
         }
 
         let detail = extractDetail(toolName: request.toolName, input: parsedInput)
@@ -257,23 +267,28 @@ struct BubbleCardView: View {
             CommandBlock(text: detail)
         }
 
-        BubbleActionButton("Approve", hint: "⌘⇧Y", role: .allow) { handleAllow() }
-            .disabled(model.isDecided)
-
-        BubbleSuggestionButton(label: "Go to Terminal") { handleDeny() }
-            .disabled(model.isDecided)
+        HStack(spacing: 8) {
+            BubbleActionButton("Edit Plan", hint: "⌘⇧E", role: .deny)  { handleDeny() }
+            BubbleActionButton("Approve",   hint: "⌘⇧Y", role: .allow) { handleAllow() }
+        }
+        .padding(.horizontal, -6)
+        .disabled(model.isDecided)
     }
 
     // MARK: - Elicitation
 
     @ViewBuilder
     private var elicitationContent: some View {
-        Text("Needs Input")
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(.secondary)
-
-        if let tag = sessionTag {
-            SessionTagLabel(text: tag)
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Needs Input")
+                    .font(.system(size: 15, weight: .semibold))
+                if let tag = sessionTag {
+                    SessionTagLabel(text: tag)
+                }
+            }
+            Spacer()
+            ToolPill(name: request.toolName)
         }
 
         let questions = (parsedInput?["questions"] as? [[String: Any]]) ?? []
@@ -282,10 +297,11 @@ struct BubbleCardView: View {
         }
 
         HStack(spacing: 8) {
-            BubbleActionButton("Go to Terminal", hint: "⌘⇧N", role: .deny)  { handleDeny() }
-            BubbleActionButton("Submit Answer",  hint: "⌘⇧Y", role: .allow) { handleSubmit() }
+            BubbleActionButton("Skip",         hint: "⌘⇧N", role: .deny)  { handleDeny() }
+            BubbleActionButton("Submit Answer", hint: "⌘⇧Y", role: .allow) { handleSubmit() }
                 .disabled(!canSubmit)
         }
+        .padding(.horizontal, -6)
         .disabled(model.isDecided)
     }
 
@@ -335,15 +351,37 @@ struct BubbleCardView: View {
 
 // MARK: - ToolPill
 
+private func pillLabel(for name: String) -> String {
+    switch name {
+    case "ExitPlanMode":    return "Plan"
+    case "AskUserQuestion": return "Ask"
+    default:                return name.uppercased()
+    }
+}
+
 private struct ToolPill: View {
     let name: String
+
+    private var isNeutral: Bool {
+        name == "ExitPlanMode" || name == "AskUserQuestion"
+    }
+
     var body: some View {
-        Text(name.uppercased())
+        Text(pillLabel(for: name))
             .font(.system(size: 10, weight: .bold))
             .foregroundStyle(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 2)
-            .background(pillColor(for: name), in: RoundedRectangle(cornerRadius: 5))
+            .background(
+                isNeutral ? Color.white.opacity(0.12) : pillColor(for: name),
+                in: RoundedRectangle(cornerRadius: 5)
+            )
+            .overlay {
+                if isNeutral {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(Color.white.opacity(0.20), lineWidth: 1)
+                }
+            }
     }
 }
 
@@ -365,17 +403,30 @@ private struct SessionTagLabel: View {
 
 private struct CommandBlock: View {
     let text: String
+    var isBash: Bool = false
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            Text(text)
-                .font(.system(size: 11, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+            Group {
+                if isBash {
+                    HStack(alignment: .firstTextBaseline, spacing: 0) {
+                        Text("$ ")
+                            .foregroundStyle(Color(hex: "#d8724e"))
+                        Text(text)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    Text(text)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .font(.system(size: 11, design: .monospaced))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
         .frame(maxHeight: 100)
-        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
     }
 }
 
@@ -400,15 +451,15 @@ private struct BubbleActionButton: View {
         Button(action: action) {
             HStack(spacing: 4) {
                 Text(label)
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(.system(size: 13, weight: .semibold))
                 if let hint {
                     Text("[\(hint)]")
                         .font(.system(size: 9, weight: .bold))
-                        .opacity(0.45)
+                        .opacity(0.55)
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 6)
+            .padding(.vertical, 9)
         }
         .buttonStyle(BubbleActionButtonStyle(role: role))
     }
@@ -422,18 +473,25 @@ private struct BubbleActionButtonStyle: ButtonStyle {
         configuration.label
             .background(
                 role == .allow
-                    ? Color(hex: "#d97757")
-                    : Color.primary.opacity(0.05),
-                in: RoundedRectangle(cornerRadius: 7)
+                    ? Color(hex: "#d8724e")
+                    : Color.white.opacity(0.06),
+                in: RoundedRectangle(cornerRadius: 14)
             )
-            .foregroundStyle(role == .allow ? Color.white : Color.primary)
+            .foregroundStyle(Color.white)
             .overlay {
-                if role == .deny {
-                    RoundedRectangle(cornerRadius: 7)
-                        .stroke(Color.primary.opacity(0.18), lineWidth: 1)
-                }
+                RoundedRectangle(cornerRadius: 14)
+                    .stroke(
+                        role == .allow
+                            ? Color.black.opacity(0.18)
+                            : Color.white.opacity(0.16),
+                        lineWidth: 1
+                    )
             }
-            .opacity(!isEnabled ? 0.45 : configuration.isPressed ? 0.78 : 1.0)
+            .shadow(
+                color: role == .allow ? Color(hex: "#d8724e").opacity(0.4) : .clear,
+                radius: 5, x: 0, y: 4
+            )
+            .opacity(!isEnabled ? 0.45 : configuration.isPressed ? 0.82 : 1.0)
     }
 }
 
@@ -454,39 +512,39 @@ private struct BubbleSuggestionButton: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 4) {
-                HStack(spacing: 4) {
+            HStack(spacing: 0) {
+                HStack(spacing: 6) {
                     Text(label)
-                        .font(.system(size: 11.5, weight: .medium))
+                        .font(.system(size: 12, design: .monospaced))
                         .lineLimit(1)
                         .truncationMode(.tail)
                     if let hint {
                         Text("[\(hint)]")
-                            .font(.system(size: 9, weight: .bold))
-                            .opacity(0.45)
+                            .font(.system(size: 10, weight: .medium, design: .monospaced))
+                            .opacity(0.55)
                     }
                 }
                 Spacer(minLength: 8)
                 Text("→")
-                    .font(.system(size: 11.5))
-                    .opacity(isHovered && isEnabled ? 1 : 0)
-                    .animation(.easeOut(duration: 0.15), value: isHovered)
+                    .font(.system(size: 13))
+                    .opacity(isHovered && isEnabled ? 0.7 : 0)
+                    .animation(.easeOut(duration: 0.12), value: isHovered)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+            .padding(.horizontal, 13)
+            .padding(.vertical, 9)
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .background(
-            Color.primary.opacity(isHovered && isEnabled ? 0.08 : 0.03),
-            in: RoundedRectangle(cornerRadius: 7)
+            Color.white.opacity(isHovered && isEnabled ? 0.10 : 0.05),
+            in: RoundedRectangle(cornerRadius: 12)
         )
         .overlay {
-            RoundedRectangle(cornerRadius: 7)
-                .stroke(Color.primary.opacity(isHovered && isEnabled ? 0.15 : 0.06), lineWidth: 1)
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.white.opacity(0.10), lineWidth: 1)
         }
-        .foregroundStyle(isHovered && isEnabled ? Color.primary : Color.secondary)
+        .foregroundStyle(Color.white)
         .onHover { isHovered = isEnabled ? $0 : false }
         .opacity(isEnabled ? 1 : 0.4)
     }
@@ -588,12 +646,17 @@ private struct OptionRow: View {
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 7)
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .background(.primary.opacity(0.02), in: RoundedRectangle(cornerRadius: 7))
+        .background(
+            isSelected ? Color(hex: "#d97757").opacity(0.10) : Color.primary.opacity(0.02),
+            in: RoundedRectangle(cornerRadius: 7)
+        )
         .overlay {
             RoundedRectangle(cornerRadius: 7)
-                .stroke(Color.primary.opacity(0.06), lineWidth: 1)
+                .stroke(isSelected ? Color(hex: "#d97757").opacity(0.55) : Color.primary.opacity(0.06), lineWidth: 1)
         }
     }
 }

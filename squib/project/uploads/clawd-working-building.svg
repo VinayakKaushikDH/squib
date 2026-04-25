@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+
+    
+    <g id="pixel-spark">
+      <rect x="0" y="0" width="1" height="1"></rect>
+    </g>
+  </defs>
+
+  
+  <rect class="shadow-anim" x="3" y="15" width="9" height="1" fill="#000000"></rect>
+  <rect x="16" y="15" width="7" height="1" fill="#000000" opacity="0.4"></rect>
+
+  
+  <g transform="translate(17, 13)">
+    <rect x="0" y="2" width="5" height="1" fill="#546E7A"></rect>
+    <rect x="1" y="0" width="3" height="2" fill="#78909C"></rect>
+    <rect x="1.5" y="-0.5" width="2" height="1" class="hot-metal"></rect>
+  </g>
+
+  
+  <g fill="#FFC107" transform="translate(19, 12.5)">
+    <use href="#pixel-spark" class="spark s1"></use>
+    <use href="#pixel-spark" class="spark s2"></use>
+    <use href="#pixel-spark" class="spark s3"></use>
+  </g>
+
+  
+  <g class="body-bounce" fill="#DE886D">
+    <rect x="3" y="13" width="1" height="2"></rect>
+    <rect x="5" y="13" width="1" height="2"></rect>
+    <rect x="9" y="13" width="1" height="2"></rect>
+    <rect x="11" y="13" width="1" height="2"></rect>
+  </g>
+
+  
+  <g class="body-bounce">
+    <g class="breathe">
+
+      
+      <g transform="translate(1, 8)">
+        <g class="sweat" fill="#40C4FF">
+          <rect x="0" y="1" width="1.5" height="1.5"></rect>
+          <rect x="0.25" y="0" width="1" height="1"></rect>
+        </g>
+      </g>
+
+      
+      <g class="body-squash">
+
+        
+        <rect x="2" y="6" width="11" height="7" fill="#DE886D"></rect>
+
+        
+        <g>
+          
+          <rect x="4" y="1" width="2" height="1" fill="#FBC02D"></rect>
+          <rect x="9" y="1" width="2" height="1" fill="#FBC02D"></rect>
+          
+          <rect x="3" y="2" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="4" y="2" width="2" height="1" fill="#FBC02D"></rect>
+          <rect x="6" y="2" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="7" y="2" width="1" height="1" fill="#FBC02D"></rect>
+          <rect x="8" y="2" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="9" y="2" width="2" height="1" fill="#FBC02D"></rect>
+          <rect x="11" y="2" width="1" height="1" fill="#F9A825"></rect>
+          
+          <rect x="2" y="3" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="3" y="3" width="3" height="1" fill="#FBC02D"></rect>
+          <rect x="6" y="3" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="7" y="3" width="1" height="1" fill="#FBC02D"></rect>
+          <rect x="8" y="3" width="1" height="1" fill="#F9A825"></rect>
+          <rect x="9" y="3" width="3" height="1" fill="#FBC02D"></rect>
+          <rect x="12" y="3" width="1" height="1" fill="#F9A825"></rect>
+          
+          <rect x="1" y="4" width="2" height="1" fill="#F9A825"></rect>
+          <rect x="3" y="4" width="9" height="1" fill="#FBC02D"></rect>
+          <rect x="12" y="4" width="2" height="1" fill="#F9A825"></rect>
+          
+          <rect x="0" y="5" width="15" height="1" fill="#F9A825"></rect>
+        </g>
+
+        
+        <g class="eyes-look">
+          <g class="blink" fill="#000">
+            <rect x="4" y="8" width="1" height="2"></rect>
+            <rect x="10" y="8" width="1" height="2"></rect>
+          </g>
+        </g>
+
+      </g>
+
+      
+      <g class="arm-l-rest">
+        <rect x="0" y="9" width="2" height="2" fill="#DE886D"></rect>
+      </g>
+
+    </g>
+  </g>
+
+  
+  <g class="body-bounce">
+    <g class="breathe">
+      <g class="arm-hammer">
+        <rect x="13" y="9" width="2" height="2" fill="#DE886D"></rect>
+        
+        <g>
+          
+          <rect x="13.5" y="4" width="1" height="6" fill="#795548"></rect>
+          
+          <rect x="12.5" y="3" width="3" height="2" fill="#9E9E9E"></rect>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

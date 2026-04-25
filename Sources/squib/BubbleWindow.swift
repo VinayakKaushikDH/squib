@@ -3,9 +3,9 @@ import SwiftUI
 import SquibCore
 
 final class BubbleWindow: NSPanel {
-    static let width:           CGFloat = 340
     static let estimatedHeight: CGFloat = 170
 
+    let width:   CGFloat
     let request: PermissionRequest
     var onDecision:      ((PermissionDecision) -> Void)?
     var onTrustSession:  (() -> Void)?
@@ -17,9 +17,10 @@ final class BubbleWindow: NSPanel {
 
     init(request: PermissionRequest) {
         self.request = request
+        self.width = request.isElicitation ? 380 : 340
         super.init(
             contentRect: NSRect(origin: .zero,
-                                size: NSSize(width: Self.width, height: Self.estimatedHeight)),
+                                size: NSSize(width: self.width, height: Self.estimatedHeight)),
             styleMask:   [.borderless, .nonactivatingPanel],
             backing:     .buffered,
             defer:       false
@@ -65,11 +66,13 @@ final class BubbleWindow: NSPanel {
     func allowSessionViaKey()    { viewModel.triggerAllowSession() }
     /// Called by BubbleManager's global key monitor (A key).
     func firstSuggestionViaKey() { viewModel.triggerFirstSuggestion() }
+    /// Called by BubbleManager's global key monitor (⌘⇧E, plan mode only).
+    func editPlanViaKey()        { viewModel.triggerEditPlan() }
 
     // MARK: - Positioning
 
     func show(at origin: NSPoint) {
-        let f = NSRect(origin: origin, size: NSSize(width: Self.width, height: measuredHeight))
+        let f = NSRect(origin: origin, size: NSSize(width: self.width, height: measuredHeight))
         if isVisible {
             setFrame(f, display: true, animate: false)
         } else {

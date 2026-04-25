@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-15 -25 45 45" width="500" height="500">
+  <defs>
+    
+    <g id="pixel-packet">
+      <rect x="0" y="0" width="1.5" height="1.5"></rect>
+    </g>
+  </defs>
+
+  
+  <rect class="shadow-anim" x="3" y="15" width="9" height="1" fill="#000" opacity="0.5"></rect>
+
+  
+  <g fill="#40C4FF">
+    <use href="#pixel-packet" class="data-bit d1" x="3" y="7"></use>
+    <use href="#pixel-packet" class="data-bit d2" x="7" y="8"></use>
+    <use href="#pixel-packet" class="data-bit d3" x="11" y="7"></use>
+    <use href="#pixel-packet" class="data-bit d4" x="5" y="8"></use>
+  </g>
+
+  
+  <g id="screen" transform="translate(1.25, 0)">
+    <rect x="-0.5" y="-6" width="13.5" height="10.5" fill="#1E1E2E" rx="0.3"></rect>
+    <rect x="-0.5" y="-6" width="13.5" height="1.2" fill="#2D2D3D" rx="0.3"></rect>
+    <rect x="0.3" y="-5.6" width="0.5" height="0.4" fill="#FF5F56"></rect>
+    <rect x="1.2" y="-5.6" width="0.5" height="0.4" fill="#FFBD2E"></rect>
+    <rect x="2.1" y="-5.6" width="0.5" height="0.4" fill="#27C93F"></rect>
+
+    
+    <rect class="code-line cl1" x="0.5" y="-3.5" width="5" height="0.7" fill="#4CAF50" opacity="0.8"></rect>
+    <rect class="code-line cl2" x="2" y="-1.8" width="8" height="0.7" fill="#4CAF50" opacity="0.8"></rect>
+    <rect class="code-line cl3" x="2" y="-0.1" width="4.5" height="0.7" fill="#40C4FF" opacity="0.7"></rect>
+    <rect class="code-line cl4" x="0.5" y="1.6" width="2" height="0.7" fill="#FFC107" opacity="0.7"></rect>
+
+  </g>
+
+  
+  <g class="body-bounce">
+    <g class="breathe">
+      <g fill="#DE886D">
+        <rect x="3" y="13" width="1" height="2"></rect>
+        <rect x="5" y="13" width="1" height="2"></rect>
+        <rect x="9" y="13" width="1" height="2"></rect>
+        <rect x="11" y="13" width="1" height="2"></rect>
+        <rect x="2" y="6" width="11" height="7"></rect>
+      </g>
+      <g class="eyes-code" fill="#000">
+        <rect x="4" y="8" width="1" height="2"></rect>
+        <rect x="10" y="8" width="1" height="2"></rect>
+      </g>
+    </g>
+  </g>
+
+  
+  <g id="keyboard" transform="translate(-0.5, 11.8)">
+    <rect x="0" y="0" width="16" height="3.2" fill="#455A64" rx="0.3"></rect>
+    <g fill="#78909C">
+      <rect x="0.5" y="0.4" width="1" height="0.7"></rect>
+      <rect x="1.8" y="0.4" width="1" height="0.7"></rect>
+      <rect x="3.5" y="0.4" width="6" height="0.7" rx="0.2"></rect>
+      <rect x="10.2" y="0.4" width="1" height="0.7"></rect>
+      <rect x="11.5" y="0.4" width="1" height="0.7"></rect>
+      <rect x="12.8" y="0.4" width="1" height="0.7"></rect>
+      <rect x="14.1" y="0.4" width="1.3" height="0.7"></rect>
+    </g>
+    <g fill="#78909C">
+      <rect x="0.8" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="2.0" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="3.2" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="4.4" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="5.6" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="6.8" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="8.0" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="9.2" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="10.4" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="11.6" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="12.8" y="1.3" width="0.9" height="0.7"></rect>
+      <rect x="14.0" y="1.3" width="0.9" height="0.7"></rect>
+    </g>
+    <g fill="#78909C">
+      <rect x="0.5" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="1.7" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="2.9" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="4.1" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="5.3" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="6.5" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="7.7" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="8.9" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="10.1" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="11.3" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="12.5" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="13.7" y="2.2" width="0.9" height="0.7"></rect>
+      <rect x="14.9" y="2.2" width="0.6" height="0.7"></rect>
+    </g>
+    
+    <g fill="#B0BEC5">
+      <rect class="key-flash kf1" x="4.4" y="1.3" width="0.9" height="0.7"></rect>
+      <rect class="key-flash kf2" x="9.2" y="1.3" width="0.9" height="0.7"></rect>
+      <rect class="key-flash kf3" x="2.9" y="2.2" width="0.9" height="0.7"></rect>
+      <rect class="key-flash kf4" x="7.7" y="2.2" width="0.9" height="0.7"></rect>
+      <rect class="key-flash kf5" x="11.6" y="1.3" width="0.9" height="0.7"></rect>
+      <rect class="key-flash kf6" x="3.5" y="0.4" width="6" height="0.7" rx="0.2"></rect>
+    </g>
+  </g>
+
+  
+  <g class="body-bounce">
+    <g class="breathe">
+      <g fill="#DE886D">
+        <g class="arm-l-type"><rect x="0" y="9" width="2" height="2"></rect></g>
+        <g class="arm-r-type"><rect x="13" y="9" width="2" height="2"></rect></g>
+      </g>
+    </g>
+  </g>
+</svg>
