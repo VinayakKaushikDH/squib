@@ -1,0 +1,9 @@
+{
+  "id": "bash-long",
+  "tool_name": "Bash",
+  "tool_input": "{\"command\":\"find . -name '*.swift' -exec grep -rn 'TODO\\\\|FIXME\\\\|HACK' {} \\\\; | sort -k1,1 | head -100\"}",
+  "cwd": "/Users/me/very-long-project-name/deeply/nested/directory/structure",
+  "session_id": "def-456-uvw",
+  "is_elicitation": false,
+  "permission_suggestions": []
+}

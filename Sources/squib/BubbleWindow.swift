@@ -1,6 +1,7 @@
 import AppKit
 import SwiftUI
 import SquibCore
+import SquibUI
 
 final class BubbleWindow: NSPanel {
     static let estimatedHeight: CGFloat = 170

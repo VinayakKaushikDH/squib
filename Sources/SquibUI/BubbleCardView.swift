@@ -107,10 +107,16 @@ private func resolveSuggestion(_ s: [String: Any]) -> [String: Any]? {
 
 // MARK: - BubbleCardView
 
-struct BubbleCardView: View {
-    @ObservedObject var model: BubbleViewModel
-    @State private var appeared    = false
-    @State private var elicAnswers: [Int: Set<String>] = [:]
+public struct BubbleCardView: View {
+    @ObservedObject public var model: BubbleViewModel
+    @State private var appeared:    Bool
+    @State private var elicAnswers: [Int: Set<String>]
+
+    public init(model: BubbleViewModel, _renderImmediately: Bool = false) {
+        self.model       = model
+        self._appeared   = State(initialValue: _renderImmediately)
+        self._elicAnswers = State(initialValue: [:])
+    }
 
     private var request: PermissionRequest { model.request }
 
@@ -151,7 +157,7 @@ struct BubbleCardView: View {
         return questions.indices.allSatisfy { !(elicAnswers[$0]?.isEmpty ?? true) }
     }
 
-    var body: some View {
+    public var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             modeContent
         }

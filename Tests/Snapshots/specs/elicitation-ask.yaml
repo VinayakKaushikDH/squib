@@ -1,0 +1,30 @@
+id: elicitation-ask
+title: "Elicitation — AskUserQuestion with two questions"
+fixture: elicitation-ask.json
+
+expect:
+  card_kind: elicitation
+  width_pt: 380
+  tool_pill:
+    visible: false
+  session_tag:
+    visible: true
+    contains: "myrepo"
+  questions:
+    - text: "Which database should I use?"
+      type: single_select
+      options: ["PostgreSQL", "SQLite", "MongoDB"]
+    - text: "Which features do you need?"
+      type: multi_select
+      options: ["Auth", "File uploads", "Webhooks"]
+  submit_button:
+    visible: true
+    label: "Submit"
+    enabled: false
+  buttons: []
+
+notes: |
+  Elicitation layout is distinct from regular permission. Width is 380pt not 340pt.
+  No tool pill, no Allow/Deny buttons. Instead shows a question form.
+  Submit button is disabled until all questions have answers.
+  First question is single-select (radio-style), second is multi-select (checkbox-style).

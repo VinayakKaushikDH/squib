@@ -1,5 +1,16 @@
 # Progress Log
 
+## 2026-04-25 — Session 23: Visual Test Harness
+- Designed and built headless bubble snapshot harness (see `Tests/Snapshots/DESIGN.md`)
+- Created `SquibUI` library target: moved `BubbleCardView` + `BubbleViewModel` from `squib` executable into `Sources/SquibUI/` so they can be imported by test tools. Added `_renderImmediately: Bool = false` to `BubbleCardView.init` to skip entry animation in headless renders.
+- Created `bubbleSnapshotTool` SPM executable: reads JSON fixtures → renders via `ImageRenderer` → writes PNGs to `Tests/Snapshots/output/`
+- 7 fixture JSONs in `Tests/Snapshots/fixtures/`, 7 spec YAMLs in `Tests/Snapshots/specs/`
+- Makefile: `make snapshot NAME=<id>` and `make snapshots`
+- All 7 scenarios render. Pills, session tags, elicitation layout, suggestions all correct.
+- **KNOWN BUG**: command block content (bash command / file path) is blank in all headless renders. `extractDetail()` / `CommandBlock` view is not rendering — likely a size-dependent conditional or `parsedInput` not evaluating in `ImageRenderer` context. Fix next session.
+
+
+
 ## 2026-04-19 — Session 3: Phase 1d
 - BubbleWindow (NSPanel, nonactivatingPanel, dark card, Allow/Deny buttons) — lower-right corner, stacks upward
 - BubbleManager: manages the stack, computes pet Y offset (= stackHeight), fires onOffsetChange

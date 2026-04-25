@@ -1,0 +1,9 @@
+{
+  "id": "elicitation-ask",
+  "tool_name": "AskUserQuestion",
+  "tool_input": "{\"questions\":[{\"question\":\"Which database should I use?\",\"type\":\"select\",\"options\":[\"PostgreSQL\",\"SQLite\",\"MongoDB\"],\"allowMultiple\":false},{\"question\":\"Which features do you need?\",\"type\":\"select\",\"options\":[\"Auth\",\"File uploads\",\"Webhooks\"],\"allowMultiple\":true}]}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "stu-901-fgh",
+  "is_elicitation": true,
+  "permission_suggestions": []
+}

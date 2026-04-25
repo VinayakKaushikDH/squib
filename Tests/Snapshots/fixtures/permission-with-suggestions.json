@@ -1,0 +1,22 @@
+{
+  "id": "permission-with-suggestions",
+  "tool_name": "Bash",
+  "tool_input": "{\"command\":\"npm install\"}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "pqr-678-ijk",
+  "is_elicitation": false,
+  "permission_suggestions": [
+    {
+      "type": "addRules",
+      "toolName": "Bash",
+      "ruleContent": "npm install",
+      "destination": "localSettings",
+      "behavior": "allow"
+    },
+    {
+      "type": "setMode",
+      "mode": "acceptEdits",
+      "destination": "localSettings"
+    }
+  ]
+}

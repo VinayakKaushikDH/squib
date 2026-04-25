@@ -1,0 +1,9 @@
+{
+  "id": "bash-short",
+  "tool_name": "Bash",
+  "tool_input": "{\"command\":\"ls -la\"}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "abc-123-xyz",
+  "is_elicitation": false,
+  "permission_suggestions": []
+}

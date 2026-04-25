@@ -31,6 +31,11 @@ Read this file at the start of every session to restore context.
 | `progress.md` | Task-level progress log |
 | `animation-gaps.md` | Prioritised task list: missing states, priority bugs, mini gaps (Session 12) |
 
+## Design Docs
+| File | Contents |
+|------|----------|
+| `../Tests/Snapshots/DESIGN.md` | Visual test harness design — headless bubble snapshot tool (agreed 2026-04-25, not yet implemented) |
+
 ## Reference
 - Source: `/Users/vinayak.kaushik/Developer/clawd-on-desk-ref`
 - Original repo: https://github.com/rullerzhou-afk/clawd-on-desk

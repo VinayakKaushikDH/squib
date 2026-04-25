@@ -4,8 +4,22 @@ APP_PATH  = $(DIST_DIR)/$(APP_NAME).app
 CONTENTS  = $(APP_PATH)/Contents
 ICON_SVG  = Sources/squib/Resources/AppIcon.svg
 ICONSET   = $(DIST_DIR)/AppIcon.iconset
+SNAP_DIR  = Tests/Snapshots
+SNAP_OUT  = $(SNAP_DIR)/output
 
-.PHONY: app install uninstall clean
+.PHONY: app install uninstall clean snapshots snapshot snapshots-clean
+
+snapshots: ## Render all bubble snapshot scenarios → Tests/Snapshots/output/
+	@mkdir -p $(SNAP_OUT)
+	swift run bubbleSnapshotTool --all --out $(SNAP_OUT) --fixtures $(SNAP_DIR)/fixtures
+
+snapshot: ## Render one scenario: make snapshot NAME=bash-short
+	@test -n "$(NAME)" || (echo "usage: make snapshot NAME=<id>"; exit 1)
+	@mkdir -p $(SNAP_OUT)
+	swift run bubbleSnapshotTool --id $(NAME) --out $(SNAP_OUT) --fixtures $(SNAP_DIR)/fixtures
+
+snapshots-clean: ## Remove generated PNGs
+	rm -rf $(SNAP_OUT)
 
 app: ## Build a distributable .app bundle → dist/squib.app
 	swift build -c release --product squib

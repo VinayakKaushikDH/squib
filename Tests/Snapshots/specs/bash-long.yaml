@@ -1,0 +1,28 @@
+id: bash-long
+title: "Bash — long command with wrapping"
+fixture: bash-long.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  tool_pill:
+    text: "BASH"
+    color: orange
+  session_tag:
+    visible: true
+    contains: "structure"
+  command_block:
+    visible: true
+    prefix: "$"
+    contains: "find ."
+    truncated: true
+  buttons:
+    - { label: "Allow", style: primary }
+    - { label: "Deny",  style: secondary }
+  allow_session_button: false
+  suggestions: []
+
+notes: |
+  Long command should wrap within the CommandBlock. The block may show a scrollbar
+  or clip/truncate the text — either is acceptable as long as the command is not
+  fully hidden. The cwd folder label shows the last path component "structure".

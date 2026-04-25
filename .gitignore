@@ -1,3 +1,4 @@
 .omc/*
 .build/*
 .DS_Store
+Tests/Snapshots/output/

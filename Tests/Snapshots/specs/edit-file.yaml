@@ -1,0 +1,26 @@
+id: edit-file
+title: "Edit — file path display"
+fixture: edit-file.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  tool_pill:
+    text: "EDIT"
+    color: blue
+  session_tag:
+    visible: true
+    contains: "myrepo"
+  command_block:
+    visible: true
+    contains: "ViewController.swift"
+    truncated: false
+  buttons:
+    - { label: "Allow", style: primary }
+    - { label: "Deny",  style: secondary }
+  allow_session_button: false
+  suggestions: []
+
+notes: |
+  Edit shows the file_path from tool_input, not the old/new strings.
+  Pill is blue. No command prefix ("$") — file tools show path only.

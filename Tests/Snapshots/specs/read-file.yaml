@@ -1,0 +1,25 @@
+id: read-file
+title: "Read — file path display"
+fixture: read-file.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  tool_pill:
+    text: "READ"
+    color: green
+  session_tag:
+    visible: true
+    contains: "myrepo"
+  command_block:
+    visible: true
+    contains: "Package.swift"
+    truncated: false
+  buttons:
+    - { label: "Allow", style: primary }
+    - { label: "Deny",  style: secondary }
+  allow_session_button: false
+  suggestions: []
+
+notes: |
+  Green pill. File path shown in command block. Short path so no truncation expected.

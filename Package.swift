@@ -10,14 +10,26 @@ let package = Package(
             path: "Sources/SquibCore",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        .target(
+            name: "SquibUI",
+            dependencies: ["SquibCore"],
+            path: "Sources/SquibUI",
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
         .executableTarget(
             name: "squib",
-            dependencies: ["SquibCore"],
+            dependencies: ["SquibCore", "SquibUI"],
             path: "Sources/squib",
             exclude: ["Info.plist"],
             resources: [
                 .process("Resources")
             ],
+            swiftSettings: [.swiftLanguageMode(.v5)]
+        ),
+        .executableTarget(
+            name: "bubbleSnapshotTool",
+            dependencies: ["SquibUI", "SquibCore"],
+            path: "Sources/bubbleSnapshotTool",
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
         // squibTestRunner: standalone executable that calls Testing.__swiftPMEntryPoint()

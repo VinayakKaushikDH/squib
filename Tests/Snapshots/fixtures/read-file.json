@@ -1,0 +1,9 @@
+{
+  "id": "read-file",
+  "tool_name": "Read",
+  "tool_input": "{\"file_path\":\"/Users/me/myrepo/Package.swift\"}",
+  "cwd": "/Users/me/myrepo",
+  "session_id": "mno-345-lmn",
+  "is_elicitation": false,
+  "permission_suggestions": []
+}

@@ -1,0 +1,9 @@
+{
+  "id": "write-file",
+  "tool_name": "Write",
+  "tool_input": "{\"file_path\":\"/etc/hosts\",\"content\":\"127.0.0.1 localhost\"}",
+  "cwd": "/",
+  "session_id": "jkl-012-opq",
+  "is_elicitation": false,
+  "permission_suggestions": []
+}

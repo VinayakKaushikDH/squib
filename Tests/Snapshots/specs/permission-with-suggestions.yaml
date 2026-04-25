@@ -1,0 +1,27 @@
+id: permission-with-suggestions
+title: "Bash with suggestions — addRules + setMode"
+fixture: permission-with-suggestions.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  tool_pill:
+    text: "BASH"
+    color: orange
+  command_block:
+    visible: true
+    contains: "npm install"
+  buttons:
+    - { label: "Allow", style: primary }
+    - { label: "Deny",  style: secondary }
+  allow_session_button: true
+  suggestions:
+    - contains: "npm install"
+    - contains: "Auto-accept edits"
+
+notes: |
+  Two suggestion buttons should appear below the main Allow/Deny row.
+  The addRules suggestion shows a label like "Always allow `npm install`".
+  The setMode suggestion shows "Auto-accept edits".
+  "Allow Session" button should appear (present when suggestions exist).
+  Card will be taller than the single-button variants.

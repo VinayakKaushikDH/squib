@@ -1,0 +1,27 @@
+id: write-file
+title: "Write — sensitive path /etc/hosts"
+fixture: write-file.json
+
+expect:
+  card_kind: regular
+  width_pt: 340
+  tool_pill:
+    text: "WRITE"
+    color: tan
+  session_tag:
+    visible: false
+  command_block:
+    visible: true
+    contains: "/etc/hosts"
+    truncated: false
+  buttons:
+    - { label: "Allow", style: primary }
+    - { label: "Deny",  style: secondary }
+  allow_session_button: false
+  suggestions: []
+
+notes: |
+  cwd is "/" so the session tag may be absent or show only the session id suffix.
+  Pill is tan (#c79556). Writing to /etc/hosts is a sensitive operation — the UI
+  should show the path clearly without any special warning styling (that is Claude
+  Code's concern, not squib's).
